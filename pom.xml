@@ -8,6 +8,9 @@
     <artifactId>woody</artifactId>
     <version>1.0.0</version>
     <description>Java implementation for Woody spec</description>
+    <properties>
+        <api-version>1.0.0</api-version>
+    </properties>
 
     <modules>
         <module>woody-api</module>

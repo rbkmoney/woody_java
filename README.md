@@ -1,3 +1,3 @@
-# rpc
+# com.rbkmoney.woody.rpc
 
-Java реализация [Библиотеки RPC вызовов для общения между микросервисами](http://52.29.202.218/scrapyard/rpc-lib/).
+Java реализация [Библиотеки RPC вызовов для общения между микросервисами](http://52.29.202.218/scrapyard/com.rbkmoney.woody.rpc-lib/).

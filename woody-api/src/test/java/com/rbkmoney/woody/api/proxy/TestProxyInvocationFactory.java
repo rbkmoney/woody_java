@@ -1,6 +1,6 @@
 package com.rbkmoney.woody.api.proxy;
 
-import com.rbkmoney.woody.api.trace.context.EventListenerTracer;
+import com.rbkmoney.woody.api.trace.context.EventTracer;
 import org.junit.Test;
 
 import static org.junit.Assert.assertSame;
@@ -37,7 +37,7 @@ public class TestProxyInvocationFactory {
             }
         };
 
-        MethodCallTracer wrappedCallTracer = new EventListenerTracer(callTracer);
+        MethodCallTracer wrappedCallTracer = new EventTracer();
 
         ProxyFactory reflectionProxyFactory = new ProxyFactory(new ReflectionMethodCallerFactory(), wrappedCallTracer, false);
         ProxyFactory handleProxyFactory = new ProxyFactory(new HandleMethodCallerFactory(), wrappedCallTracer, false);

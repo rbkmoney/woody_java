@@ -34,38 +34,42 @@ public class TraceContext {
 
     }
 
-    public static TraceContext forClient(IdGenerator idGenerator, Runnable postInit, Runnable preDestroy) {
-        return new TraceContext(idGenerator, postInit, preDestroy);
+    public static TraceContext forClient(IdGenerator idGenerator, Runnable postInit, Runnable preDestroy, Runnable preErrDestroy) {
+        return new TraceContext(idGenerator, postInit, preDestroy, preErrDestroy);
     }
 
-    public static TraceContext forServer(IdGenerator idGenerator, Runnable postInit, Runnable preDestroy) {
-        return new TraceContext(idGenerator, postInit, preDestroy);
+    public static TraceContext forServer(IdGenerator idGenerator, Runnable postInit, Runnable preDestroy, Runnable preErrDestroy) {
+        return new TraceContext(idGenerator, postInit, preDestroy, preErrDestroy);
     }
 
     private final IdGenerator idGenerator;
     private final Runnable postInit;
     private final Runnable preDestroy;
+    private final Runnable preErrDestroy;
     private final boolean isAuto;
     private final boolean isClient;
 
     public TraceContext(IdGenerator idGenerator) {
         this(idGenerator, () -> {
         }, () -> {
+        }, () -> {
         });
     }
 
-    public TraceContext(IdGenerator idGenerator, Runnable postInit, Runnable preDestroy) {
+    public TraceContext(IdGenerator idGenerator, Runnable postInit, Runnable preDestroy, Runnable preErrDestroy) {
         this.idGenerator = idGenerator;
         this.postInit = postInit;
         this.preDestroy = preDestroy;
+        this.preErrDestroy = preErrDestroy;
         this.isAuto = true;
         this.isClient = false;
     }
 
-    public TraceContext(IdGenerator idGenerator, Runnable postInit, Runnable preDestroy, boolean isClient) {
+    public TraceContext(IdGenerator idGenerator, Runnable postInit, Runnable preDestroy, Runnable preErrDestroy, boolean isClient) {
         this.idGenerator = idGenerator;
         this.postInit = postInit;
         this.preDestroy = preDestroy;
+        this.preErrDestroy = preErrDestroy;
         this.isAuto = false;
         this.isClient = isClient;
     }
@@ -84,11 +88,19 @@ public class TraceContext {
     }
 
     public void destroy() {
+        destroy(false);
+    }
+
+    public void destroy(boolean onError) {
         TraceData traceData = getCurrentTraceData();
         boolean isClient = isClientDestroy(traceData);
-        setDuration(isClient ? traceData.getClientSpan().getSpan() : traceData.getServerSpan().getSpan());
+        setDuration(isClient ? traceData.getClientSpan().getSpan() : traceData.getServiceSpan().getSpan());
         try {
-            preDestroy.run();
+            if (onError) {
+                preErrDestroy.run();
+            } else {
+                preDestroy.run();
+            }
         } finally {
             if (isClient) {
                 destroyClientContext(traceData);
@@ -98,10 +110,15 @@ public class TraceContext {
         }
     }
 
+    public void setDuration() {
+        TraceData traceData = getCurrentTraceData();
+        setDuration(isClient ? traceData.getClientSpan().getSpan() : traceData.getServiceSpan().getSpan());
+    }
+
     private void initClientContext(TraceData traceData) {
         long timestamp = System.currentTimeMillis();
         Span clientSpan = traceData.getClientSpan().getSpan();
-        Span serverSpan = traceData.getServerSpan().getSpan();
+        Span serverSpan = traceData.getServiceSpan().getSpan();
 
         boolean root = traceData.isRoot();
         String traceId = root ? idGenerator.generateId(timestamp) : serverSpan.getTraceId();
@@ -109,7 +126,7 @@ public class TraceContext {
             clientSpan.setId(traceId);
             clientSpan.setParentId(NO_PARENT_ID);
         } else {
-            clientSpan.setId(idGenerator.generateId(timestamp, traceData.getServerSpan().getCounter().incrementAndGet()));
+            clientSpan.setId(idGenerator.generateId(timestamp, traceData.getServiceSpan().getCounter().incrementAndGet()));
             clientSpan.setParentId(serverSpan.getId());
         }
         clientSpan.setTraceId(traceId);
@@ -122,7 +139,7 @@ public class TraceContext {
 
     private void initServerContext(TraceData traceData) {
         long timestamp = System.currentTimeMillis();
-        traceData.getServerSpan().getSpan().setTimestamp(timestamp);
+        traceData.getServiceSpan().getSpan().setTimestamp(timestamp);
     }
 
     private void destroyServerContext(TraceData traceData) {
@@ -142,19 +159,19 @@ public class TraceContext {
     }
 
     private boolean isClientInitAuto(TraceData traceData) {
-        Span serverSpan = traceData.getServerSpan().getSpan();
+        Span serverSpan = traceData.getServiceSpan().getSpan();
 
-        assert !(traceData.getClientSpan().isStarted() & traceData.getServerSpan().isStarted());
-        assert !(traceData.getClientSpan().isFilled() & traceData.getServerSpan().isFilled());
+        assert !(traceData.getClientSpan().isStarted() & traceData.getServiceSpan().isStarted());
+        assert !(traceData.getClientSpan().isFilled() & traceData.getServiceSpan().isFilled());
 
         return serverSpan.isFilled() ? serverSpan.isStarted() : true;
 
     }
 
     private boolean isClientDestroyAuto(TraceData traceData) {
-        assert !(traceData.getClientSpan().isStarted() || traceData.getServerSpan().isStarted());
+        assert (traceData.getClientSpan().isStarted());
 
-        return traceData.getServerSpan().isStarted() ? traceData.getClientSpan().isStarted() : true;
+        return traceData.getServiceSpan().isStarted() ? traceData.getClientSpan().isStarted() : true;
 
     }
 

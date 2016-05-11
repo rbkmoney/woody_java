@@ -25,6 +25,10 @@ public class Metadata {
         return (T) values.put(key, value);
     }
 
+    public boolean containsKey(String key) {
+        return values.containsKey(key);
+    }
+
     public Collection<String> getKeys() {
         return values.keySet();
     }

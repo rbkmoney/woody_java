@@ -9,4 +9,5 @@ public interface MethodCallTracer {
     void afterCall(Object[] args, InstanceMethodCaller caller, Object result);
 
     void callError(Object[] args, InstanceMethodCaller caller, Throwable error);
+
 }

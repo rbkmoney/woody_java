@@ -5,6 +5,8 @@ import com.rbkmoney.woody.api.proxy.MethodCallTracer;
 
 /**
  * Created by vpankrashkin on 26.04.16.
+ *
+ * Used to control context lifecycle on interface method call and return
  */
 public class ContextTracer implements MethodCallTracer {
     private final TraceContext traceContext;
@@ -35,7 +37,7 @@ public class ContextTracer implements MethodCallTracer {
         try {
             targetTracer.callError(args, caller, error);
         } finally {
-            traceContext.destroy();
+            traceContext.destroy(true);
         }
     }
 }

@@ -4,19 +4,19 @@ package com.rbkmoney.woody.api.trace;
  * Created by vpankrashkin on 21.04.16.
  */
 public class TraceData {
-    private ClientSpan clientSpan = new ClientSpan();
-    private ServerSpan serverSpan = new ServerSpan();
+    private final ClientSpan clientSpan = new ClientSpan();
+    private final ServiceSpan serviceSpan = new ServiceSpan();
 
     public ClientSpan getClientSpan() {
         return clientSpan;
     }
 
-    public ServerSpan getServerSpan() {
-        return serverSpan;
+    public ServiceSpan getServiceSpan() {
+        return serviceSpan;
     }
 
     /**
-     * Checks if {@link ServerSpan} is filled to determine root:
+     * Checks if {@link ServiceSpan} is filled to determine root:
      * - request initialized by server: span must be filled by server with data referred from client: has filled server span, it's not root by default -> false
      * - request initialized by client, produced by any server request handling event: has filled server span, it's not root -> false
      * - request initialized by client, not produced by any server request handling event: server span not filled, it's root -> true
@@ -24,7 +24,7 @@ public class TraceData {
      * @return true - if root call is running; false - otherwise
      */
     public boolean isRoot() {
-        return !serverSpan.isFilled();
+        return !serviceSpan.isFilled();
     }
 
     /**
@@ -48,19 +48,19 @@ public class TraceData {
      * @return true - if call is running as root client or child client call for server request handling; false - if call is running in server request handing
      */
     public boolean isClient() {
-        return serverSpan.isFilled() ? clientSpan.isFilled() : true;
+        return serviceSpan.isFilled() ? clientSpan.isFilled() : true;
     }
 
-    public AbstractSpan getActiveSpan() {
-        return isClient() ? clientSpan : serverSpan;
+    public ContextSpan getActiveSpan() {
+        return isClient() ? clientSpan : serviceSpan;
     }
 
-    public AbstractSpan getSpan(boolean isClient) {
-        return isClient ? clientSpan : serverSpan;
+    public ContextSpan getSpan(boolean isClient) {
+        return isClient ? clientSpan : serviceSpan;
     }
 
     public void reset() {
         clientSpan.reset();
-        serverSpan.reset();
+        serviceSpan.reset();
     }
 }
