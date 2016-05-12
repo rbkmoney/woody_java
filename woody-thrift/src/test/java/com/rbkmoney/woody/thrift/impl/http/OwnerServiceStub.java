@@ -11,12 +11,12 @@ import org.apache.thrift.TException;
 public class OwnerServiceStub implements OwnerService.Iface {
     @Override
     public Owner getOwner(int id) throws TException {
-        return null;
+        return new Owner(id, "" + id);
     }
 
     @Override
     public Owner getErrOwner(int id) throws err_one, TException {
-        return null;
+        throw new err_one(id);
     }
 
     @Override
@@ -31,6 +31,6 @@ public class OwnerServiceStub implements OwnerService.Iface {
 
     @Override
     public Owner setErrOwner(Owner owner, int id) throws TException {
-        return null;
+        throw new err_one(id);
     }
 }

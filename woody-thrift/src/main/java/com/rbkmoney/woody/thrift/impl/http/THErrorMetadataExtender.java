@@ -47,8 +47,8 @@ public class THErrorMetadataExtender {
 
     public TraceData extendServiceError(TraceData traceData) {
         extendError(traceData.getServiceSpan(), traceData1 -> {
-            Metadata metadata = traceData.getClientSpan().getMetadata();
-            Throwable callErr = ContextUtils.getCallError(traceData.getClientSpan());
+            Metadata metadata = traceData.getServiceSpan().getMetadata();
+            Throwable callErr = ContextUtils.getCallError(traceData.getServiceSpan());
             if (isWrappedError(callErr)) {
                 extendWrappedErrorMetadata(metadata, callErr);
             } else if (callErr instanceof THRequestInterceptionException) {

@@ -14,10 +14,7 @@ import org.apache.thrift.transport.TTransportException;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -26,7 +23,8 @@ import java.util.stream.IntStream;
 /**
  * Created by vpankrashkin on 05.05.16.
  */
-public class TestErrLoadThriftRPCClient {
+@Ignore
+public class TestLoadErrThriftRPCClient {
 
     private Server server;
 
@@ -122,7 +120,7 @@ public class TestErrLoadThriftRPCClient {
         public TServletExample() {
             super(
                     new OwnerService.Processor(
-                            new TestErrLoadThriftRPCClient.OwnerServiceImpl()),
+                            new TestLoadErrThriftRPCClient.OwnerServiceImpl()),
                     new TCompactProtocol.Factory()
             );
         }

@@ -3,10 +3,10 @@ package com.rbkmoney.woody.thrift.impl.http.interceptor;
 import com.rbkmoney.woody.api.interceptor.RequestInterceptor;
 import com.rbkmoney.woody.api.trace.*;
 import com.rbkmoney.woody.thrift.impl.http.transport.UrlStringEndpoint;
-import org.apache.http.HttpHost;
 import org.apache.http.client.methods.HttpRequestBase;
 
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 /**
@@ -33,8 +33,8 @@ public class THCRequestInterceptor implements RequestInterceptor {
     }
 
     protected boolean interceptRequestBase(ClientSpan clientSpan, HttpRequestBase requestBase, Object... contextParams) {
-        HttpHost httpHost = ContextUtils.getContextParameter(HttpHost.class, contextParams, 0);
-        extendMetadata(clientSpan, httpHost == null ? null : httpHost.toString());
+        URL url = ContextUtils.getContextParameter(URL.class, contextParams, 0);
+        extendMetadata(clientSpan, url == null ? null : url.toString());
         ArrayList<String[]> headers = prepareClientHeaders(clientSpan);
         for (int i = 0; i < headers.size(); ++i) {
             requestBase.setHeader(headers.get(i)[0], headers.get(i)[1]);

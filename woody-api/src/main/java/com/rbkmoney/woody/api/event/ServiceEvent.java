@@ -12,6 +12,11 @@ public class ServiceEvent extends Event {
     }
 
     @Override
+    public ServiceEventType getEventType() {
+        return (ServiceEventType) super.getEventType();
+    }
+
+    @Override
     public ContextSpan getActiveSpan() {
         return getTraceData().getServiceSpan();
     }

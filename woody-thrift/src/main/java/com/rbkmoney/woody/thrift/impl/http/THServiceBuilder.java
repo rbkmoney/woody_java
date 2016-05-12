@@ -71,8 +71,9 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
     @Override
     protected <T> Servlet createProviderService(Class<T> serviceInterface, T handler) {
         try {
+            THErrorMetadataExtender metadataExtender = new THErrorMetadataExtender(serviceInterface);
             TProcessor tProcessor = createThriftProcessor(serviceInterface, handler);
-            return createThriftServlet(tProcessor, createTransportInterceptor(), new THErrorMetadataExtender(serviceInterface));
+            return createThriftServlet(tProcessor, createTransportInterceptor(metadataExtender), metadataExtender);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -92,9 +93,10 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
         );
     }
 
-    protected CommonInterceptor createTransportInterceptor() {
+    protected CommonInterceptor createTransportInterceptor(THErrorMetadataExtender metadataExtender) {
         TraceContext traceContext = createTraceContext();
         return new CompositeInterceptor(
+                new BasicCommonInterceptor(null, new THSResponseMetadataInterceptor(metadataExtender)),
                 new BasicCommonInterceptor(new THSRequestInterceptor(), new THSResponseInterceptor(true)),
                 new ContextInterceptor(
                         traceContext,

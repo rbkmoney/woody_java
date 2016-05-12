@@ -13,6 +13,11 @@ public class ClientEvent extends Event {
     }
 
     @Override
+    public ClientEventType getEventType() {
+        return (ClientEventType) super.getEventType();
+    }
+
+    @Override
     public ContextSpan getActiveSpan() {
         return getTraceData().getClientSpan();
     }

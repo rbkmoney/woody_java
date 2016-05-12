@@ -21,7 +21,7 @@ public class MetadataTracer implements MethodCallTracer {
     }
 
     public static MetadataTracer forServer() {
-        return new MetadataTracer(true);
+        return new MetadataTracer(false);
     }
 
     public static MetadataTracer forAuto() {

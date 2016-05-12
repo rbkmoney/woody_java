@@ -16,7 +16,7 @@ public abstract class Event {
         return traceData;
     }
 
-    public ClientEventType getEventType() {
+    public Object getEventType() {
         return getActiveSpan().getMetadata().getValue(MetadataProperties.EVENT_TYPE);
     }
 

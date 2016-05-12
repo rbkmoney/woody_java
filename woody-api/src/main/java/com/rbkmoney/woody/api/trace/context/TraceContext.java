@@ -169,7 +169,7 @@ public class TraceContext {
     }
 
     private boolean isClientDestroyAuto(TraceData traceData) {
-        assert (traceData.getClientSpan().isStarted());
+        assert (traceData.getClientSpan().isStarted() || traceData.getServiceSpan().isStarted());
 
         return traceData.getServiceSpan().isStarted() ? traceData.getClientSpan().isStarted() : true;
 

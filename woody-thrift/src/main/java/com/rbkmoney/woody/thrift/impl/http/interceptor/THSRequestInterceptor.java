@@ -52,7 +52,11 @@ public class THSRequestInterceptor implements RequestInterceptor {
     }
 
     private void extendMetadata(ServiceSpan serviceSpan, HttpServletRequest request, Object... contextParams) {
-        StringBuffer sb = request.getRequestURL().append(request.getQueryString());
+        String queryString = request.getQueryString();
+        StringBuffer sb = request.getRequestURL();
+        if (queryString != null) {
+            sb.append('?').append(request.getQueryString());
+        }
         serviceSpan.getMetadata().putValue(MetadataProperties.CALL_ENDPOINT, new UrlStringEndpoint(sb.toString()));
         HttpServletResponse response = ContextUtils.getContextParameter(HttpServletResponse.class, contextParams, 0);
         if (response != null) {

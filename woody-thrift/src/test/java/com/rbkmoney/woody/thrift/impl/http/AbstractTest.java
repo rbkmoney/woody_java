@@ -1,6 +1,7 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.event.ClientEventListener;
+import com.rbkmoney.woody.api.event.ServiceEventListener;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.thrift.TException;
@@ -11,6 +12,7 @@ import org.apache.thrift.server.TServlet;
 import org.apache.thrift.transport.THttpClient;
 import org.apache.thrift.transport.TTransportException;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.HandlerCollection;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.After;
@@ -23,9 +25,9 @@ import java.net.URISyntaxException;
 /**
  * Created by vpankrashkin on 06.05.16.
  */
-public class AbstractClientTest<I> {
+public class AbstractTest {
+    private HandlerCollection handlerCollection;
     protected Server server;
-    protected Servlet servlet = createMutableTervlet();
     protected int serverPort = 8080;
     protected TProcessor tProcessor;
 
@@ -33,12 +35,24 @@ public class AbstractClientTest<I> {
     public void startJetty() throws Exception {
 
         server = new Server(serverPort);
-        ServletContextHandler context = new ServletContextHandler();
-        ServletHolder defaultServ = new ServletHolder("default", servlet);
-        context.addServlet(defaultServ, "/");
-        server.setHandler(context);
+        HandlerCollection contextHandlerCollection = new HandlerCollection(true); // important! use parameter
+        // mutableWhenRunning==true
+        this.handlerCollection = contextHandlerCollection;
+        server.setHandler(contextHandlerCollection);
 
         server.start();
+    }
+
+    protected void addServlet(Servlet servlet, String mapping) {
+        try {
+            ServletContextHandler context = new ServletContextHandler();
+            ServletHolder defaultServ = new ServletHolder(mapping, servlet);
+            context.addServlet(defaultServ, mapping);
+            handlerCollection.addHandler(context);
+            context.start();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @After
@@ -68,6 +82,17 @@ public class AbstractClientTest<I> {
         }, new TCompactProtocol.Factory());
     }
 
+    protected <T> Servlet createThrftRPCService(Class<T> iface, T handler, IdGenerator idGenerator, ServiceEventListener eventListener) {
+        THServiceBuilder serviceBuilder = new THServiceBuilder();
+        serviceBuilder.withIdGenerator(idGenerator);
+        serviceBuilder.withEventListener(eventListener);
+        return serviceBuilder.build(iface, handler);
+    }
+
+    protected String getUrlString(String contextPath) {
+        return getUrlString() + contextPath;
+    }
+
     protected <T> T createThriftClient(Class<T> iface) throws TTransportException {
         try {
             THttpClient thc = new THttpClient(getUrlString(), HttpClientBuilder.create().build());
@@ -78,11 +103,15 @@ public class AbstractClientTest<I> {
         }
     }
 
-
     protected <T> T createThriftRPCClient(Class<T> iface, IdGenerator idGenerator, ClientEventListener eventListener) {
+        return createThriftRPCClient(iface, idGenerator, eventListener, getUrlString());
+    }
+
+
+    protected <T> T createThriftRPCClient(Class<T> iface, IdGenerator idGenerator, ClientEventListener eventListener, String url) {
         try {
             THClientBuilder clientBuilder = new THClientBuilder();
-            clientBuilder.withAddress(new URI(getUrlString()));
+            clientBuilder.withAddress(new URI(url));
             clientBuilder.withHttpClient(HttpClientBuilder.create().build());
             clientBuilder.withIdGenerator(idGenerator);
             clientBuilder.withEventListener(eventListener);

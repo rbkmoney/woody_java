@@ -17,10 +17,7 @@ import org.apache.thrift.transport.TTransportException;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import javax.servlet.Servlet;
 import java.net.URI;
@@ -30,6 +27,7 @@ import java.util.stream.IntStream;
 /**
  * Created by vpankrashkin on 05.05.16.
  */
+@Ignore
 public class TestLoadThriftRPCClient {
 
     private Server server;
@@ -46,7 +44,7 @@ public class TestLoadThriftRPCClient {
         serviceBuilder.withIdGenerator(new IdGeneratorStub());
         serviceBuilder.withEventListener(new ServiceEventListener() {
             @Override
-            public void notifyEvent(ServiceEvent serviceEvent) {
+            public void notifyEvent(ServiceEvent event) {
 
             }
         });
@@ -88,7 +86,7 @@ public class TestLoadThriftRPCClient {
                 e.printStackTrace();
             }
         });
-        int testCount = 10000;
+        int testCount = 20000;
         runHtriftRPC(testCount, tRPCClient);
         runThrift(testCount, tClient);
         System.out.println("Warmup ended.");
