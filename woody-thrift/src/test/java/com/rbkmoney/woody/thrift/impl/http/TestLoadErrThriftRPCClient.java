@@ -3,7 +3,7 @@ package com.rbkmoney.woody.thrift.impl.http;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerService;
-import com.rbkmoney.woody.rpc.err_one;
+import com.rbkmoney.woody.rpc.test_error;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TCompactProtocol;
@@ -34,8 +34,6 @@ public class TestLoadErrThriftRPCClient {
         server = new Server(8080);
         ServletContextHandler context = new ServletContextHandler();
         ServletHolder defaultServ = new ServletHolder("default", TServletExample.class);
-        //defaultServ.setInitParameter("resourceBase",System.getProperty("user.dir"));
-        //defaultServ.setInitParameter("dirAllowed","true");
         context.addServlet(defaultServ, "/");
         server.setHandler(context);
 
@@ -61,14 +59,14 @@ public class TestLoadErrThriftRPCClient {
         try {
             tClient.getErrOwner(0);
         } catch (TException e) {
-            Assert.assertSame(e.getClass(), err_one.class);
+            Assert.assertSame(e.getClass(), test_error.class);
             //e.printStackTrace();
         }
 
         try {
             tRPCClient.getErrOwner(0);
         } catch (TException e) {
-            Assert.assertSame(e.getClass(), err_one.class);
+            Assert.assertSame(e.getClass(), test_error.class);
             //e.printStackTrace();
         }
 
@@ -92,7 +90,7 @@ public class TestLoadErrThriftRPCClient {
         IntStream.range(1, testCount).forEach(i -> {
             try {
                 tClient.getErrOwner(i);
-            } catch (err_one e) {
+            } catch (test_error e) {
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -107,7 +105,7 @@ public class TestLoadErrThriftRPCClient {
         IntStream.range(1, testCount).forEach(i -> {
             try {
                 tRPCClient.getErrOwner(i);
-            } catch (err_one e) {
+            } catch (test_error e) {
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -153,8 +151,8 @@ public class TestLoadErrThriftRPCClient {
 
     private static class OwnerServiceImpl extends OwnerServiceStub {
         @Override
-        public Owner getErrOwner(int id) throws TException, err_one {
-            throw new err_one(id);
+        public Owner getErrOwner(int id) throws TException, test_error {
+            throw new test_error(id);
         }
     }
 

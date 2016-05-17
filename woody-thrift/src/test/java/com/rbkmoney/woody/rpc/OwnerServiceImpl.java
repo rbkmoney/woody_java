@@ -12,7 +12,7 @@ public class OwnerServiceImpl implements OwnerService.Iface {
     }
 
     @Override
-    public Owner getErrOwner(int id) throws err_one, TException {
+    public Owner getErrOwner(int id) throws test_error, TException {
         return null;
     }
 

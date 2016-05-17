@@ -9,7 +9,6 @@ import org.apache.thrift.protocol.TCompactProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.server.TServlet;
 import org.apache.thrift.transport.THttpClient;
-import org.apache.thrift.transport.TTransportException;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -29,8 +28,6 @@ public class TestHttp {
         server = new Server(8080);
         ServletContextHandler context = new ServletContextHandler();
         ServletHolder defaultServ = new ServletHolder("default", TServletExample.class);
-        //defaultServ.setInitParameter("resourceBase",System.getProperty("user.dir"));
-        //defaultServ.setInitParameter("dirAllowed","true");
         context.addServlet(defaultServ, "/");
         server.setHandler(context);
 
@@ -48,7 +45,7 @@ public class TestHttp {
     }
 
     @Test
-    public void testServlet() throws TTransportException, TException {
+    public void testServlet() throws TException {
         String servletUrl = "http://localhost:8080/";
         THttpClient thc = new THttpClient(servletUrl);
         TProtocol loPFactory = new TCompactProtocol(thc);

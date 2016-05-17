@@ -22,13 +22,7 @@ public class HandleMethodCallerFactory implements MethodCallerFactory {
                 @Override
                 public Object call(Object[] args) throws Throwable {
 
-                    return mh.invokeWithArguments(target, args)
-                            ;
-                    //.unreflectSpecial(method, target.getClass())
-
-                    //.invokeWithArguments(args);
-                    //.bindTo(target)
-                    //.invokeWithArguments(args);
+                    return mh.invokeWithArguments(target, args);
 
                 }
             };
@@ -52,31 +46,4 @@ public class HandleMethodCallerFactory implements MethodCallerFactory {
         }
 
     }
-//    @Override
-//    public InstanceMethodCaller getInstance(Object target, Method method) {
-//
-//
-//        try {
-//            // 1. Retrieves a Lookup
-//            MethodHandles.Lookup lookup = MethodHandles.lookup();
-//
-//            MethodHandle handle=lookup.unreflect(method);
-//
-//
-//            // 4. Invoke the method
-//            return new InstanceMethodCaller() {
-//                @Override
-//                public Object call(Object[] args) throws Throwable {
-//                    return handle.invokeWithArguments(args);
-//                }
-//            };
-//            //return args -> handle.invokeWithArguments(args);
-//            //                                       ^----^  ^----^
-//            //                                          |    argument
-//            //                       instance of FooBar to invoke the method on
-//        }catch ( IllegalAccessException e) {
-//            e.printStackTrace();
-//            throw new RuntimeException(e);
-//        }
-//    }
 }

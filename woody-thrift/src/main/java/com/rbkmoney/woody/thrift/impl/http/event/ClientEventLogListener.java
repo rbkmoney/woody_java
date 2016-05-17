@@ -13,8 +13,8 @@ public class ClientEventLogListener implements ClientEventListener {
 
     @Override
     public void notifyEvent(ClientEvent event1) {
-        THClientEvent event = (THClientEvent) event1;
         try {
+            THClientEvent event = (THClientEvent) event1;
             switch (event.getEventType()) {
                 case CALL_SERVICE:
                     log.info("CLIENT Event: {}, Span [{}-{}-{}], [{}, Type: {}], Time: {}", event.getEventType(), event.getTraceId(), event.getSpanId(), event.getParentId(), event.getCallName(), event.getCallType(), event.getTimeStamp());
@@ -36,7 +36,7 @@ public class ClientEventLogListener implements ClientEventListener {
                     break;
             }
         } catch (Exception e) {
-
+            log.error("Event processing failed", e);
         }
     }
 }
