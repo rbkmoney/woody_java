@@ -18,10 +18,6 @@ public class CompositeInterceptor<ReqProvider, RespProvider> implements CommonIn
         this(true, interceptors);
     }
 
-    /*public CompositeInterceptor(Collection<? extends CommonInterceptor> interceptors) {
-        this(true, interceptors.stream().toArray(CommonInterceptor[]::new));
-    }*/
-
     @Override
     public boolean interceptRequest(TraceData traceData, ReqProvider providerContext, Object... contextParams) {
         boolean successful = true;

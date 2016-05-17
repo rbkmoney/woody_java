@@ -6,7 +6,7 @@ import com.rbkmoney.woody.api.event.ErrorType;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerService;
-import com.rbkmoney.woody.rpc.err_one;
+import com.rbkmoney.woody.rpc.test_error;
 import com.rbkmoney.woody.thrift.impl.http.event.THClientEvent;
 import org.apache.thrift.TException;
 import org.junit.Test;
@@ -33,8 +33,8 @@ public class TestClientEventHandling extends AbstractTest {
             }
 
             @Override
-            public Owner getErrOwner(int id) throws err_one {
-                throw new err_one(id);
+            public Owner getErrOwner(int id) throws test_error {
+                throw new test_error(id);
             }
         }
 
@@ -71,7 +71,7 @@ public class TestClientEventHandling extends AbstractTest {
                 case ERROR:
                     assertFalse(thClientEvent.isSuccessfullCall());
                     assertEquals(ErrorType.APPLICATION_KNOWN_ERROR, thClientEvent.getErrorType());
-                    assertEquals("err_one", thClientEvent.getErrorName());
+                    assertEquals("test_error", thClientEvent.getErrorName());
                     assertNull(thClientEvent.getThriftErrorType());
                     break;
                 default:

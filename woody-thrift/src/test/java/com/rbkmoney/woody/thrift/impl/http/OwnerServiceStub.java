@@ -2,7 +2,7 @@ package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerService;
-import com.rbkmoney.woody.rpc.err_one;
+import com.rbkmoney.woody.rpc.test_error;
 import org.apache.thrift.TException;
 
 /**
@@ -15,8 +15,8 @@ public class OwnerServiceStub implements OwnerService.Iface {
     }
 
     @Override
-    public Owner getErrOwner(int id) throws err_one, TException {
-        throw new err_one(id);
+    public Owner getErrOwner(int id) throws test_error, TException {
+        throw new test_error(id);
     }
 
     @Override
@@ -31,6 +31,6 @@ public class OwnerServiceStub implements OwnerService.Iface {
 
     @Override
     public Owner setErrOwner(Owner owner, int id) throws TException {
-        throw new err_one(id);
+        throw new test_error(id);
     }
 }

@@ -2,7 +2,7 @@ package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerService;
-import com.rbkmoney.woody.rpc.err_one;
+import com.rbkmoney.woody.rpc.test_error;
 import com.rbkmoney.woody.thrift.impl.http.event.ClientEventListenerImpl;
 import com.rbkmoney.woody.thrift.impl.http.event.ClientEventLogListener;
 import com.rbkmoney.woody.thrift.impl.http.event.ServiceEventListenerImpl;
@@ -31,14 +31,14 @@ public class TestChildRequests extends AbstractTest {
     OwnerService.Iface client2 = createThriftRPCClient(OwnerService.Iface.class, new IdGeneratorStub(), new ClientEventLogListener(), getUrlString("/rpc"));
     OwnerService.Iface handler = new OwnerServiceStub() {
         @Override
-        public Owner getErrOwner(int id) throws TException, err_one {
+        public Owner getErrOwner(int id) throws TException, test_error {
             switch (id) {
                 case 0:
                     Owner owner = client2.getOwner(0);
                     client2.setOwnerOneway(owner);
                     return client2.getOwner(10);
                 case 200:
-                    throw new err_one(200);
+                    throw new test_error(200);
                 case 500:
                     throw new RuntimeException("Test");
                 default:
@@ -64,7 +64,7 @@ public class TestChildRequests extends AbstractTest {
         try {
             client1.getErrOwner(200);
             Assert.fail();
-        } catch (err_one e) {
+        } catch (test_error e) {
         }
         out.println("<");
         out.println("Root call>");

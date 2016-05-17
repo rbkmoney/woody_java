@@ -2,7 +2,7 @@ package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerService;
-import com.rbkmoney.woody.rpc.err_one;
+import com.rbkmoney.woody.rpc.test_error;
 import com.rbkmoney.woody.thrift.impl.http.event.ClientActionListener;
 import com.rbkmoney.woody.thrift.impl.http.event.ClientEventListenerImpl;
 import com.rbkmoney.woody.thrift.impl.http.event.ServiceActionListener;
@@ -25,7 +25,7 @@ public class TestEventOrder extends AbstractTest {
     ServiceEventListenerImpl serviceEventListener = new ServiceEventListenerImpl();
     OwnerService.Iface handler = new OwnerServiceStub() {
         @Override
-        public Owner getErrOwner(int id) throws TException, err_one {
+        public Owner getErrOwner(int id) throws TException, test_error {
             switch (id) {
                 case 500:
                     throw new RuntimeException("Test");
@@ -117,7 +117,7 @@ public class TestEventOrder extends AbstractTest {
         try {
             client.getErrOwner(1);
             Assert.fail("Exception should be here");
-        } catch (err_one e) {
+        } catch (test_error e) {
             Assert.assertEquals(1, e.getId());
         }
 
