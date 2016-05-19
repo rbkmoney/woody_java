@@ -13,7 +13,7 @@ public class ContextInterceptor<ReqProvider, RespProvider> implements CommonInte
 
     public ContextInterceptor(TraceContext traceContext, CommonInterceptor interceptor) {
         this.traceContext = traceContext;
-        this.interceptor = interceptor;
+        this.interceptor = interceptor != null ? interceptor : new EmptyCommonInterceptor();
     }
 
     @Override

@@ -2,9 +2,9 @@ package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.AbstractServiceBuilder;
 import com.rbkmoney.woody.api.event.ServiceEventListener;
-import com.rbkmoney.woody.api.interceptor.BasicCommonInterceptor;
 import com.rbkmoney.woody.api.interceptor.CommonInterceptor;
 import com.rbkmoney.woody.api.interceptor.CompositeInterceptor;
+import com.rbkmoney.woody.api.interceptor.ContainerCommonInterceptor;
 import com.rbkmoney.woody.api.interceptor.ContextInterceptor;
 import com.rbkmoney.woody.api.proxy.InstanceMethodCaller;
 import com.rbkmoney.woody.api.proxy.MethodCallTracer;
@@ -80,24 +80,25 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
     }
 
     @Override
-    protected ProxyBuilder createProxyBuilder(Class clientInterface) {
-        ProxyBuilder proxyBuilder = super.createProxyBuilder(clientInterface);
+    protected ProxyBuilder createProxyBuilder(Class iface) {
+        ProxyBuilder proxyBuilder = super.createProxyBuilder(iface);
         proxyBuilder.setStartEventPhases(ProxyBuilder.EVENT_BEFORE_CALL_START);
         proxyBuilder.setEndEventPhases(ProxyBuilder.EVENT_AFTER_CALL_END);
+        proxyBuilder.setErrorEventPhases(ProxyBuilder.EVENT_AFTER_CALL_END);
         return proxyBuilder;
     }
 
     protected CommonInterceptor createMessageInterceptor() {
         return new CompositeInterceptor(
-                new BasicCommonInterceptor(new THSMessageRequestInterceptor(), new THSMessageResponseInterceptor())
+                new ContainerCommonInterceptor(new THSMessageRequestInterceptor(), new THSMessageResponseInterceptor())
         );
     }
 
     protected CommonInterceptor createTransportInterceptor(THErrorMetadataExtender metadataExtender) {
         TraceContext traceContext = createTraceContext();
         return new CompositeInterceptor(
-                new BasicCommonInterceptor(null, new THSResponseMetadataInterceptor(metadataExtender)),
-                new BasicCommonInterceptor(new THSRequestInterceptor(), new THSResponseInterceptor(true)),
+                new ContainerCommonInterceptor(null, new THSResponseMetadataInterceptor(metadataExtender)),
+                new ContainerCommonInterceptor(new THSRequestInterceptor(), new THSResponseInterceptor(true)),
                 new ContextInterceptor(
                         traceContext,
                         new TransportEventInterceptor(getOnReceiveEventListener(), null)
@@ -106,7 +107,7 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
     }
 
     protected TraceContext createTraceContext() {
-        return TraceContext.forServer(getIdGenerator(), () -> {
+        return TraceContext.forServer(() -> {
         }, getOnSendEventListener(), getErrorListener());
 
     }
@@ -121,8 +122,8 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
     protected Servlet createThriftServlet(TProcessor tProcessor, CommonInterceptor servletInterceptor, THErrorMetadataExtender metadataExtender) {
         CompositeInterceptor protInterceptor = new CompositeInterceptor(
                 createMessageInterceptor(),
-                new BasicCommonInterceptor(null, new THSResponseMetadataInterceptor(metadataExtender)),
-                new BasicCommonInterceptor(null, new THSResponseInterceptor(false))
+                new ContainerCommonInterceptor(null, new THSResponseMetadataInterceptor(metadataExtender)),
+                new ContainerCommonInterceptor(null, new THSResponseInterceptor(false))
         );
         TProtocolFactory tProtocolFactory = wrapProtocolFactory(new TCompactProtocol.Factory(), protInterceptor);
         return new TServlet(tProcessor, tProtocolFactory, servletInterceptor);

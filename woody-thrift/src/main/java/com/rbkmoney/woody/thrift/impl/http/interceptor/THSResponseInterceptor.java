@@ -9,15 +9,18 @@ import com.rbkmoney.woody.thrift.impl.http.transport.THttpHeader;
 import com.rbkmoney.woody.thrift.impl.http.transport.TTransportErrorType;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.function.Function;
 
 /**
  * Created by vpankrashkin on 29.04.16.
  */
 public class THSResponseInterceptor implements ResponseInterceptor {
-    public static final String THRFIT_TRANSPORT_ERROR_MSG = "thrift transport error";
-    public static final String THRFIT_PROTOCOL_ERROR_MSG = "thrift protocol error";
-    public static final String UNKNOWN_PROVIDER_ERROR_MSG = "unknown provider error";
-    public static final String BAD_REQUEST_HEADERS_MSG = "bad request headers";
+    public static final Function<Object, String> THRFIT_TRANSPORT_ERROR_FUNC = obj -> "thrift transport error";
+    public static final Function<Object, String> THRFIT_PROTOCOL_ERROR_FUNC = obj -> "thrift protocol error";
+    public static final Function<Object, String> UNKNOWN_PROVIDER_ERROR_FUNC = obj -> "unknown provider error";
+    public static final Function<String, String> BAD_CONTENT_TYPE_FUNC = cType -> "content type wrong/missing";
+    public static final Function<THttpHeader, String> BAD_REQUEST_HEADERS_FUNC = tHttpHeader -> (tHttpHeader == null ? "Trace header" : tHttpHeader.getKeyValue()) + " missing";
+    public static final Function<String, String> BAD_REQUEST_METHOD_FUNC = rewMethod -> "http method wrong";
     boolean isUseContext;
 
     public THSResponseInterceptor(boolean isUseContext) {
@@ -79,33 +82,41 @@ public class THSResponseInterceptor implements ResponseInterceptor {
                                 TTransportErrorType tTransportErrorType = ContextUtils.getMetadataParameter(serviceSpan, TTransportErrorType.class, THMetadataProperties.TH_ERROR_SUBTYPE);
                                 if (tTransportErrorType != null) {
                                     switch (tTransportErrorType) {
+                                        case BAD_REQUEST_TYPE:
+                                            responseStatus = 405;
+                                            errThriftValue = BAD_REQUEST_METHOD_FUNC.apply(ContextUtils.getInterceptionErrorReason(serviceSpan, String.class));
+                                            break;
                                         case BAD_TRACE_HEADERS:
+                                            responseStatus = 400;
+                                            errThriftValue = BAD_REQUEST_HEADERS_FUNC.apply(ContextUtils.getInterceptionErrorReason(serviceSpan, THttpHeader.class));
+                                            break;
                                         case BAD_CONTENT_TYPE:
-                                            responseStatus = 403;
-                                            errThriftValue = BAD_REQUEST_HEADERS_MSG;
+                                            responseStatus = 415;
+                                            errThriftValue = BAD_CONTENT_TYPE_FUNC.apply(ContextUtils.getInterceptionErrorReason(serviceSpan, String.class));
                                             break;
                                         default:
                                             responseStatus = 403;
-                                            errThriftValue = THRFIT_TRANSPORT_ERROR_MSG;
+                                            errThriftValue = THRFIT_TRANSPORT_ERROR_FUNC.apply(ContextUtils.getInterceptionErrorReason(serviceSpan, Object.class));
+                                            break;
                                     }
                                 } else {
                                     responseStatus = 403;
-                                    errThriftValue = THRFIT_TRANSPORT_ERROR_MSG;
+                                    errThriftValue = THRFIT_TRANSPORT_ERROR_FUNC.apply(ContextUtils.getInterceptionErrorReason(serviceSpan, Object.class));
                                 }
                                 break;
                             case PROTOCOL:
                                 responseStatus = 406;
-                                errThriftValue = THRFIT_PROTOCOL_ERROR_MSG;
+                                errThriftValue = THRFIT_PROTOCOL_ERROR_FUNC.apply(ContextUtils.getInterceptionErrorReason(serviceSpan, Object.class));
                                 break;
                             case UNKNOWN:
                             default:
                                 responseStatus = 410;
-                                errThriftValue = UNKNOWN_PROVIDER_ERROR_MSG;
+                                errThriftValue = UNKNOWN_PROVIDER_ERROR_FUNC.apply(ContextUtils.getInterceptionErrorReason(serviceSpan, Object.class));
                                 break;
                         }
                     } else {
                         responseStatus = 410;
-                        errThriftValue = UNKNOWN_PROVIDER_ERROR_MSG;
+                        errThriftValue = UNKNOWN_PROVIDER_ERROR_FUNC.apply(ContextUtils.getInterceptionErrorReason(serviceSpan, Object.class));
                     }
                     break;
                 case APPLICATION_UNKNOWN_ERROR:

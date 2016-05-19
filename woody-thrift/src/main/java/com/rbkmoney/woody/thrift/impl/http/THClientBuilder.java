@@ -2,9 +2,9 @@ package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.AbstractClientBuilder;
 import com.rbkmoney.woody.api.event.ClientEventListener;
-import com.rbkmoney.woody.api.interceptor.BasicCommonInterceptor;
 import com.rbkmoney.woody.api.interceptor.CommonInterceptor;
 import com.rbkmoney.woody.api.interceptor.CompositeInterceptor;
+import com.rbkmoney.woody.api.interceptor.ContainerCommonInterceptor;
 import com.rbkmoney.woody.api.provider.ProviderEventInterceptor;
 import com.rbkmoney.woody.api.proxy.InstanceMethodCaller;
 import com.rbkmoney.woody.api.proxy.MethodCallTracer;
@@ -41,9 +41,9 @@ public class THClientBuilder extends AbstractClientBuilder {
     }
 
     @Override
-    protected MethodCallTracer getOnCallMetadataExtender(Class clientInterface) {
+    protected MethodCallTracer getOnCallMetadataExtender(Class iface) {
         return new EmptyTracer() {
-            THErrorMetadataExtender metadataExtender = new THErrorMetadataExtender(clientInterface);
+            THErrorMetadataExtender metadataExtender = new THErrorMetadataExtender(iface);
 
             @Override
             public void callError(Object[] args, InstanceMethodCaller caller, Throwable error) {
@@ -78,21 +78,22 @@ public class THClientBuilder extends AbstractClientBuilder {
     }
 
     @Override
-    protected <T> T createProviderClient(Class<T> clientInterface) {
+    protected <T> T createProviderClient(Class<T> iface) {
         try {
             THttpClient tHttpClient = new THttpClient(getAddress().toString(), httpClient, createTransportInterceptor());
             TProtocol tProtocol = createProtocol(tHttpClient);
-            return createThriftClient(clientInterface, tProtocol, createMessageInterceptor());
+            return createThriftClient(iface, tProtocol, createMessageInterceptor());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    protected ProxyBuilder createProxyBuilder(Class clientInterface) {
-        ProxyBuilder proxyBuilder = super.createProxyBuilder(clientInterface);
+    protected ProxyBuilder createProxyBuilder(Class iface) {
+        ProxyBuilder proxyBuilder = super.createProxyBuilder(iface);
         proxyBuilder.setStartEventPhases(ProxyBuilder.EVENT_DISABLE);
         proxyBuilder.setEndEventPhases(ProxyBuilder.EVENT_BEFORE_CONTEXT_DESTROY);
+        proxyBuilder.setErrorEventPhases(ProxyBuilder.EVENT_AFTER_CALL_END);
         return proxyBuilder;
     }
 
@@ -106,14 +107,14 @@ public class THClientBuilder extends AbstractClientBuilder {
 
     protected CommonInterceptor createMessageInterceptor() {
         return new CompositeInterceptor(
-                new BasicCommonInterceptor(new THCMessageRequestInterceptor(), new THCMessageResponseInterceptor()),
+                new ContainerCommonInterceptor(new THCMessageRequestInterceptor(), new THCMessageResponseInterceptor()),
                 new ProviderEventInterceptor(getOnCallStartEventListener(), null)
         );
     }
 
     protected CommonInterceptor createTransportInterceptor() {
         return new CompositeInterceptor(
-                new BasicCommonInterceptor(new THCRequestInterceptor(), new THCResponseInterceptor()),
+                new ContainerCommonInterceptor(new THCRequestInterceptor(), new THCResponseInterceptor()),
                 new TransportEventInterceptor(getOnSendEventListener(), getOnReceiveEventListener())
         );
     }

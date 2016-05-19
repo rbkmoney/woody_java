@@ -38,8 +38,8 @@ public class TraceContext {
         return new TraceContext(idGenerator, postInit, preDestroy, preErrDestroy);
     }
 
-    public static TraceContext forServer(IdGenerator idGenerator, Runnable postInit, Runnable preDestroy, Runnable preErrDestroy) {
-        return new TraceContext(idGenerator, postInit, preDestroy, preErrDestroy);
+    public static TraceContext forServer(Runnable postInit, Runnable preDestroy, Runnable preErrDestroy) {
+        return new TraceContext(null, postInit, preDestroy, preErrDestroy);
     }
 
     private final IdGenerator idGenerator;
@@ -116,6 +116,8 @@ public class TraceContext {
     }
 
     private void initClientContext(TraceData traceData) {
+        assert idGenerator != null;
+
         long timestamp = System.currentTimeMillis();
         Span clientSpan = traceData.getClientSpan().getSpan();
         Span serverSpan = traceData.getServiceSpan().getSpan();

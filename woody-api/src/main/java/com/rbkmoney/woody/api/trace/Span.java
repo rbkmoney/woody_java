@@ -11,6 +11,18 @@ public class Span {
     private long timestamp;
     private long duration;
 
+    public Span() {
+    }
+
+    protected Span(Span oldSpan) {
+        this.traceId = oldSpan.traceId;
+        this.name = oldSpan.name;
+        this.id = oldSpan.id;
+        this.parentId = oldSpan.parentId;
+        this.timestamp = oldSpan.timestamp;
+        this.duration = oldSpan.duration;
+    }
+
     public String getTraceId() {
         return traceId;
     }
@@ -74,6 +86,10 @@ public class Span {
         parentId = null;
         timestamp = 0;
         duration = 0;
+    }
+
+    public Span cloneObject() {
+        return new Span(this);
     }
 
     @Override

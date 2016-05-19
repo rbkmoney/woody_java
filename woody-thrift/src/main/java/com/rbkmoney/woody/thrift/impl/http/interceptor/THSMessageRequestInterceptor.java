@@ -20,8 +20,8 @@ public class THSMessageRequestInterceptor implements RequestInterceptor<TMessage
     }
 
     public THSMessageRequestInterceptor(Runnable eventListener) {
-        this.eventListener = eventListener == null ? () -> {
-        } : eventListener;
+        this.eventListener = eventListener != null ? eventListener : () -> {
+        };
     }
 
     @Override
