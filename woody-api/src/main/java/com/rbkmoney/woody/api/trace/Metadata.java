@@ -11,7 +11,16 @@ public class Metadata {
     private static final int DEFAULT_INIT_SIZE = 16;
     private static final float DEFAULT_LOAD_FACTOR = 0.75f;
 
-    private Map<String, Object> values = createStore(DEFAULT_INIT_SIZE, DEFAULT_LOAD_FACTOR);
+    private Map<String, Object> values;
+
+    public Metadata() {
+        this.values = createStore(DEFAULT_INIT_SIZE, DEFAULT_LOAD_FACTOR);
+    }
+
+    protected Metadata(Metadata oldMetadata) {
+        this.values = cloneStore(oldMetadata.values);
+    }
+
 
     public <T> T getValue(String key) {
         return (T) values.get(key);
@@ -38,8 +47,18 @@ public class Metadata {
         values = createStore(DEFAULT_INIT_SIZE, DEFAULT_LOAD_FACTOR);
     }
 
-    private static Map<String, Object> createStore(int size, float loadFactor) {
+    public Metadata cloneObject() {
+        return new Metadata(this);
+    }
+
+    private static HashMap<String, Object> createStore(int size, float loadFactor) {
         return new HashMap<>(size, loadFactor);
+    }
+
+    private static Map<String, Object> cloneStore(Map<String, Object> oldMap) {
+        Map<String, Object> newMap = createStore(DEFAULT_INIT_SIZE, DEFAULT_LOAD_FACTOR);
+        newMap.putAll(oldMap);
+        return newMap;
     }
 
 }

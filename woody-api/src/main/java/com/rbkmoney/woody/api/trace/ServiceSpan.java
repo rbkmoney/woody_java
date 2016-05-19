@@ -9,6 +9,18 @@ public class ServiceSpan extends ContextSpan {
 
     private final AtomicInteger counter = new AtomicInteger();
 
+    public ServiceSpan() {
+    }
+
+    protected ServiceSpan(ServiceSpan serviceSpan) {
+        super(serviceSpan);
+        this.counter.set(serviceSpan.counter.get());
+    }
+
+    public ServiceSpan cloneObject() {
+        return new ServiceSpan(this);
+    }
+
     public AtomicInteger getCounter() {
         return counter;
     }
