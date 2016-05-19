@@ -5,13 +5,13 @@ import com.rbkmoney.woody.api.trace.TraceData;
 /**
  * Created by vpankrashkin on 04.05.16.
  */
-public class BasicCommonInterceptor<ReqProvider, RespProvider> implements CommonInterceptor<ReqProvider, RespProvider> {
+public class ContainerCommonInterceptor<ReqProvider, RespProvider> implements CommonInterceptor<ReqProvider, RespProvider> {
     private RequestInterceptor<ReqProvider> requestInterceptor;
     private ResponseInterceptor<RespProvider> responseInterceptor;
 
-    public BasicCommonInterceptor(RequestInterceptor<ReqProvider> requestInterceptor, ResponseInterceptor<RespProvider> responseInterceptor) {
-        this.requestInterceptor = requestInterceptor == null ? new EmptyCommonInterceptor() : requestInterceptor;
-        this.responseInterceptor = responseInterceptor == null ? new EmptyCommonInterceptor() : responseInterceptor;
+    public ContainerCommonInterceptor(RequestInterceptor<ReqProvider> requestInterceptor, ResponseInterceptor<RespProvider> responseInterceptor) {
+        this.requestInterceptor = requestInterceptor != null ? requestInterceptor : new EmptyCommonInterceptor();
+        this.responseInterceptor = responseInterceptor != null ? responseInterceptor : new EmptyCommonInterceptor();
     }
 
     @Override

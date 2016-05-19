@@ -1,12 +1,11 @@
 package com.rbkmoney.woody.thrift.impl.http.event;
 
-import com.rbkmoney.woody.api.event.ClientEvent;
 import com.rbkmoney.woody.api.event.ClientEventListener;
 
 /**
  * Created by vpankrashkin on 12.05.16.
  */
-public class ClientEventListenerImpl implements ClientEventListener {
+public class ClientEventListenerImpl implements ClientEventListener<THClientEvent> {
     private ClientActionListener eventActionListener;
 
     public ClientEventListenerImpl() {
@@ -21,7 +20,7 @@ public class ClientEventListenerImpl implements ClientEventListener {
     }
 
     @Override
-    public void notifyEvent(ClientEvent event) {
+    public void notifyEvent(THClientEvent event) {
         switch (event.getEventType()) {
             case CALL_SERVICE:
                 if (eventActionListener != null)

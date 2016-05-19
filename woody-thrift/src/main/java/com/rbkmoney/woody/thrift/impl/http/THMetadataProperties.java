@@ -14,8 +14,8 @@ public class THMetadataProperties {
     public static final String TH_CALL_MSG_TYPE = TH_PROPERTY_PREFIX + "call_msg_type";
     public static final String TH_CALL_RESULT_MSG_TYPE = TH_PROPERTY_PREFIX + "call_result_msg_type";
 
+    public static final String TH_TRANSPORT_REQUEST = TH_PROPERTY_PREFIX + "transport_request";
     public static final String TH_TRANSPORT_RESPONSE = TH_PROPERTY_PREFIX + "transport_response";
-
     public static final String TH_TRANSPORT_RESPONSE_SET = TH_PROPERTY_PREFIX + "transport_response_set";
 
     public static final String TH_ERROR_METADATA_SOURCE = TH_PROPERTY_PREFIX + "error_metadata_source";

@@ -47,26 +47,26 @@ public abstract class AbstractClientBuilder implements ClientBuilder {
     }
 
     @Override
-    public <T> T build(Class<T> clientInterface) {
+    public <T> T build(Class<T> iface) {
         try {
-            T target = createProviderClient(clientInterface);
-            return createProxyClient(clientInterface, target);
+            T target = createProviderClient(iface);
+            return createProxyClient(iface, target);
         } catch (Exception e) {
             throw new WoodyInstantiationException(e);
         }
     }
 
-    protected <T> T createProxyClient(Class<T> clientInterface, T target) {
-        return createProxyBuilder(clientInterface).build(clientInterface, target);
+    protected <T> T createProxyClient(Class<T> iface, T target) {
+        return createProxyBuilder(iface).build(iface, target);
     }
 
-    protected ProxyBuilder createProxyBuilder(Class clientInterface) {
+    protected ProxyBuilder createProxyBuilder(Class iface) {
         ProxyBuilder proxyBuilder = new ProxyBuilder();
         proxyBuilder.setIdGenerator(idGenerator);
         proxyBuilder.setStartEventListener(getOnCallStartEventListener());
         proxyBuilder.setEndEventListener(getOnCallEndEventListener());
         proxyBuilder.setErrEventListener(getErrorListener());
-        proxyBuilder.setMetadataExtender(getOnCallMetadataExtender(clientInterface));
+        proxyBuilder.setMetadataExtender(getOnCallMetadataExtender(iface));
         return proxyBuilder;
     }
 
@@ -80,9 +80,9 @@ public abstract class AbstractClientBuilder implements ClientBuilder {
 
     abstract protected Runnable getOnCallEndEventListener();
 
-    abstract protected MethodCallTracer getOnCallMetadataExtender(Class clientInterface);
+    abstract protected MethodCallTracer getOnCallMetadataExtender(Class iface);
 
-    abstract protected <T> T createProviderClient(Class<T> clientInterface);
+    abstract protected <T> T createProviderClient(Class<T> iface);
 
     protected static class ProxyBuilder {
         public static final int EVENT_DISABLE = 0b0;
@@ -143,9 +143,9 @@ public abstract class AbstractClientBuilder implements ClientBuilder {
             this.errorEventPhases = phases;
         }
 
-        public <T> T build(Class<T> clientInterface, T target) {
+        public <T> T build(Class<T> iface, T target) {
             ProxyFactory proxyFactory = createProxyFactory();
-            return proxyFactory.getInstance(clientInterface, target);
+            return proxyFactory.getInstance(iface, target);
         }
 
         protected ProxyFactory createProxyFactory() {
@@ -169,7 +169,7 @@ public abstract class AbstractClientBuilder implements ClientBuilder {
                     new EventTracer(
                             hasFlag(EVENT_BEFORE_CALL_START, startEventPhases) ? startEventListener : listenerStub,
                             hasFlag(EVENT_AFTER_CALL_END, endEventPhases) ? endEventListener : listenerStub,
-                            errEventListener)
+                            hasFlag(EVENT_AFTER_CALL_END, errorEventPhases) ? errEventListener : listenerStub)
             );
         }
 

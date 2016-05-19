@@ -1,7 +1,6 @@
 package com.rbkmoney.woody.api;
 
 import com.rbkmoney.woody.api.event.ServiceEventListener;
-import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.api.proxy.MethodCallTracer;
 import com.rbkmoney.woody.api.proxy.ProxyFactory;
 import com.rbkmoney.woody.api.trace.context.CompositeTracer;
@@ -14,7 +13,6 @@ import com.rbkmoney.woody.api.trace.context.MetadataTracer;
  */
 public abstract class AbstractServiceBuilder<Service> implements ServiceBuilder<Service> {
     private ServiceEventListener eventListener;
-    private IdGenerator idGenerator;
 
 
     @Override
@@ -24,20 +22,10 @@ public abstract class AbstractServiceBuilder<Service> implements ServiceBuilder<
     }
 
     @Override
-    public ServiceBuilder withIdGenerator(IdGenerator generator) {
-        this.idGenerator = generator;
-        return this;
-    }
-
-    protected IdGenerator getIdGenerator() {
-        return idGenerator;
-    }
-
-    @Override
-    public <T> Service build(Class<T> serviceInterface, T serviceHandler) {
+    public <T> Service build(Class<T> iface, T serviceHandler) {
         try {
-            T target = createProxyService(serviceInterface, serviceHandler);
-            return createProviderService(serviceInterface, target);
+            T target = createProxyService(iface, serviceHandler);
+            return createProviderService(iface, target);
         } catch (Exception e) {
             throw new WoodyInstantiationException(e);
         }
@@ -62,17 +50,16 @@ public abstract class AbstractServiceBuilder<Service> implements ServiceBuilder<
     abstract protected <T> Service createProviderService(Class<T> serviceInterface, T handler);
 
 
-    protected <T> T createProxyService(Class<T> serviceInterface, T handler) {
-        return createProxyBuilder(serviceInterface).build(serviceInterface, handler);
+    protected <T> T createProxyService(Class<T> iface, T handler) {
+        return createProxyBuilder(iface).build(iface, handler);
     }
 
-    protected ProxyBuilder createProxyBuilder(Class serviceInterface) {
+    protected ProxyBuilder createProxyBuilder(Class iface) {
         ProxyBuilder proxyBuilder = new ProxyBuilder();
-        proxyBuilder.setIdGenerator(idGenerator);
         proxyBuilder.setStartEventListener(getOnCallStartEventListener());
         proxyBuilder.setEndEventListener(getOnCallEndEventListener());
         proxyBuilder.setErrEventListener(getErrorListener());
-        proxyBuilder.setMetadataExtender(getOnCallMetadataExtender(serviceInterface));
+        proxyBuilder.setMetadataExtender(getOnCallMetadataExtender(iface));
         return proxyBuilder;
     }
 
@@ -94,7 +81,6 @@ public abstract class AbstractServiceBuilder<Service> implements ServiceBuilder<
         private Runnable startEventListener;
         private Runnable endEventListener;
         private Runnable errEventListener;
-        private IdGenerator idGenerator;
         private MethodCallTracer metadataExtender;
 
         public void setStartEventListener(Runnable startEventListener) {
@@ -107,10 +93,6 @@ public abstract class AbstractServiceBuilder<Service> implements ServiceBuilder<
 
         public void setErrEventListener(Runnable errEventListener) {
             this.errEventListener = errEventListener;
-        }
-
-        public void setIdGenerator(IdGenerator idGenerator) {
-            this.idGenerator = idGenerator;
         }
 
         public void setMetadataExtender(MethodCallTracer metadataExtender) {
@@ -133,9 +115,9 @@ public abstract class AbstractServiceBuilder<Service> implements ServiceBuilder<
             this.errorEventPhases = phases;
         }
 
-        public <T> T build(Class<T> serviceInterface, T target) {
+        public <T> T build(Class<T> iface, T target) {
             ProxyFactory proxyFactory = createProxyFactory();
-            return proxyFactory.getInstance(serviceInterface, target);
+            return proxyFactory.getInstance(iface, target);
         }
 
         protected ProxyFactory createProxyFactory() {
@@ -152,7 +134,7 @@ public abstract class AbstractServiceBuilder<Service> implements ServiceBuilder<
                     new EventTracer(
                             hasFlag(EVENT_BEFORE_CALL_START, startEventPhases) ? startEventListener : listenerStub,
                             hasFlag(EVENT_AFTER_CALL_END, endEventPhases) ? endEventListener : listenerStub,
-                            errEventListener)
+                            hasFlag(EVENT_AFTER_CALL_END, errorEventPhases) ? errEventListener : listenerStub)
             );
         }
 

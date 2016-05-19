@@ -3,7 +3,8 @@ namespace java com.rbkmoney.woody.rpc
 typedef i32 int // We can use typedef to get pretty names for the types we are using
 struct Owner {
 1:int id,
-2:string name
+2:string name,
+3:optional string value;
 }
 
 exception test_error {

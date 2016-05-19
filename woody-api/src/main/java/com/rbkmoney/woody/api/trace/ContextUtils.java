@@ -22,6 +22,14 @@ public class ContextUtils {
         span.getMetadata().putValue(MetadataProperties.INTERCEPTION_ERROR, t);
     }
 
+    public static void setInterceptionErrorReason(ContextSpan span, Object reason) {
+        span.getMetadata().putValue(MetadataProperties.INTERCEPTION_ERROR_REASON, reason);
+    }
+
+    public static <T> T getInterceptionErrorReason(ContextSpan span, Class<T> targetType) {
+        return getMetadataParameter(span, targetType, MetadataProperties.INTERCEPTION_ERROR_REASON);
+    }
+
     public static void setCallError(ContextSpan span, Throwable t) {
         span.getMetadata().putValue(MetadataProperties.CALL_ERROR, t);
     }
