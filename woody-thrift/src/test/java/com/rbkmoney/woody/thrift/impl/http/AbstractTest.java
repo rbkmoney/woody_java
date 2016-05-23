@@ -82,9 +82,8 @@ public class AbstractTest {
         }, new TCompactProtocol.Factory());
     }
 
-    protected <T> Servlet createThrftRPCService(Class<T> iface, T handler, IdGenerator idGenerator, ServiceEventListener eventListener) {
+    protected <T> Servlet createThrftRPCService(Class<T> iface, T handler, ServiceEventListener eventListener) {
         THServiceBuilder serviceBuilder = new THServiceBuilder();
-        serviceBuilder.withIdGenerator(idGenerator);
         serviceBuilder.withEventListener(eventListener);
         return serviceBuilder.build(iface, handler);
     }

@@ -1,12 +1,11 @@
 package com.rbkmoney.woody.thrift.impl.http.event;
 
-import com.rbkmoney.woody.api.event.ServiceEvent;
 import com.rbkmoney.woody.api.event.ServiceEventListener;
 
 /**
  * Created by vpankrashkin on 12.05.16.
  */
-public class ServiceEventListenerImpl implements ServiceEventListener {
+public class ServiceEventListenerImpl implements ServiceEventListener<THServiceEvent> {
     private volatile ServiceActionListener eventActionListener;
 
     public ServiceEventListenerImpl() {
@@ -21,7 +20,7 @@ public class ServiceEventListenerImpl implements ServiceEventListener {
     }
 
     @Override
-    public void notifyEvent(ServiceEvent event) {
+    public void notifyEvent(THServiceEvent event) {
         switch (event.getEventType()) {
             case CALL_HANDLER:
                 if (eventActionListener != null)
@@ -45,7 +44,7 @@ public class ServiceEventListenerImpl implements ServiceEventListener {
                 break;
             default:
                 if (eventActionListener != null)
-                    eventActionListener.unddefined(event);
+                    eventActionListener.undefined(event);
                 break;
 
         }

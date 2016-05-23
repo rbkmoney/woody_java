@@ -1,6 +1,5 @@
 package com.rbkmoney.woody.thrift.impl.http.event;
 
-import com.rbkmoney.woody.api.event.ClientEvent;
 import com.rbkmoney.woody.api.event.ClientEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,13 +7,12 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by vpankrashkin on 12.05.16.
  */
-public class ClientEventLogListener implements ClientEventListener {
+public class ClientEventLogListener implements ClientEventListener<THClientEvent> {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Override
-    public void notifyEvent(ClientEvent event1) {
+    public void notifyEvent(THClientEvent event) {
         try {
-            THClientEvent event = (THClientEvent) event1;
             switch (event.getEventType()) {
                 case CALL_SERVICE:
                     log.info("CLIENT Event: {}, Span [{}-{}-{}], [{}, Type: {}], Time: {}", event.getEventType(), event.getTraceId(), event.getSpanId(), event.getParentId(), event.getCallName(), event.getCallType(), event.getTimeStamp());

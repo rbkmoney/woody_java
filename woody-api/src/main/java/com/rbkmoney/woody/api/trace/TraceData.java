@@ -4,8 +4,18 @@ package com.rbkmoney.woody.api.trace;
  * Created by vpankrashkin on 21.04.16.
  */
 public class TraceData {
-    private final ClientSpan clientSpan = new ClientSpan();
-    private final ServiceSpan serviceSpan = new ServiceSpan();
+    private final ClientSpan clientSpan;
+    private final ServiceSpan serviceSpan;
+
+    public TraceData() {
+        this.clientSpan = new ClientSpan();
+        this.serviceSpan = new ServiceSpan();
+    }
+
+    protected TraceData(TraceData oldTraceData) {
+        this.clientSpan = oldTraceData.clientSpan.cloneObject();
+        this.serviceSpan = oldTraceData.serviceSpan.cloneObject();
+    }
 
     public ClientSpan getClientSpan() {
         return clientSpan;
@@ -43,7 +53,7 @@ public class TraceData {
      * 1,1 means that both spans exist and child client call is active now because for any client request client span is cleared after call completion, so after child call state returns to (1,0) case - (1,1) is child client state -> true
      * <p>
      * This allows to eliminate the necessity for call processing code to be explicitly configured with expected call state. This can be figured out directly from the context in runtime.
-     * The only exclusion is {@link com.rbkmoney.woody.api.trace.context.TraceContext} itself. It uses already filled trace id field for server state initiazation
+     * The only exclusion is {@link com.rbkmoney.woody.api.trace.context.TraceContext} itself. It uses already filled trace id field for server state initialization
      *
      * @return true - if call is running as root client or child client call for server request handling; false - if call is running in server request handing
      */
@@ -62,5 +72,9 @@ public class TraceData {
     public void reset() {
         clientSpan.reset();
         serviceSpan.reset();
+    }
+
+    public TraceData cloneObject() {
+        return new TraceData(this);
     }
 }

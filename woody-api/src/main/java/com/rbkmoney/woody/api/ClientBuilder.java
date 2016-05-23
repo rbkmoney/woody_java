@@ -15,5 +15,5 @@ public interface ClientBuilder {
 
     ClientBuilder withIdGenerator(IdGenerator generator);
 
-    <T> T build(Class<T> clientInterface);
+    <T> T build(Class<T> iface);
 }

@@ -1,17 +1,16 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
+import com.rbkmoney.woody.api.event.ClientEventListener;
+import com.rbkmoney.woody.api.event.CompositeClientEventListener;
+import com.rbkmoney.woody.api.event.CompositeServiceEventListener;
 import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerService;
 import com.rbkmoney.woody.rpc.test_error;
-import com.rbkmoney.woody.thrift.impl.http.event.ClientEventListenerImpl;
-import com.rbkmoney.woody.thrift.impl.http.event.ClientEventLogListener;
-import com.rbkmoney.woody.thrift.impl.http.event.ServiceEventListenerImpl;
-import com.rbkmoney.woody.thrift.impl.http.event.ServiceEventLogListener;
+import com.rbkmoney.woody.thrift.impl.http.event.*;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.servlet.Servlet;
@@ -21,14 +20,17 @@ import static java.lang.System.out;
 /**
  * Created by vpankrashkin on 12.05.16.
  */
-@Ignore
+
 public class TestChildRequests extends AbstractTest {
 
-    ClientEventListenerImpl clientEventListener = new ClientEventListenerImpl();
     ServiceEventListenerImpl serviceEventListener = new ServiceEventListenerImpl();
+    ClientEventListener clientEventLogListener = new CompositeClientEventListener(
+            new ClientEventLogListener(),
+            new HttpClientEventLogListener()
+    );
 
-    OwnerService.Iface client1 = createThriftRPCClient(OwnerService.Iface.class, new IdGeneratorStub(), new ClientEventLogListener(), getUrlString("/rpc"));
-    OwnerService.Iface client2 = createThriftRPCClient(OwnerService.Iface.class, new IdGeneratorStub(), new ClientEventLogListener(), getUrlString("/rpc"));
+    OwnerService.Iface client1 = createThriftRPCClient(OwnerService.Iface.class, new IdGeneratorStub(), clientEventLogListener, getUrlString("/rpc"));
+    OwnerService.Iface client2 = createThriftRPCClient(OwnerService.Iface.class, new IdGeneratorStub(), clientEventLogListener, getUrlString("/rpc"));
     OwnerService.Iface handler = new OwnerServiceStub() {
         @Override
         public Owner getErrOwner(int id) throws TException, test_error {
@@ -47,7 +49,10 @@ public class TestChildRequests extends AbstractTest {
         }
     };
 
-    Servlet servlet = createThrftRPCService(OwnerService.Iface.class, handler, new IdGeneratorStub(), new ServiceEventLogListener());
+    Servlet servlet = createThrftRPCService(OwnerService.Iface.class, handler, new CompositeServiceEventListener<>(
+            new ServiceEventLogListener(),
+            new HttpServiceEventLogListener()
+    ));
 
     @Before
     public void before() {

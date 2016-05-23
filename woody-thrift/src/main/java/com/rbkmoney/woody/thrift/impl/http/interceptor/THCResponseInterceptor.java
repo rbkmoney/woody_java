@@ -28,6 +28,7 @@ public class THCResponseInterceptor implements ResponseInterceptor {
         try {
             clientSpan.getMetadata().putValue(THMetadataProperties.TH_RESPONSE_STATUS, connection.getResponseCode());
             clientSpan.getMetadata().putValue(THMetadataProperties.TH_RESPONSE_MESSAGE, connection.getResponseMessage());
+            clientSpan.getMetadata().putValue(THMetadataProperties.TH_TRANSPORT_RESPONSE, connection);
             return true;
         } catch (IOException e) {
             return interceptError(clientSpan, "Failed to get response data", e);
@@ -37,6 +38,8 @@ public class THCResponseInterceptor implements ResponseInterceptor {
     protected boolean interceptResponseBase(ClientSpan clientSpan, HttpResponse response) {
         clientSpan.getMetadata().putValue(THMetadataProperties.TH_RESPONSE_STATUS, response.getStatusLine().getStatusCode());
         clientSpan.getMetadata().putValue(THMetadataProperties.TH_RESPONSE_MESSAGE, response.getStatusLine().getReasonPhrase());
+        clientSpan.getMetadata().putValue(THMetadataProperties.TH_TRANSPORT_RESPONSE, response);
+
         return true;
     }
 

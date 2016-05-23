@@ -1,12 +1,10 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
-import com.rbkmoney.woody.api.event.ClientEvent;
-import com.rbkmoney.woody.api.event.ClientEventListener;
-import com.rbkmoney.woody.api.event.ServiceEvent;
-import com.rbkmoney.woody.api.event.ServiceEventListener;
 import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerService;
 import com.rbkmoney.woody.rpc.TestHttp;
+import com.rbkmoney.woody.thrift.impl.http.event.ClientEventListenerImpl;
+import com.rbkmoney.woody.thrift.impl.http.event.ServiceEventListenerImpl;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TCompactProtocol;
@@ -41,13 +39,7 @@ public class TestLoadThriftRPCClient {
         context.addServlet(defaultServ, "/default");
 
         THServiceBuilder serviceBuilder = new THServiceBuilder();
-        serviceBuilder.withIdGenerator(new IdGeneratorStub());
-        serviceBuilder.withEventListener(new ServiceEventListener() {
-            @Override
-            public void notifyEvent(ServiceEvent event) {
-
-            }
-        });
+        serviceBuilder.withEventListener(new ServiceEventListenerImpl());
         Servlet rpcServlet = serviceBuilder.build(OwnerService.Iface.class, new OwnerServiceImpl());
         ServletHolder rpcServ = new ServletHolder("rpc", rpcServlet);
         context.addServlet(defaultServ, "/rpc");
@@ -146,12 +138,7 @@ public class TestLoadThriftRPCClient {
         clientBuilder.withAddress(new URI(url));
         clientBuilder.withHttpClient(HttpClientBuilder.create().build());
         clientBuilder.withIdGenerator(new IdGeneratorStub());
-        clientBuilder.withEventListener(new ClientEventListener() {
-            @Override
-            public void notifyEvent(ClientEvent event) {
-
-            }
-        });
+        clientBuilder.withEventListener(new ClientEventListenerImpl());
 
         return clientBuilder.build(OwnerService.Iface.class);
     }

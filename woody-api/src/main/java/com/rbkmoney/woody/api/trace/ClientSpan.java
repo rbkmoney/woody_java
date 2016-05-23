@@ -5,4 +5,15 @@ package com.rbkmoney.woody.api.trace;
  */
 public class ClientSpan extends ContextSpan {
 
+    public ClientSpan() {
+    }
+
+    protected ClientSpan(ClientSpan clientSpan) {
+        super(clientSpan);
+    }
+
+    public ClientSpan cloneObject() {
+        return new ClientSpan(this);
+    }
+
 }

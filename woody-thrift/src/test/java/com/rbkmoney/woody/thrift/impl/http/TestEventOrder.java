@@ -35,7 +35,7 @@ public class TestEventOrder extends AbstractTest {
         }
     };
 
-    Servlet servlet = createThrftRPCService(OwnerService.Iface.class, handler, new IdGeneratorStub(), serviceEventListener);
+    Servlet servlet = createThrftRPCService(OwnerService.Iface.class, handler, serviceEventListener);
 
     OwnerService.Iface client = createThriftRPCClient(OwnerService.Iface.class, new IdGeneratorStub(), clientEventListener, getUrlString("/rpc"));
 

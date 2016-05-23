@@ -55,6 +55,7 @@ public class THErrorMetadataExtender {
                 metadata.putValue(MetadataProperties.ERROR_TYPE, ErrorType.PROVIDER_ERROR);
                 metadata.putValue(THMetadataProperties.TH_ERROR_TYPE, TErrorType.TRANSPORT);
                 metadata.putValue(THMetadataProperties.TH_ERROR_SUBTYPE, ((THRequestInterceptionException) callErr).getErrorType());
+                ContextUtils.setInterceptionErrorReason(traceData.getServiceSpan(), ((THRequestInterceptionException) callErr).getReason());
             } else {
                 metadata.putValue(MetadataProperties.ERROR_TYPE, ErrorType.APPLICATION_UNKNOWN_ERROR);
                 metadata.putValue(MetadataProperties.ERROR_MESSAGE, UNKNOWN_ERROR_MESSAGE);

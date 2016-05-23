@@ -23,9 +23,17 @@ public class THSRequestInterceptor implements RequestInterceptor {
     }
 
     protected boolean interceptHttpRequest(TraceData traceData, HttpServletRequest request, Object... contextParams) {
+        String errMethod = chechRequestMethod(request);
+        if (errMethod != null) {
+            return interceptRequest(traceData, new THRequestInterceptionException(TTransportErrorType.BAD_REQUEST_TYPE, errMethod));
+        }
+        String errContentType = checkContentType(request);
+        if (errContentType != null) {
+            return interceptError(traceData, new THRequestInterceptionException(TTransportErrorType.BAD_CONTENT_TYPE, errContentType));
+        }
         THttpHeader errHeader = setSpanHeaders(traceData.getServiceSpan(), request);
         if (errHeader != null) {
-            return interceptError(traceData, new THRequestInterceptionException(TTransportErrorType.BAD_TRACE_HEADERS));
+            return interceptError(traceData, new THRequestInterceptionException(TTransportErrorType.BAD_TRACE_HEADERS, errHeader));
         }
         extendMetadata(traceData.getServiceSpan(), request, contextParams);
         return true;
@@ -51,6 +59,16 @@ public class THSRequestInterceptor implements RequestInterceptor {
         return null;
     }
 
+    protected String chechRequestMethod(HttpServletRequest request) {
+        String reqMethod = request.getMethod();
+        return "POST".equals(reqMethod) ? null : reqMethod;
+    }
+
+    private String checkContentType(HttpServletRequest request) {
+        String cType = request.getContentType();
+        return "application/x-thrift".equalsIgnoreCase(cType) ? null : cType;
+    }
+
     private void extendMetadata(ServiceSpan serviceSpan, HttpServletRequest request, Object... contextParams) {
         String queryString = request.getQueryString();
         StringBuffer sb = request.getRequestURL();
@@ -59,9 +77,10 @@ public class THSRequestInterceptor implements RequestInterceptor {
         }
         serviceSpan.getMetadata().putValue(MetadataProperties.CALL_ENDPOINT, new UrlStringEndpoint(sb.toString()));
         HttpServletResponse response = ContextUtils.getContextParameter(HttpServletResponse.class, contextParams, 0);
-        if (response != null) {
-            serviceSpan.getMetadata().putValue(THMetadataProperties.TH_TRANSPORT_RESPONSE, response);
-        }
+
+        serviceSpan.getMetadata().putValue(THMetadataProperties.TH_TRANSPORT_REQUEST, request);
+        serviceSpan.getMetadata().putValue(THMetadataProperties.TH_TRANSPORT_RESPONSE, response);
+
     }
 
     private String getSpanHeader(String name, HttpServletRequest request) {

@@ -1,7 +1,7 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.event.CallType;
-import com.rbkmoney.woody.api.event.ClientEvent;
+import com.rbkmoney.woody.api.event.ClientEventListener;
 import com.rbkmoney.woody.api.event.ErrorType;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.rpc.Owner;
@@ -45,8 +45,7 @@ public class TestClientEventHandling extends AbstractTest {
     public void testExpectedError() {
         addServlet(createMutableTervlet(), "/");
 
-        OwnerService.Iface client = (OwnerService.Iface) createThriftRPCClient(OwnerService.Iface.class, new IdGeneratorStub(), (ClientEvent clientEvent) -> {
-            THClientEvent thClientEvent = (THClientEvent) clientEvent;
+        OwnerService.Iface client = createThriftRPCClient(OwnerService.Iface.class, new IdGeneratorStub(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
             switch (thClientEvent.getEventType()) {
                 case CALL_SERVICE:
                     assertArrayEquals(new Object[]{0}, thClientEvent.getCallArguments());
@@ -92,8 +91,7 @@ public class TestClientEventHandling extends AbstractTest {
     public void testGetOwnerOK() {
         addServlet(createMutableTervlet(), "/");
 
-        OwnerService.Iface client = createThriftRPCClient(OwnerService.Iface.class, new IdGeneratorStub(), (ClientEvent clientEvent) -> {
-            THClientEvent thClientEvent = (THClientEvent) clientEvent;
+        OwnerService.Iface client = createThriftRPCClient(OwnerService.Iface.class, new IdGeneratorStub(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
             switch (thClientEvent.getEventType()) {
                 case CALL_SERVICE:
                     assertArrayEquals(new Object[]{1}, thClientEvent.getCallArguments());
@@ -134,8 +132,7 @@ public class TestClientEventHandling extends AbstractTest {
     public void testUnexpectedError() {
         addServlet(createMutableTervlet(), "/");
 
-        OwnerService.Iface client = createThriftRPCClient(OwnerService.Iface.class, new IdGeneratorStub(), (ClientEvent clientEvent) -> {
-            THClientEvent thClientEvent = (THClientEvent) clientEvent;
+        OwnerService.Iface client = createThriftRPCClient(OwnerService.Iface.class, new IdGeneratorStub(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
             switch (thClientEvent.getEventType()) {
                 case CALL_SERVICE:
                     assertArrayEquals(new Object[]{0}, thClientEvent.getCallArguments());
