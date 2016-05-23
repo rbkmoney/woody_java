@@ -44,7 +44,7 @@ public class ServiceEventListenerImpl implements ServiceEventListener<THServiceE
                 break;
             default:
                 if (eventActionListener != null)
-                    eventActionListener.unddefined(event);
+                    eventActionListener.undefined(event);
                 break;
 
         }
