@@ -16,5 +16,5 @@ public interface ServiceActionListener {
 
     ServiceEvent error(ServiceEvent event);
 
-    ServiceEvent unddefined(ServiceEvent event);
+    ServiceEvent undefined(ServiceEvent event);
 }
