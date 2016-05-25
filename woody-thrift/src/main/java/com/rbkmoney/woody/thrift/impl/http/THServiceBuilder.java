@@ -14,7 +14,7 @@ import com.rbkmoney.woody.api.transport.TransportEventInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.event.THServiceEvent;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.*;
 import org.apache.thrift.TProcessor;
-import org.apache.thrift.protocol.TCompactProtocol;
+import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.protocol.TProtocolFactory;
 import org.apache.thrift.server.TServlet;
@@ -112,6 +112,10 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
 
     }
 
+    protected TProtocolFactory createProtocolFactory() {
+        return new TBinaryProtocol.Factory();
+    }
+
     protected TProtocolFactory wrapProtocolFactory(TProtocolFactory tProtocolFactory, CommonInterceptor commonInterceptor) {
         return tTransport -> {
             TProtocol tProtocol = tProtocolFactory.getProtocol(tTransport);
@@ -125,7 +129,7 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
                 new ContainerCommonInterceptor(null, new THSResponseMetadataInterceptor(metadataExtender)),
                 new ContainerCommonInterceptor(null, new THSResponseInterceptor(false))
         );
-        TProtocolFactory tProtocolFactory = wrapProtocolFactory(new TCompactProtocol.Factory(), protInterceptor);
+        TProtocolFactory tProtocolFactory = wrapProtocolFactory(createProtocolFactory(), protInterceptor);
         return new TServlet(tProcessor, tProtocolFactory, servletInterceptor);
     }
 

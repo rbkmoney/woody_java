@@ -12,9 +12,12 @@ import java.net.URI;
  * Created by vpankrashkin on 25.04.16.
  */
 public abstract class AbstractClientBuilder implements ClientBuilder {
+    private static final ClientEventListener DEFAULT_EVENT_LISTENER = (event) -> {
+    };
+
     private URI address;
-    private ClientEventListener eventListener;
     private IdGenerator idGenerator;
+    private ClientEventListener eventListener = DEFAULT_EVENT_LISTENER;
 
     @Override
     public ClientBuilder withAddress(URI address) {

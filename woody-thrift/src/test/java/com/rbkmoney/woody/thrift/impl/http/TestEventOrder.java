@@ -7,6 +7,7 @@ import com.rbkmoney.woody.thrift.impl.http.event.ClientActionListener;
 import com.rbkmoney.woody.thrift.impl.http.event.ClientEventListenerImpl;
 import com.rbkmoney.woody.thrift.impl.http.event.ServiceActionListener;
 import com.rbkmoney.woody.thrift.impl.http.event.ServiceEventListenerImpl;
+import com.rbkmoney.woody.thrift.impl.http.generator.TimestampIdGenerator;
 import org.apache.thrift.TException;
 import org.junit.Assert;
 import org.junit.Before;
@@ -37,7 +38,7 @@ public class TestEventOrder extends AbstractTest {
 
     Servlet servlet = createThrftRPCService(OwnerService.Iface.class, handler, serviceEventListener);
 
-    OwnerService.Iface client = createThriftRPCClient(OwnerService.Iface.class, new IdGeneratorStub(), clientEventListener, getUrlString("/rpc"));
+    OwnerService.Iface client = createThriftRPCClient(OwnerService.Iface.class, new TimestampIdGenerator(), clientEventListener, getUrlString("/rpc"));
 
     @Before
     public void before() {

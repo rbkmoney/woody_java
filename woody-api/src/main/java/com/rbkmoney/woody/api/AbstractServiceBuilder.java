@@ -12,8 +12,10 @@ import com.rbkmoney.woody.api.trace.context.MetadataTracer;
  * Created by vpankrashkin on 10.05.16.
  */
 public abstract class AbstractServiceBuilder<Service> implements ServiceBuilder<Service> {
-    private ServiceEventListener eventListener;
+    private static final ServiceEventListener DEFAULT_EVENT_LISTENER = (event) -> {
+    };
 
+    private ServiceEventListener eventListener = DEFAULT_EVENT_LISTENER;
 
     @Override
     public ServiceBuilder withEventListener(ServiceEventListener listener) {

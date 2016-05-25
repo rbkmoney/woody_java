@@ -7,6 +7,7 @@ import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerService;
 import com.rbkmoney.woody.rpc.test_error;
 import com.rbkmoney.woody.thrift.impl.http.event.*;
+import com.rbkmoney.woody.thrift.impl.http.generator.TimestampIdGenerator;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.Assert;
@@ -29,8 +30,8 @@ public class TestChildRequests extends AbstractTest {
             new HttpClientEventLogListener()
     );
 
-    OwnerService.Iface client1 = createThriftRPCClient(OwnerService.Iface.class, new IdGeneratorStub(), clientEventLogListener, getUrlString("/rpc"));
-    OwnerService.Iface client2 = createThriftRPCClient(OwnerService.Iface.class, new IdGeneratorStub(), clientEventLogListener, getUrlString("/rpc"));
+    OwnerService.Iface client1 = createThriftRPCClient(OwnerService.Iface.class, new TimestampIdGenerator(), clientEventLogListener, getUrlString("/rpc"));
+    OwnerService.Iface client2 = createThriftRPCClient(OwnerService.Iface.class, new TimestampIdGenerator(), clientEventLogListener, getUrlString("/rpc"));
     OwnerService.Iface handler = new OwnerServiceStub() {
         @Override
         public Owner getErrOwner(int id) throws TException, test_error {
