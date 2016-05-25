@@ -76,7 +76,7 @@ public class HttpServiceEventLogListener implements ServiceEventListener<THServi
         sb.append('[');
         for (Iterator<String> it = headers.iterator(); it.hasNext(); ) {
             String header = it.next();
-            sb.append(' ').append(header).append(": ").append(httpResponse.getHeader(header));
+            sb.append(header).append(": ").append(httpResponse.getHeader(header));
             if (it.hasNext())
                 sb.append(", ");
         }

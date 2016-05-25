@@ -2,6 +2,7 @@ package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.AbstractClientBuilder;
 import com.rbkmoney.woody.api.event.ClientEventListener;
+import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.api.interceptor.CommonInterceptor;
 import com.rbkmoney.woody.api.interceptor.CompositeInterceptor;
 import com.rbkmoney.woody.api.interceptor.ContainerCommonInterceptor;
@@ -12,6 +13,7 @@ import com.rbkmoney.woody.api.trace.context.EmptyTracer;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
 import com.rbkmoney.woody.api.transport.TransportEventInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.event.THClientEvent;
+import com.rbkmoney.woody.thrift.impl.http.generator.TimestampIdGenerator;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THCMessageRequestInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THCMessageResponseInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THCRequestInterceptor;
@@ -19,7 +21,7 @@ import com.rbkmoney.woody.thrift.impl.http.interceptor.THCResponseInterceptor;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.thrift.TServiceClient;
-import org.apache.thrift.protocol.TCompactProtocol;
+import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.THttpClient;
 import org.apache.thrift.transport.TTransport;
@@ -33,7 +35,14 @@ import java.util.Optional;
  * Created by vpankrashkin on 28.04.16.
  */
 public class THClientBuilder extends AbstractClientBuilder {
-    private HttpClient httpClient = createHttpClient();
+    private static final IdGenerator DEFAULT_ID_GENERATOR = new TimestampIdGenerator();
+
+    private HttpClient httpClient;
+
+    public THClientBuilder() {
+        this.httpClient = createHttpClient();
+        super.withIdGenerator(DEFAULT_ID_GENERATOR);
+    }
 
     public THClientBuilder withHttpClient(HttpClient httpClient) {
         this.httpClient = httpClient;
@@ -98,7 +107,7 @@ public class THClientBuilder extends AbstractClientBuilder {
     }
 
     protected TProtocol createProtocol(TTransport tTransport) {
-        return new TCompactProtocol(tTransport);
+        return new TBinaryProtocol(tTransport);
     }
 
     protected HttpClient createHttpClient() {

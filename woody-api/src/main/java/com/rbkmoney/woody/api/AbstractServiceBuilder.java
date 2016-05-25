@@ -1,5 +1,6 @@
 package com.rbkmoney.woody.api;
 
+import com.rbkmoney.woody.api.event.ServiceEvent;
 import com.rbkmoney.woody.api.event.ServiceEventListener;
 import com.rbkmoney.woody.api.proxy.MethodCallTracer;
 import com.rbkmoney.woody.api.proxy.ProxyFactory;
@@ -12,8 +13,10 @@ import com.rbkmoney.woody.api.trace.context.MetadataTracer;
  * Created by vpankrashkin on 10.05.16.
  */
 public abstract class AbstractServiceBuilder<Service> implements ServiceBuilder<Service> {
-    private ServiceEventListener eventListener;
+    private static final ServiceEventListener DEFAULT_EVENT_LISTENER = (ServiceEventListener<ServiceEvent>) event -> {
+    };
 
+    private ServiceEventListener eventListener = DEFAULT_EVENT_LISTENER;
 
     @Override
     public ServiceBuilder withEventListener(ServiceEventListener listener) {
