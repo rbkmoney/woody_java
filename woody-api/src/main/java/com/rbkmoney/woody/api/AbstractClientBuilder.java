@@ -1,5 +1,6 @@
 package com.rbkmoney.woody.api;
 
+import com.rbkmoney.woody.api.event.ClientEvent;
 import com.rbkmoney.woody.api.event.ClientEventListener;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.api.proxy.MethodCallTracer;
@@ -12,7 +13,7 @@ import java.net.URI;
  * Created by vpankrashkin on 25.04.16.
  */
 public abstract class AbstractClientBuilder implements ClientBuilder {
-    private static final ClientEventListener DEFAULT_EVENT_LISTENER = (event) -> {
+    private static final ClientEventListener DEFAULT_EVENT_LISTENER = (ClientEventListener<ClientEvent>) event -> {
     };
 
     private URI address;
