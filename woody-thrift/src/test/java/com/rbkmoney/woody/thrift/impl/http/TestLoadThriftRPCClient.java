@@ -137,7 +137,6 @@ public class TestLoadThriftRPCClient {
         THClientBuilder clientBuilder = new THClientBuilder();
         clientBuilder.withAddress(new URI(url));
         clientBuilder.withHttpClient(HttpClientBuilder.create().build());
-        clientBuilder.withIdGenerator(new IdGeneratorStub());
         clientBuilder.withEventListener(new ClientEventListenerImpl());
 
         return clientBuilder.build(OwnerService.Iface.class);

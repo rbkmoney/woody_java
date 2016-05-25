@@ -1,6 +1,5 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
-import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerService;
 import com.rbkmoney.woody.rpc.test_error;
@@ -134,17 +133,6 @@ public class TestLoadErrThriftRPCClient {
         THClientBuilder clientBuilder = new THClientBuilder();
         clientBuilder.withAddress(new URI(url));
         clientBuilder.withHttpClient(HttpClientBuilder.create().build());
-        clientBuilder.withIdGenerator(new IdGenerator() {
-            @Override
-            public String generateId(long timestamp) {
-                return Long.toString(timestamp);
-            }
-
-            @Override
-            public String generateId(long timestamp, int counter) {
-                return new StringBuilder().append(timestamp).append(':').append(counter).toString();
-            }
-        });
 
         return clientBuilder.build(OwnerService.Iface.class);
     }

@@ -6,7 +6,7 @@ import com.rbkmoney.woody.api.generator.IdGenerator;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.thrift.TException;
 import org.apache.thrift.TProcessor;
-import org.apache.thrift.protocol.TCompactProtocol;
+import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.server.TServlet;
 import org.apache.thrift.transport.THttpClient;
@@ -70,7 +70,7 @@ public class AbstractTest {
     }
 
     public TServlet createTServlet(TProcessor tProcessor) {
-        return new TServlet(tProcessor, new TCompactProtocol.Factory());
+        return new TServlet(tProcessor, new TBinaryProtocol.Factory());
     }
 
     public TServlet createMutableTervlet() {
@@ -79,7 +79,7 @@ public class AbstractTest {
             public boolean process(TProtocol in, TProtocol out) throws TException {
                 return tProcessor.process(in, out);
             }
-        }, new TCompactProtocol.Factory());
+        }, new TBinaryProtocol.Factory());
     }
 
     protected <T> Servlet createThrftRPCService(Class<T> iface, T handler, ServiceEventListener eventListener) {
@@ -95,7 +95,7 @@ public class AbstractTest {
     protected <T> T createThriftClient(Class<T> iface) throws TTransportException {
         try {
             THttpClient thc = new THttpClient(getUrlString(), HttpClientBuilder.create().build());
-            TProtocol tProtocol = new TCompactProtocol(thc);
+            TProtocol tProtocol = new TBinaryProtocol(thc);
             return THClientBuilder.createThriftClient(iface, tProtocol, null);
         } catch (TTransportException e) {
             throw new RuntimeException(e);
