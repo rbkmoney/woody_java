@@ -87,6 +87,5 @@
                 </executions>
             </plugin>
         </plugins>
-        <finalName>rpc-lib</finalName>
     </build>
 </project>
