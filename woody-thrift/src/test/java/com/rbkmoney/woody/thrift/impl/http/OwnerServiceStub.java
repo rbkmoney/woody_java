@@ -1,14 +1,14 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.rpc.Owner;
-import com.rbkmoney.woody.rpc.OwnerService;
+import com.rbkmoney.woody.rpc.OwnerServiceSrv;
 import com.rbkmoney.woody.rpc.test_error;
 import org.apache.thrift.TException;
 
 /**
  * Created by vpankrashkin on 19.04.16.
  */
-public class OwnerServiceStub implements OwnerService.Iface {
+public class OwnerServiceStub implements OwnerServiceSrv.Iface {
     @Override
     public Owner getOwner(int id) throws TException {
         return new Owner(id, "" + id);

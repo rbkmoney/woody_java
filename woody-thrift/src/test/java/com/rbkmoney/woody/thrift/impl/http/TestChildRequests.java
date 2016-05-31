@@ -4,7 +4,7 @@ import com.rbkmoney.woody.api.event.ClientEventListener;
 import com.rbkmoney.woody.api.event.CompositeClientEventListener;
 import com.rbkmoney.woody.api.event.CompositeServiceEventListener;
 import com.rbkmoney.woody.rpc.Owner;
-import com.rbkmoney.woody.rpc.OwnerService;
+import com.rbkmoney.woody.rpc.OwnerServiceSrv;
 import com.rbkmoney.woody.rpc.test_error;
 import com.rbkmoney.woody.thrift.impl.http.event.*;
 import com.rbkmoney.woody.thrift.impl.http.generator.TimestampIdGenerator;
@@ -30,9 +30,9 @@ public class TestChildRequests extends AbstractTest {
             new HttpClientEventLogListener()
     );
 
-    OwnerService.Iface client1 = createThriftRPCClient(OwnerService.Iface.class, new TimestampIdGenerator(), clientEventLogListener, getUrlString("/rpc"));
-    OwnerService.Iface client2 = createThriftRPCClient(OwnerService.Iface.class, new TimestampIdGenerator(), clientEventLogListener, getUrlString("/rpc"));
-    OwnerService.Iface handler = new OwnerServiceStub() {
+    OwnerServiceSrv.Iface client1 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), clientEventLogListener, getUrlString("/rpc"));
+    OwnerServiceSrv.Iface client2 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), clientEventLogListener, getUrlString("/rpc"));
+    OwnerServiceSrv.Iface handler = new OwnerServiceStub() {
         @Override
         public Owner getErrOwner(int id) throws TException, test_error {
             switch (id) {
@@ -50,7 +50,7 @@ public class TestChildRequests extends AbstractTest {
         }
     };
 
-    Servlet servlet = createThrftRPCService(OwnerService.Iface.class, handler, new CompositeServiceEventListener<>(
+    Servlet servlet = createThrftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener<>(
             new ServiceEventLogListener(),
             new HttpServiceEventLogListener()
     ));
