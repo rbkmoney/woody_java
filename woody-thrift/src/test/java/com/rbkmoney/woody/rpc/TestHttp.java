@@ -49,7 +49,7 @@ public class TestHttp {
         String servletUrl = "http://localhost:8080/";
         THttpClient thc = new THttpClient(servletUrl);
         TProtocol loPFactory = new TCompactProtocol(thc);
-        OwnerService.Client client = new OwnerService.Client(loPFactory);
+        OwnerServiceSrv.Client client = new OwnerServiceSrv.Client(loPFactory);
         Owner bean = client.getOwner(1);
         Assert.assertEquals("name", bean.getName());
 
@@ -58,7 +58,7 @@ public class TestHttp {
     public static class TServletExample extends TServlet {
         public TServletExample() {
             super(
-                    new OwnerService.Processor(
+                    new OwnerServiceSrv.Processor(
                             new OwnerServiceImpl()),
                     new TCompactProtocol.Factory()
             );

@@ -41,7 +41,7 @@ public class TestSocket {
     public void testExample() throws TTransportException, TException {
         TTransport transport = new TSocket("localhost", PORT);
         TProtocol protocol = new TBinaryProtocol(transport);
-        OwnerService.Client client = new OwnerService.Client(protocol);
+        OwnerServiceSrv.Client client = new OwnerServiceSrv.Client(protocol);
         transport.open();
         Owner bean = client.getOwner(1);
         transport.close();
@@ -53,7 +53,7 @@ public class TestSocket {
             try {
                 TTransport transport = new TSocket("localhost", PORT);
                 TProtocol protocol = new TBinaryProtocol(transport);
-                OwnerService.Client client = new OwnerService.Client(protocol);
+                OwnerServiceSrv.Client client = new OwnerServiceSrv.Client(protocol);
                 transport.open();
                 Owner bean = client.getOwner(1);
                 transport.close();
@@ -75,7 +75,7 @@ public class TestSocket {
         public void run() {
             try {
                 TServerSocket serverTransport = new TServerSocket(PORT);
-                OwnerService.Processor processor = new OwnerService.Processor(new OwnerServiceImpl());
+                OwnerServiceSrv.Processor processor = new OwnerServiceSrv.Processor(new OwnerServiceImpl());
                 TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).processor(processor));
                 System.out.println("Starting server on port " + PORT);
                 server.serve();

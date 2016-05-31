@@ -5,7 +5,7 @@ import com.rbkmoney.woody.api.event.ClientEventListener;
 import com.rbkmoney.woody.api.event.ErrorType;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.rpc.Owner;
-import com.rbkmoney.woody.rpc.OwnerService;
+import com.rbkmoney.woody.rpc.OwnerServiceSrv;
 import com.rbkmoney.woody.rpc.test_error;
 import com.rbkmoney.woody.thrift.impl.http.event.THClientEvent;
 import com.rbkmoney.woody.thrift.impl.http.generator.TimestampIdGenerator;
@@ -20,7 +20,7 @@ import static org.junit.Assert.*;
 public class TestClientEventHandling extends AbstractTest {
     {
 
-        tProcessor = new OwnerService.Processor<>(new OwnerServiceStub() {
+        tProcessor = new OwnerServiceSrv.Processor<>(new OwnerServiceStub() {
             @Override
             public Owner getOwner(int id) throws TException {
                 switch (id) {
@@ -46,7 +46,7 @@ public class TestClientEventHandling extends AbstractTest {
     public void testExpectedError() {
         addServlet(createMutableTervlet(), "/");
 
-        OwnerService.Iface client = createThriftRPCClient(OwnerService.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
+        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
             switch (thClientEvent.getEventType()) {
                 case CALL_SERVICE:
                     assertArrayEquals(new Object[]{0}, thClientEvent.getCallArguments());
@@ -92,7 +92,7 @@ public class TestClientEventHandling extends AbstractTest {
     public void testGetOwnerOK() {
         addServlet(createMutableTervlet(), "/");
 
-        OwnerService.Iface client = createThriftRPCClient(OwnerService.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
+        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
             switch (thClientEvent.getEventType()) {
                 case CALL_SERVICE:
                     assertArrayEquals(new Object[]{1}, thClientEvent.getCallArguments());
@@ -133,7 +133,7 @@ public class TestClientEventHandling extends AbstractTest {
     public void testUnexpectedError() {
         addServlet(createMutableTervlet(), "/");
 
-        OwnerService.Iface client = createThriftRPCClient(OwnerService.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
+        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
             switch (thClientEvent.getEventType()) {
                 case CALL_SERVICE:
                     assertArrayEquals(new Object[]{0}, thClientEvent.getCallArguments());

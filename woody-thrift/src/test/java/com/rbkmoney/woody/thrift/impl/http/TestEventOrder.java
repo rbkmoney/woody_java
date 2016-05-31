@@ -1,7 +1,7 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.rpc.Owner;
-import com.rbkmoney.woody.rpc.OwnerService;
+import com.rbkmoney.woody.rpc.OwnerServiceSrv;
 import com.rbkmoney.woody.rpc.test_error;
 import com.rbkmoney.woody.thrift.impl.http.event.ClientActionListener;
 import com.rbkmoney.woody.thrift.impl.http.event.ClientEventListenerImpl;
@@ -24,7 +24,7 @@ public class TestEventOrder extends AbstractTest {
 
     ClientEventListenerImpl clientEventListener = new ClientEventListenerImpl();
     ServiceEventListenerImpl serviceEventListener = new ServiceEventListenerImpl();
-    OwnerService.Iface handler = new OwnerServiceStub() {
+    OwnerServiceSrv.Iface handler = new OwnerServiceStub() {
         @Override
         public Owner getErrOwner(int id) throws TException, test_error {
             switch (id) {
@@ -36,9 +36,9 @@ public class TestEventOrder extends AbstractTest {
         }
     };
 
-    Servlet servlet = createThrftRPCService(OwnerService.Iface.class, handler, serviceEventListener);
+    Servlet servlet = createThrftRPCService(OwnerServiceSrv.Iface.class, handler, serviceEventListener);
 
-    OwnerService.Iface client = createThriftRPCClient(OwnerService.Iface.class, new TimestampIdGenerator(), clientEventListener, getUrlString("/rpc"));
+    OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), clientEventListener, getUrlString("/rpc"));
 
     @Before
     public void before() {

@@ -1,7 +1,7 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.rpc.Owner;
-import com.rbkmoney.woody.rpc.OwnerService;
+import com.rbkmoney.woody.rpc.OwnerServiceSrv;
 import com.rbkmoney.woody.rpc.test_error;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.thrift.TException;
@@ -52,8 +52,8 @@ public class TestLoadErrThriftRPCClient {
     @Test
     public void testServlet() throws TTransportException, TException, URISyntaxException {
         String servletUrl = "http://localhost:8080/";
-        OwnerService.Iface tClient = createThriftClient(servletUrl);
-        OwnerService.Iface tRPCClient = createThriftRPCClient(servletUrl);
+        OwnerServiceSrv.Iface tClient = createThriftClient(servletUrl);
+        OwnerServiceSrv.Iface tRPCClient = createThriftRPCClient(servletUrl);
 
         try {
             tClient.getErrOwner(0);
@@ -84,7 +84,7 @@ public class TestLoadErrThriftRPCClient {
 
     }
 
-    private void runThrift(int testCount, OwnerService.Iface tClient) {
+    private void runThrift(int testCount, OwnerServiceSrv.Iface tClient) {
         long start = System.currentTimeMillis();
         IntStream.range(1, testCount).forEach(i -> {
             try {
@@ -99,7 +99,7 @@ public class TestLoadErrThriftRPCClient {
 
     }
 
-    private void runHtriftRPC(int testCount, OwnerService.Iface tRPCClient) {
+    private void runHtriftRPC(int testCount, OwnerServiceSrv.Iface tRPCClient) {
         long start = System.currentTimeMillis();
         IntStream.range(1, testCount).forEach(i -> {
             try {
@@ -116,25 +116,25 @@ public class TestLoadErrThriftRPCClient {
     public static class TServletExample extends TServlet {
         public TServletExample() {
             super(
-                    new OwnerService.Processor(
+                    new OwnerServiceSrv.Processor(
                             new TestLoadErrThriftRPCClient.OwnerServiceImpl()),
                     new TCompactProtocol.Factory()
             );
         }
     }
 
-    private OwnerService.Iface createThriftClient(String url) throws TTransportException {
+    private OwnerServiceSrv.Iface createThriftClient(String url) throws TTransportException {
         THttpClient thc = new THttpClient(url, HttpClientBuilder.create().build());
         TProtocol loPFactory = new TCompactProtocol(thc);
-        return new OwnerService.Client(loPFactory);
+        return new OwnerServiceSrv.Client(loPFactory);
     }
 
-    private OwnerService.Iface createThriftRPCClient(String url) throws URISyntaxException {
+    private OwnerServiceSrv.Iface createThriftRPCClient(String url) throws URISyntaxException {
         THClientBuilder clientBuilder = new THClientBuilder();
         clientBuilder.withAddress(new URI(url));
         clientBuilder.withHttpClient(HttpClientBuilder.create().build());
 
-        return clientBuilder.build(OwnerService.Iface.class);
+        return clientBuilder.build(OwnerServiceSrv.Iface.class);
     }
 
     private static class OwnerServiceImpl extends OwnerServiceStub {
