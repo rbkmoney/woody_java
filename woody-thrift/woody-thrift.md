@@ -57,7 +57,7 @@ THClientBuilder clientBuilder = new THClientBuilder()
 ThriftServiceSrv.Iface client = clientBuilder.build(ThriftServiceSrv.Iface.class);
 ```
 
-Полученный объект `client` реализует интерфейс Thritf сервиса и готов к использованию.  
+Полученный объект `client` реализует интерфейс Thrift сервиса и готов к использованию.  
 __Текущая версия клиента не thread-safe!__
 
 ### Создание сервиса
@@ -68,6 +68,7 @@ serviceBuilder.withEventListener(eventListener);
 Servlet service = serviceBuilder.build(ThriftServiceSrv.Iface.class, handler);
 ```
 
-Полученный объект `service` - это ничто иное, как javax.servlet.Servlet, готовый обрабатывать запросы к Thrift-сервису, `handler` - реализация `ThriftServiceSrv.Iface`, которая вызвается 
+`service` - это ничто иное, как javax.servlet.Servlet, который нужно добавить в servlet контейнер.
+`handler` - реализация `ThriftServiceSrv.Iface`, которая вызывается для обработки запросов к сервису.
 
 
