@@ -1,6 +1,7 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.AbstractClientBuilder;
+import com.rbkmoney.woody.api.ClientBuilder;
 import com.rbkmoney.woody.api.event.ClientEventListener;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.api.interceptor.CommonInterceptor;
@@ -28,6 +29,7 @@ import org.apache.thrift.transport.TTransport;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -47,6 +49,21 @@ public class THClientBuilder extends AbstractClientBuilder {
     public THClientBuilder withHttpClient(HttpClient httpClient) {
         this.httpClient = httpClient;
         return this;
+    }
+
+    @Override
+    public THClientBuilder withAddress(URI address) {
+        return (THClientBuilder) super.withAddress(address);
+    }
+
+    @Override
+    public THClientBuilder withEventListener(ClientEventListener listener) {
+        return (THClientBuilder) super.withEventListener(listener);
+    }
+
+    @Override
+    public THClientBuilder withIdGenerator(IdGenerator generator) {
+        return (THClientBuilder) super.withIdGenerator(generator);
     }
 
     @Override

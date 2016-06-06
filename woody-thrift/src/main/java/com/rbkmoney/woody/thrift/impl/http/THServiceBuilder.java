@@ -1,6 +1,7 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.AbstractServiceBuilder;
+import com.rbkmoney.woody.api.ServiceBuilder;
 import com.rbkmoney.woody.api.event.ServiceEventListener;
 import com.rbkmoney.woody.api.interceptor.CommonInterceptor;
 import com.rbkmoney.woody.api.interceptor.CompositeInterceptor;
@@ -30,6 +31,10 @@ import java.util.Optional;
  */
 public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
 
+    @Override
+    public THServiceBuilder withEventListener(ServiceEventListener listener) {
+        return (THServiceBuilder) super.withEventListener(listener);
+    }
 
     @Override
     protected MethodCallTracer getOnCallMetadataExtender(Class serviceInterface) {
