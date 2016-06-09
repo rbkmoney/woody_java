@@ -2,6 +2,7 @@ package com.rbkmoney.woody.api.proxy;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 
 /**
  * Created by vpankrashkin on 22.04.16.
@@ -31,7 +32,7 @@ public class ProxyFactory {
         if (!allowObjectOverriding) {
             Method[] overriden = MethodShadow.getShadowedMethods(object, iface);
             if (overriden.length != 0) {
-                throw new IllegalArgumentException("Target interface " + iface.getName() + "shadows Object methods:" + overriden);
+                throw new IllegalArgumentException("Target interface " + iface.getName() + "shadows Object methods:" + Arrays.toString(overriden));
             }
         }
         return makeProxy(target, iface, callerFactory, callTracer);
