@@ -85,7 +85,7 @@ public class TraceContext {
         } else {
             initServerContext(traceData);
         }
-        
+
         MDCUtils.putContextIds(traceData.getActiveSpan().getSpan());
 
         postInit.run();
@@ -106,15 +106,18 @@ public class TraceContext {
                 preDestroy.run();
             }
         } finally {
-            MDCUtils.removeContextIds();
             if (isClient) {
-                if (!traceData.isRoot() && traceData.isClient()) {
-                    MDCUtils.putContextIds(traceData.getServiceSpan().getSpan());
-                }
                 destroyClientContext(traceData);
             } else {
                 destroyServerContext(traceData);
             }
+
+            if (traceData.getServiceSpan().isFilled()) {
+                MDCUtils.putContextIds(traceData.getServiceSpan().getSpan());
+            } else {
+                MDCUtils.removeContextIds();
+            }
+
         }
     }
 
