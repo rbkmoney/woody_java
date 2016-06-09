@@ -12,10 +12,6 @@ public class MDCUtils {
     public static final String TRACE_ID = "trace_id";
     public static final String PARENT_ID = "parent_id";
 
-    private MDCUtils() {
-        throw new IllegalAccessError("Utility class");
-    }
-
     /**
      * Put context ids in MDC
      *
