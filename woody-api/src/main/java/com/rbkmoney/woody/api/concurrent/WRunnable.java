@@ -1,5 +1,6 @@
 package com.rbkmoney.woody.api.concurrent;
 
+import com.rbkmoney.woody.api.MDCUtils;
 import com.rbkmoney.woody.api.trace.TraceData;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
 
@@ -41,6 +42,11 @@ public class WRunnable implements Runnable {
     public void run() {
         TraceData originalTraceData = TraceContext.getCurrentTraceData();
         TraceContext.setCurrentTraceData(getTraceData().cloneObject());
+
+        if (traceData != originalTraceData) {
+            MDCUtils.putContextIds(traceData.getActiveSpan().getSpan());
+        }
+
         try {
             geWrappedRunnable().run();
         } finally {
