@@ -9,7 +9,6 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -63,8 +62,7 @@ public class SnowflakeIdGenerator implements IdGenerator {
     private String nextId(long timestamp) {
         Long id = ((timestamp - twepoch) << timestampLeftShift) |
                 ((nodeId & maxNodeId) << nodeIdShift) |
-                (sequence.get() & sequenceMask);
-        sequence.incrementAndGet();
+                (sequence.getAndIncrement() & sequenceMask);
 
         return Long.toHexString(id);
     }
