@@ -51,6 +51,7 @@ public class WRunnable implements Runnable {
             geWrappedRunnable().run();
         } finally {
             TraceContext.setCurrentTraceData(originalTraceData);
+            MDCUtils.putContextIds(originalTraceData.getActiveSpan().getSpan());
         }
     }
 }

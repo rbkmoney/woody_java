@@ -29,9 +29,9 @@ public class MDCUtils {
      * @param parentId - parent id
      */
     public static void putContextIds(String spanId, String traceId, String parentId) {
-        MDC.put(SPAN_ID, spanId);
-        MDC.put(TRACE_ID, traceId);
-        MDC.put(PARENT_ID, parentId);
+        MDC.put(SPAN_ID, spanId != null ? spanId : "");
+        MDC.put(TRACE_ID, traceId != null ? traceId : "");
+        MDC.put(PARENT_ID, parentId != null ? parentId : "");
     }
 
     /**
