@@ -57,9 +57,9 @@ public class SnowflakeIdGenerator implements IdGenerator {
         return new StringBuilder().append(nextId(timestamp)).append(':').append(counter).toString();
     }
 
-    public synchronized String nextId(long timestamp) {
+    private synchronized String nextId(long timestamp) {
         if (timestamp < lastTimestamp) {
-            throw new RuntimeException(String.format("clock moved backwards. refusing to generate id for %d milliseconds.", lastTimestamp - timestamp));
+            throw new IllegalStateException(String.format("clock moved backwards. refusing to generate id for %d milliseconds.", lastTimestamp - timestamp));
         }
         if (lastTimestamp == timestamp) {
             sequence = (sequence + 1) & sequenceMask;
