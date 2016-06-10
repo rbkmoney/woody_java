@@ -9,15 +9,17 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by tolkonepiu on 09.06.16.
  */
 public class SnowflakeIdGenerator implements IdGenerator {
 
-    Logger log = LoggerFactory.getLogger(this.getClass());
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    private final long sequenceBits = 12;
+    private final long sequenceBits = 12L;
     private final long nodeIdBits = 10L;
     private final long maxNodeId = -1L ^ (-1L << nodeIdBits);
 
@@ -28,13 +30,14 @@ public class SnowflakeIdGenerator implements IdGenerator {
     private final long nodeId;
     private final long sequenceMask = -1L ^ (-1L << sequenceBits);
 
-    private volatile long lastTimestamp = -1L;
-    private volatile long sequence = 0L;
+    public static final String DEFAULT_SUFFIX = "root";
+
+    private final AtomicLong sequence = new AtomicLong();
 
     private final String suffix;
 
     public SnowflakeIdGenerator() {
-        this("root");
+        this(DEFAULT_SUFFIX);
     }
 
     public SnowflakeIdGenerator(String suffix) {
@@ -57,40 +60,23 @@ public class SnowflakeIdGenerator implements IdGenerator {
         return new StringBuilder().append(nextId(timestamp)).append(':').append(counter).toString();
     }
 
-    private synchronized String nextId(long timestamp) {
-        if (timestamp < lastTimestamp) {
-            throw new IllegalStateException(String.format("clock moved backwards. refusing to generate id for %d milliseconds.", lastTimestamp - timestamp));
-        }
-        if (lastTimestamp == timestamp) {
-            sequence = (sequence + 1) & sequenceMask;
-            if (sequence == 0) {
-                timestamp = tilNextMillis(lastTimestamp);
-            }
-        } else {
-            sequence = 0;
-        }
-        lastTimestamp = timestamp;
+    private String nextId(long timestamp) {
         Long id = ((timestamp - twepoch) << timestampLeftShift) |
-                (nodeId << nodeIdShift) |
-                sequence;
+                ((nodeId & maxNodeId) << nodeIdShift) |
+                (sequence.get() & sequenceMask);
+        sequence.incrementAndGet();
+
         return Long.toHexString(id);
     }
 
-    protected String getSuffix() {
+    public String getSuffix() {
         return suffix;
     }
 
-    protected long getNodeId() {
+    public long getNodeId() {
         return nodeId;
     }
 
-    protected long tilNextMillis(long lastTimestamp) {
-        long timestamp = System.currentTimeMillis();
-        while (timestamp <= lastTimestamp) {
-            timestamp = System.currentTimeMillis();
-        }
-        return timestamp;
-    }
 
     protected long generateNodeId() {
         long id = new Random(maxNodeId).nextInt();
