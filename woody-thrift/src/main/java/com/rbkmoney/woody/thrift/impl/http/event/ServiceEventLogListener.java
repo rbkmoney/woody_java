@@ -15,19 +15,19 @@ public class ServiceEventLogListener implements ServiceEventListener<THServiceEv
         try {
             switch (event.getEventType()) {
                 case CALL_HANDLER:
-                    log.info("SERVER Event: {}, Span [{}-{}-{}], [{}, Type: {}], Time: {}", event.getEventType(), event.getTraceId(), event.getSpanId(), event.getParentId(), event.getCallName(), event.getCallType(), event.getTimeStamp());
+                    log.info("SERVER Event: {}, [{}, Type: {}], Time: {}", event.getEventType(), event.getCallName(), event.getCallType(), event.getTimeStamp());
                     break;
                 case HANDLER_RESULT:
-                    log.info("SERVER Event: {}, Span [{}-{}-{}], Status: {}, Time: {}", event.getEventType(), event.getTraceId(), event.getSpanId(), event.getParentId(), event.isSuccessfullCall() ? "ok" : "error", event.getTimeStamp());
+                    log.info("SERVER Event: {}, Status: {}, Time: {}", event.getEventType(), event.isSuccessfullCall() ? "ok" : "error", event.getTimeStamp());
                     break;
                 case SERVICE_RECEIVE:
-                    log.info("SERVER Event: {}, Span [{}-{}-{}], Status: {}, Url: {}, Time: {}", event.getEventType(), event.getTraceId(), event.getSpanId(), event.getParentId(), event.isSuccessfullCall() ? "ok" : "error", event.getEndpoint().getStringValue(), event.getTimeStamp());
+                    log.info("SERVER Event: {}, Status: {}, Url: {}, Time: {}", event.getEventType(), event.isSuccessfullCall() ? "ok" : "error", event.getEndpoint().getStringValue(), event.getTimeStamp());
                     break;
                 case SERVICE_RESULT:
-                    log.info("SERVER Event: {}, Span [{}-{}-{}], Status: {}, Time: {}, Duration: {}", event.getEventType(), event.getTraceId(), event.getSpanId(), event.getParentId(), event.isSuccessfullCall() ? "ok" : "error", event.getTimeStamp(), event.getDuration());
+                    log.info("SERVER Event: {}, Status: {}, Time: {}, Duration: {}", event.getEventType(), event.isSuccessfullCall() ? "ok" : "error", event.getTimeStamp(), event.getDuration());
                     break;
                 case ERROR:
-                    log.info("SERVER Event: {}, Span [{}-{}-{}], ErrType: {}, TErrType: {}, ErrName: {},  Time: {}", event.getEventType(), event.getTraceId(), event.getSpanId(), event.getParentId(), event.getErrorType(), event.getThriftErrorType(), event.getErrorName(), event.getTimeStamp());
+                    log.info("SERVER Event: {}, ErrType: {}, TErrType: {}, ErrName: {},  Time: {}", event.getEventType(), event.getErrorType(), event.getThriftErrorType(), event.getErrorName(), event.getTimeStamp());
                     break;
                 default:
                     log.info("SERVER Unknown error: {}", event);
