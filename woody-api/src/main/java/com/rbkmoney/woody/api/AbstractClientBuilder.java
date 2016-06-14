@@ -3,8 +3,10 @@ package com.rbkmoney.woody.api;
 import com.rbkmoney.woody.api.event.ClientEvent;
 import com.rbkmoney.woody.api.event.ClientEventListener;
 import com.rbkmoney.woody.api.generator.IdGenerator;
+import com.rbkmoney.woody.api.proxy.InvocationTargetProvider;
 import com.rbkmoney.woody.api.proxy.MethodCallTracer;
 import com.rbkmoney.woody.api.proxy.ProxyFactory;
+import com.rbkmoney.woody.api.proxy.SingleTargetProvider;
 import com.rbkmoney.woody.api.trace.context.*;
 
 import java.net.URI;
@@ -54,14 +56,24 @@ public abstract class AbstractClientBuilder implements ClientBuilder {
     public <T> T build(Class<T> iface) {
         try {
             T target = createProviderClient(iface);
-            return createProxyClient(iface, target);
+            return build(iface, new SingleTargetProvider<>(iface, target));
+        } catch (WoodyInstantiationException e) {
+            throw e;
         } catch (Exception e) {
             throw new WoodyInstantiationException(e);
         }
     }
 
-    protected <T> T createProxyClient(Class<T> iface, T target) {
-        return createProxyBuilder(iface).build(iface, target);
+    public <T> T build(Class<T> iface, InvocationTargetProvider<T> targetProvider) {
+        try {
+            return createProxyClient(iface, targetProvider);
+        } catch (Exception e) {
+            throw new WoodyInstantiationException(e);
+        }
+    }
+
+    protected <T> T createProxyClient(Class<T> iface, InvocationTargetProvider<T> targetProvider) {
+        return createProxyBuilder(iface).build(iface, targetProvider);
     }
 
     protected ProxyBuilder createProxyBuilder(Class iface) {
@@ -148,8 +160,12 @@ public abstract class AbstractClientBuilder implements ClientBuilder {
         }
 
         public <T> T build(Class<T> iface, T target) {
+            return build(iface, new SingleTargetProvider<>(iface, target));
+        }
+
+        public <T> T build(Class<T> iface, InvocationTargetProvider<T> targetProvider) {
             ProxyFactory proxyFactory = createProxyFactory();
-            return proxyFactory.getInstance(iface, target);
+            return proxyFactory.getInstance(iface, targetProvider);
         }
 
         protected ProxyFactory createProxyFactory() {

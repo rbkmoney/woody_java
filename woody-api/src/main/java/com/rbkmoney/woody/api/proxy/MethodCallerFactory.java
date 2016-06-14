@@ -6,5 +6,5 @@ import java.lang.reflect.Method;
  * Created by vpankrashkin on 22.04.16.
  */
 public interface MethodCallerFactory {
-    InstanceMethodCaller getInstance(Object target, Method method);
+    InstanceMethodCaller getInstance(InvocationTargetProvider targetProvider, Method method);
 }

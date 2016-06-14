@@ -1,7 +1,6 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.AbstractClientBuilder;
-import com.rbkmoney.woody.api.ClientBuilder;
 import com.rbkmoney.woody.api.event.ClientEventListener;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.api.interceptor.CommonInterceptor;
@@ -66,6 +65,10 @@ public class THClientBuilder extends AbstractClientBuilder {
         return (THClientBuilder) super.withIdGenerator(generator);
     }
 
+    public HttpClient getHttpClient() {
+        return httpClient;
+    }
+
     @Override
     protected MethodCallTracer getOnCallMetadataExtender(Class iface) {
         return new EmptyTracer() {
@@ -106,7 +109,7 @@ public class THClientBuilder extends AbstractClientBuilder {
     @Override
     protected <T> T createProviderClient(Class<T> iface) {
         try {
-            THttpClient tHttpClient = new THttpClient(getAddress().toString(), httpClient, createTransportInterceptor());
+            THttpClient tHttpClient = new THttpClient(getAddress().toString(), getHttpClient(), createTransportInterceptor());
             TProtocol tProtocol = createProtocol(tHttpClient);
             return createThriftClient(iface, tProtocol, createMessageInterceptor());
         } catch (Exception e) {

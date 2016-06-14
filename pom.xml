@@ -15,7 +15,7 @@
     <version>1.0.0</version>
     <description>Java implementation for Woody spec</description>
     <properties>
-        <api-version>1.0.0</api-version>
+        <api-version>1.0.1</api-version>
     </properties>
 
     <modules>

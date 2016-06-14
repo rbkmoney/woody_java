@@ -8,15 +8,21 @@ import java.lang.reflect.Method;
  */
 public class ReflectionMethodCallerFactory implements MethodCallerFactory {
     @Override
-    public InstanceMethodCaller getInstance(Object target, Method method) {
+    public InstanceMethodCaller getInstance(InvocationTargetProvider targetProvider, Method method) {
         method.setAccessible(true);
         return new InstanceMethodCaller(method) {
             @Override
             public Object call(Object[] args) throws Throwable {
+                Object target = targetProvider.getTarget();
                 try {
-                    return method.invoke(target, args);
+                    try {
+                        return method.invoke(target, args);
+                    } finally {
+                        targetProvider.releaseTarget(target);
+                    }
                 } catch (InvocationTargetException e) {
-                    throw e.getCause();
+                    Throwable cause = e.getCause();
+                    throw cause == null ? e : cause;
                 }
             }
         };

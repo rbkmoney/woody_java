@@ -2,8 +2,10 @@ package com.rbkmoney.woody.api;
 
 import com.rbkmoney.woody.api.event.ServiceEvent;
 import com.rbkmoney.woody.api.event.ServiceEventListener;
+import com.rbkmoney.woody.api.proxy.InvocationTargetProvider;
 import com.rbkmoney.woody.api.proxy.MethodCallTracer;
 import com.rbkmoney.woody.api.proxy.ProxyFactory;
+import com.rbkmoney.woody.api.proxy.SingleTargetProvider;
 import com.rbkmoney.woody.api.trace.context.CompositeTracer;
 import com.rbkmoney.woody.api.trace.context.EmptyTracer;
 import com.rbkmoney.woody.api.trace.context.EventTracer;
@@ -119,8 +121,12 @@ public abstract class AbstractServiceBuilder<Service> implements ServiceBuilder<
         }
 
         public <T> T build(Class<T> iface, T target) {
+            return build(iface, new SingleTargetProvider<>(iface, target));
+        }
+
+        public <T> T build(Class<T> iface, InvocationTargetProvider<T> targetProvider) {
             ProxyFactory proxyFactory = createProxyFactory();
-            return proxyFactory.getInstance(iface, target);
+            return proxyFactory.getInstance(iface, targetProvider);
         }
 
         protected ProxyFactory createProxyFactory() {

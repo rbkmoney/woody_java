@@ -11,9 +11,9 @@ import java.lang.reflect.Method;
 public class HandleMethodCallerFactory implements MethodCallerFactory {
 
     @Override
-    public InstanceMethodCaller getInstance(Object target, Method method) {
+    public InstanceMethodCaller getInstance(InvocationTargetProvider targetProvider, Method method) {
 
-
+        Object target = targetProvider.getTarget();
         try {
             MethodHandle mh = MethodHandles.lookup()
                     .findVirtual(target.getClass(), method.getName(), MethodType.methodType(method.getReturnType(), method.getParameterTypes())).asSpreader(Object[].class, method.getParameterCount());
@@ -30,20 +30,9 @@ public class HandleMethodCallerFactory implements MethodCallerFactory {
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException(e);
+        } finally {
+            targetProvider.releaseTarget(target);
         }
     }
 
-    private Object[] createArgList(Object target, Object[] args) {
-        if (args == null || args.length == 0) {
-            return new Object[]{target};
-        } else {
-            Object[] mArgs = new Object[args.length + 1];
-            {
-                mArgs[0] = target;
-                System.arraycopy(args, 0, mArgs, 1, args.length);
-                return mArgs;
-            }
-        }
-
-    }
 }

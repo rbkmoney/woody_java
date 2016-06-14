@@ -58,7 +58,15 @@ ThriftServiceSrv.Iface client = clientBuilder.build(ThriftServiceSrv.Iface.class
 ```
 
 Полученный объект `client` реализует интерфейс Thrift сервиса и готов к использованию.  
-__Текущая версия клиента не thread-safe!__
+
+### Создание thread-safe клиента
+
+Есть два билдера thread-safe клиента:
+
+1. THSpawnClientBuilder - создает новый экземпляр Thrift клиента на каждый вызов сервиса.
+2. THPooledClientBuilder - использует пул для переиспользования созданных экземпляров Thrift клиента.
+
+Создание thread-safe клиента аналогично приведенному выше.
 
 ### Создание сервиса
 
