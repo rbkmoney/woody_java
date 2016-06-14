@@ -1,12 +1,17 @@
 package com.rbkmoney.woody.api.concurrent;
 
+import com.rbkmoney.woody.api.MDCUtils;
 import com.rbkmoney.woody.api.trace.TraceData;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Callable;
 
 
 public class WCallable<T> implements Callable<T> {
+
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
 
     private final TraceData traceData;
     private final Callable<T> wrappedCallable;
@@ -45,10 +50,16 @@ public class WCallable<T> implements Callable<T> {
     public T call() throws Exception {
         TraceData originalTraceData = TraceContext.getCurrentTraceData();
         TraceContext.setCurrentTraceData(getTraceData().cloneObject());
+
+        if (traceData != originalTraceData) {
+            MDCUtils.putContextIds(traceData.getActiveSpan().getSpan());
+        }
+
         try {
             return getWrappedCallable().call();
         } finally {
             TraceContext.setCurrentTraceData(originalTraceData);
+            MDCUtils.putContextIds(originalTraceData.getActiveSpan().getSpan());
         }
     }
 

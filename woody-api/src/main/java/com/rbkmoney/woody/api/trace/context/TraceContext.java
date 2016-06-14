@@ -1,5 +1,6 @@
 package com.rbkmoney.woody.api.trace.context;
 
+import com.rbkmoney.woody.api.MDCUtils;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.api.trace.Span;
 import com.rbkmoney.woody.api.trace.TraceData;
@@ -84,6 +85,9 @@ public class TraceContext {
         } else {
             initServerContext(traceData);
         }
+
+        MDCUtils.putContextIds(traceData.getActiveSpan().getSpan());
+
         postInit.run();
     }
 
@@ -107,6 +111,13 @@ public class TraceContext {
             } else {
                 destroyServerContext(traceData);
             }
+
+            if (traceData.getServiceSpan().isFilled()) {
+                MDCUtils.putContextIds(traceData.getServiceSpan().getSpan());
+            } else {
+                MDCUtils.removeContextIds();
+            }
+
         }
     }
 
