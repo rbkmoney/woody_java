@@ -26,10 +26,10 @@ public class TestProxyInvocationFactory {
         ProxyFactory handleProxyFactory = new ProxyFactory(new HandleMethodCallerFactory(), wrappedCallTracer, false);
 
         Srv directLambda = () -> "string";
-        Srv refDirectProxy = reflectionProxyFactory.getInstance(Srv.class, directImpl);
-        Srv refLambdaProxy = reflectionProxyFactory.getInstance(Srv.class, directLambda);
-        Srv handleDirectProxy = handleProxyFactory.getInstance(Srv.class, directImpl);
-        Srv handleLambdaProxy = handleProxyFactory.getInstance(Srv.class, directLambda);
+        Srv refDirectProxy = reflectionProxyFactory.getInstance(Srv.class, new SingleTargetProvider<Srv>(directImpl));
+        Srv refLambdaProxy = reflectionProxyFactory.getInstance(Srv.class, new SingleTargetProvider<Srv>(directLambda));
+        Srv handleDirectProxy = handleProxyFactory.getInstance(Srv.class, new SingleTargetProvider<Srv>(directImpl));
+        Srv handleLambdaProxy = handleProxyFactory.getInstance(Srv.class, new SingleTargetProvider<Srv>(directLambda));
         handleDirectProxy.getString();
         handleLambdaProxy.getString();
         for (int i = 0; i < 1000000; i++) {

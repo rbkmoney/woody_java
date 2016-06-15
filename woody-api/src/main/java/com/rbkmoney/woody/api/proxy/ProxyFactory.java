@@ -23,28 +23,28 @@ public class ProxyFactory {
         this.allowObjectOverriding = allowObjectOverriding;
     }
 
-    public <T> T getInstance(Class<T> iface, T target) {
-        return getInstance(iface, target, callerFactory, callTracer, allowObjectOverriding);
+    public <T> T getInstance(Class<T> iface, InvocationTargetProvider<T> targetProvider) {
+        return getInstance(iface, targetProvider, callerFactory, callTracer, allowObjectOverriding);
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getInstance(Class<T> iface, T target, MethodCallerFactory callerFactory, MethodCallTracer callTracer, boolean allowObjectOverriding) {
+    public <T> T getInstance(Class<T> iface, InvocationTargetProvider<T> targetProvider, MethodCallerFactory callerFactory, MethodCallTracer callTracer, boolean allowObjectOverriding) {
         if (!allowObjectOverriding) {
             Method[] overriden = MethodShadow.getShadowedMethods(object, iface);
             if (overriden.length != 0) {
                 throw new IllegalArgumentException("Target interface " + iface.getName() + "shadows Object methods:" + Arrays.toString(overriden));
             }
         }
-        return makeProxy(target, iface, callerFactory, callTracer);
+        return makeProxy(iface, targetProvider, callerFactory, callTracer);
 
     }
 
-    protected <T> T makeProxy(T target, Class<T> iface, MethodCallerFactory callerFactory, MethodCallTracer callTracer) {
+    protected <T> T makeProxy(Class<T> iface, InvocationTargetProvider<T> targetProvider, MethodCallerFactory callerFactory, MethodCallTracer callTracer) {
 
         return (T) Proxy.newProxyInstance(
                 iface.getClassLoader(),
                 new Class[]{iface},
-                new ProxyInvocationHandler(target, iface, callerFactory, MethodCallInterceptors.trackedCallInterceptor(callTracer)));
+                new ProxyInvocationHandler(iface, targetProvider, callerFactory, MethodCallInterceptors.trackedCallInterceptor(callTracer)));
 
     }
 }

@@ -15,7 +15,7 @@ public class MethodShadow {
 
     public static Method[] getShadowedMethods(Class ifaceA, Collection<Class> ifacesB) {
         for (Class ifaceB : ifacesB) {
-            Method[] shadowedMethods = getShadowedMethods(ifaceA, ifaceB);
+            Method[] shadowedMethods = getShadowedIfaceMethods(ifaceA, ifaceB);
             if (shadowedMethods.length != 0) {
                 return shadowedMethods;
             }
@@ -23,21 +23,24 @@ public class MethodShadow {
         return new Method[0];
     }
 
-    public static Method[] getShadowedMethods(Class ifaceA, Class ifaceB) {
+    public static Method[] getShadowedIfaceMethods(Class ifaceA, Class ifaceB) {
         Stream.of(ifaceA, ifaceB).forEach(iface -> checkInterface(iface, "Referred class is not an interface:"));
 
         return getOverlappingMethods(ifaceA.getMethods(), ifaceB.getMethods());
     }
 
     public static Method[] getShadowedMethods(Object object, Class iface) {
+        return getShadowedMethods(object.getClass(), iface);
+    }
+
+    public static Method[] getShadowedMethods(Class objClass, Class iface) {
         checkInterface(iface, "Referred class is not an interface:");
-        Method[] objMethods = Arrays.stream(object.getClass().getMethods()).filter(m -> {
+        Method[] objMethods = Arrays.stream(objClass.getMethods()).filter(m -> {
             int mod = m.getModifiers();
             return !(isPrivate(mod));
         }).toArray(Method[]::new);
 
         return getOverlappingMethods(objMethods, iface.getMethods());
-
     }
 
     public static boolean isSameSignature(Method methodA, Method methodB) {
