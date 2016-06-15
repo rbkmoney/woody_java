@@ -21,8 +21,8 @@ public class TestSnowflakeIdGenerator {
         long timestamp2 = 1465564339295L;
 
         IdGenerator idGenerator = new SnowflakeIdGenerator("test", 123);
-        assertEquals("a4979062647b000:test", idGenerator.generateId(timestamp1));
-        assertEquals("a4979062787b001:test", idGenerator.generateId(timestamp2));
+        assertEquals("Ckl5BiZHsAA:test", idGenerator.generateId(timestamp1));
+        assertEquals("Ckl5BieHsAE:test", idGenerator.generateId(timestamp2));
 
     }
 

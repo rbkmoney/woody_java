@@ -1,6 +1,7 @@
 package com.rbkmoney.woody.thrift.impl.http.generator;
 
 import com.rbkmoney.woody.api.generator.IdGenerator;
+import com.rbkmoney.woody.thrift.impl.http.util.Base62Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,11 +61,10 @@ public class SnowflakeIdGenerator implements IdGenerator {
     }
 
     private String nextId(long timestamp) {
-        Long id = ((timestamp - twepoch) << timestampLeftShift) |
+        long id = ((timestamp - twepoch) << timestampLeftShift) |
                 ((nodeId & maxNodeId) << nodeIdShift) |
                 (sequence.getAndIncrement() & sequenceMask);
-
-        return Long.toHexString(id);
+        return Base62Utils.base62Encode(id);
     }
 
     public String getSuffix() {
