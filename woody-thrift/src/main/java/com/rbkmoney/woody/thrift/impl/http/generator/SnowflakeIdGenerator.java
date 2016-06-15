@@ -9,7 +9,6 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.IllegalFormatException;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -58,15 +57,15 @@ public class SnowflakeIdGenerator implements IdGenerator {
 
     private void checkSuffix(String suffix) {
         if (suffix == null || suffix.isEmpty()) {
-            throw new RuntimeException("Suffix value must not be empty");
+            throw new IllegalArgumentException("Suffix value must not be empty");
         }
 
-        if (suffix.getBytes().length > maxSuffixLength) {
-            throw new RuntimeException("Suffix value to long");
+        if (suffix.length() > maxSuffixLength) {
+            throw new IllegalArgumentException("Suffix value to long");
         }
 
         if (!suffix.matches("[a-zA-Z0-9.,_-]*")) {
-            throw new RuntimeException("Unrecognized symbols in suffix value");
+            throw new IllegalArgumentException("Unrecognized symbols in suffix value");
         }
     }
 
