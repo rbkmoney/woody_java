@@ -13,6 +13,7 @@ import com.rbkmoney.woody.api.trace.context.EmptyTracer;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
 import com.rbkmoney.woody.api.transport.TransportEventInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.event.THClientEvent;
+import com.rbkmoney.woody.thrift.impl.http.generator.SnowflakeIdGenerator;
 import com.rbkmoney.woody.thrift.impl.http.generator.TimestampIdGenerator;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THCMessageRequestInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THCMessageResponseInterceptor;
@@ -36,7 +37,7 @@ import java.util.Optional;
  * Created by vpankrashkin on 28.04.16.
  */
 public class THClientBuilder extends AbstractClientBuilder {
-    private static final IdGenerator DEFAULT_ID_GENERATOR = new TimestampIdGenerator();
+    private static final IdGenerator DEFAULT_ID_GENERATOR = new SnowflakeIdGenerator();
 
     private HttpClient httpClient;
 
