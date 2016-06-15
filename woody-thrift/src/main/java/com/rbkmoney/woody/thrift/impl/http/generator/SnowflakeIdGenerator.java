@@ -9,8 +9,9 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.IllegalFormatException;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by tolkonepiu on 09.06.16.
@@ -29,10 +30,11 @@ public class SnowflakeIdGenerator implements IdGenerator {
     private final long twepoch = 1288834974657L;
     private final long nodeId;
     private final long sequenceMask = -1L ^ (-1L << sequenceBits);
+    private final int maxSuffixLength = 21;
 
     public static final String DEFAULT_SUFFIX = "root";
 
-    private final AtomicLong sequence = new AtomicLong();
+    private final AtomicInteger sequence = new AtomicInteger();
 
     private final String suffix;
 
@@ -41,13 +43,31 @@ public class SnowflakeIdGenerator implements IdGenerator {
     }
 
     public SnowflakeIdGenerator(String suffix) {
+        checkSuffix(suffix);
+
         this.suffix = suffix;
         this.nodeId = generateNodeId();
     }
 
     public SnowflakeIdGenerator(String suffix, long nodeId) {
+        checkSuffix(suffix);
+
         this.suffix = suffix;
         this.nodeId = nodeId;
+    }
+
+    private void checkSuffix(String suffix) {
+        if (suffix == null || suffix.isEmpty()) {
+            throw new RuntimeException("Suffix value must not be empty");
+        }
+
+        if (suffix.getBytes().length > maxSuffixLength) {
+            throw new RuntimeException("Suffix value to long");
+        }
+
+        if (!suffix.matches("[a-zA-Z0-9.,_-]*")) {
+            throw new RuntimeException("Unrecognized symbols in suffix value");
+        }
     }
 
     @Override

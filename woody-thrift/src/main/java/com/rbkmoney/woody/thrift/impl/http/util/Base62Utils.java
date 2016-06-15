@@ -16,9 +16,7 @@ public class Base62Utils {
         if (b < 61) {
             out.append(CODES[b]);
         } else {
-
             out.append(CODE_FLAG);
-
             out.append(CODES[b - 61]);
         }
     }
