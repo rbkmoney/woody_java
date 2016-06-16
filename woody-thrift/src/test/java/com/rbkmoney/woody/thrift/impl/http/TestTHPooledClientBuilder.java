@@ -18,7 +18,7 @@ public class TestTHPooledClientBuilder extends AbstractConcurrentClientTest {
             clientBuilder.withAddress(new URI(url));
             clientBuilder.withHttpClient(HttpClientBuilder.create().build());
             clientBuilder.withIdGenerator(idGenerator);
-            clientBuilder.withEventListener(eventListener);
+            clientBuilder.withEventListener(clientEventStub);
             return clientBuilder.build(iface);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
