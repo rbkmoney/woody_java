@@ -5,19 +5,18 @@
     <parent>
         <artifactId>woody</artifactId>
         <groupId>com.rbkmoney.woody</groupId>
-        <version>1.0.0</version>
+        <version>${woody-version}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>woody-thrift</artifactId>
-    <version>1.0.2</version>
+    <version>${woody-thrift-version}</version>
 
     <dependencies>
         <!--RBK libs-->
         <dependency>
             <groupId>com.rbkmoney.woody</groupId>
             <artifactId>woody-api</artifactId>
-            <version>${api-version}</version>
         </dependency>
         <dependency>
             <groupId>com.rbkmoney.thrift</groupId>
