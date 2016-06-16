@@ -32,10 +32,10 @@ public abstract class AbstractConcurrentClientTest extends AbstractTest {
     final AtomicInteger clientCalls = new AtomicInteger(0);
     final AtomicInteger serverAccepts = new AtomicInteger(0);
 
-    ServiceEventListener serviceEventStub = new ServiceEventListenerImpl();
-    ServiceEventListener serviceEventLogger = new ServiceEventLogListener();
-    ClientEventListener clientEventStub = new ClientEventListenerImpl();
-    ClientEventListener clientEventLogger = new ClientEventLogListener();
+    protected ServiceEventListener serviceEventStub = new ServiceEventListenerImpl();
+    protected ServiceEventListener serviceEventLogger = new ServiceEventLogListener();
+    protected ClientEventListener clientEventStub = new ClientEventListenerImpl();
+    protected ClientEventListener clientEventLogger = new ClientEventLogListener();
 
     @Test
     public void testPool() throws InterruptedException {
@@ -109,6 +109,11 @@ public abstract class AbstractConcurrentClientTest extends AbstractTest {
 
         Assert.assertEquals(clientCalls.get(), serverAccepts.get());
 
+    }
+
+    @Override
+    protected <T> Servlet createThrftRPCService(Class<T> iface, T handler, ServiceEventListener eventListener) {
+        return super.createThrftRPCService(iface, handler, serviceEventStub);
     }
 
     abstract protected <T> T createThriftRPCClient(Class<T> iface, IdGenerator idGenerator, ClientEventListener eventListener, String url);
