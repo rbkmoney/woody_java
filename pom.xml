@@ -12,13 +12,12 @@
     <packaging>pom</packaging>
     <groupId>com.rbkmoney.woody</groupId>
     <artifactId>woody</artifactId>
-    <version>${woody-version}</version>
+    <version>1.0.2</version>
+
     <description>Java implementation for Woody spec</description>
 
     <properties>
-        <woody-version>1.0.2</woody-version>
-        <woody-api-version>${woody-version}</woody-api-version>
-        <woody-thrift-version>${woody-version}</woody-thrift-version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <modules>
@@ -31,7 +30,7 @@
             <dependency>
                 <groupId>com.rbkmoney.woody</groupId>
                 <artifactId>woody-api</artifactId>
-                <version>${woody-api-version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>

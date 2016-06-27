@@ -11,3 +11,8 @@ Java реализация [Библиотеки RPC вызовов для общ
 
 [Thrift](https://thrift.apache.org/)  
 [Dapper](http://research.google.com/pubs/pub36356.html)
+
+## Выпуск новой версии
+Версии _woody-pom_ и всех его модулей должны совпадать, для этого перед началом работы над новой версией библиотеки нужно увеличить версию _woody-pom_ и в корневой директории проекта выполнить команду:  
+`mvn versions:update-child-modules -DgenerateBackupPoms=false`  
+Параметр `generateBackupPoms` можно опустить, если нужны резервные копии изменяемых файлов.
