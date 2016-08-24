@@ -9,8 +9,10 @@ public class ProxyInvocationHandler implements InvocationHandler {
 
     private final Map<Method, InstanceMethodCaller> callMap;
     private final MethodCallInterceptor callInterceptor;
+    private final InvocationTargetProvider targetProvider;
 
     public ProxyInvocationHandler(Class iface, InvocationTargetProvider targetProvider, MethodCallerFactory callerFactory, MethodCallInterceptor callInterceptor) {
+        this.targetProvider = targetProvider;
         this.callMap = createCallMap(targetProvider, iface, callerFactory);
         this.callInterceptor = callInterceptor;
     }
@@ -21,7 +23,7 @@ public class ProxyInvocationHandler implements InvocationHandler {
         if (methodCaller != null) {
             return callInterceptor.intercept(args, callMap.get(method));
         } else {
-            return method.invoke(proxy, args);
+            return method.invoke(targetProvider.getTarget(), args);
         }
     }
 
