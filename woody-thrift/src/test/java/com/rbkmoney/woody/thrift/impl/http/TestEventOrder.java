@@ -66,7 +66,7 @@ public class TestEventOrder extends AbstractTest {
         serviceEventListener.setEventActionListener(serviceEventActionListener);
 
         client.getOwner(0);
-
+        System.out.println("Target client:"+client);
         verify(clientActionListener);
     }
 
