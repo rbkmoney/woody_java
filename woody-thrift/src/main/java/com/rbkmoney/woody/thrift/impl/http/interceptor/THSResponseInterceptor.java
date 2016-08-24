@@ -7,6 +7,8 @@ import com.rbkmoney.woody.thrift.impl.http.TErrorType;
 import com.rbkmoney.woody.thrift.impl.http.THMetadataProperties;
 import com.rbkmoney.woody.thrift.impl.http.transport.THttpHeader;
 import com.rbkmoney.woody.thrift.impl.http.transport.TTransportErrorType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.function.Function;
@@ -22,6 +24,9 @@ public class THSResponseInterceptor implements ResponseInterceptor {
     public static final Function<String, String> BAD_CONTENT_TYPE_FUNC = cType -> "content type wrong/missing";
     public static final Function<THttpHeader, String> BAD_REQUEST_HEADERS_FUNC = tHttpHeader -> (tHttpHeader == null ? "Trace header" : tHttpHeader.getKeyValue()) + " missing";
     public static final Function<String, String> BAD_REQUEST_METHOD_FUNC = rewMethod -> "http method wrong";
+
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
+
     private boolean isUseContext;
 
     public THSResponseInterceptor(boolean isUseContext) {
@@ -46,6 +51,8 @@ public class THSResponseInterceptor implements ResponseInterceptor {
         if (response == null) {
             return interceptError(traceData, "Unknown type:" + providerContext.getClass());
         }
+
+        logIfError(traceData.getServiceSpan());
 
         if (response.isCommitted()) {
             return true;
@@ -153,6 +160,13 @@ public class THSResponseInterceptor implements ResponseInterceptor {
     private boolean interceptError(TraceData traceData, Throwable cause) {
         ContextUtils.setInterceptionError(traceData.getServiceSpan(), cause);
         return false;
+    }
+
+    private void logIfError(ServiceSpan serviceSpan) {
+        Throwable t = ContextUtils.getCallError(serviceSpan);
+        if (t != null) {
+            log.warn("Response has error:", t.toString());
+        }
     }
 
 }

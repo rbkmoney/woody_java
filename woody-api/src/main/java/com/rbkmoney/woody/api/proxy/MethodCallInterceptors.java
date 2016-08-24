@@ -22,7 +22,7 @@ public class MethodCallInterceptors {
                 callTracer.afterCall(args, caller, result);
                 return result;
             } catch (Throwable t) {
-                log.trace("Call Error", t);
+                log.debug("Call Error", t);
                 callTracer.callError(args, caller, t);
                 throw t;
             }
