@@ -5,8 +5,8 @@ import com.rbkmoney.woody.api.event.ServiceEventListener;
 /**
  * Created by vpankrashkin on 22.04.16.
  */
-public interface ServiceBuilder<Service> {
+public interface ServiceBuilder<Srv> {
     ServiceBuilder withEventListener(ServiceEventListener listener);
 
-    <T> Service build(Class<T> iface, T serviceHandler);
+    <T> Srv build(Class<T> iface, T serviceHandler);
 }

@@ -42,6 +42,9 @@ public class WCallable<T> implements Callable<T> {
     }
 
     private WCallable(Callable<T> wrappedCallable, TraceData traceData) {
+        if (wrappedCallable == null || traceData == null) {
+            throw new NullPointerException("Null arguments're not allowed");
+        }
         this.traceData = traceData;
         this.wrappedCallable = wrappedCallable;
     }

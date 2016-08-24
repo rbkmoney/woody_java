@@ -14,7 +14,7 @@ import com.rbkmoney.woody.api.trace.context.MetadataTracer;
 /**
  * Created by vpankrashkin on 10.05.16.
  */
-public abstract class AbstractServiceBuilder<Service> implements ServiceBuilder<Service> {
+public abstract class AbstractServiceBuilder<Srv> implements ServiceBuilder<Srv> {
     private static final ServiceEventListener DEFAULT_EVENT_LISTENER = (ServiceEventListener<ServiceEvent>) event -> {
     };
 
@@ -27,7 +27,7 @@ public abstract class AbstractServiceBuilder<Service> implements ServiceBuilder<
     }
 
     @Override
-    public <T> Service build(Class<T> iface, T serviceHandler) {
+    public <T> Srv build(Class<T> iface, T serviceHandler) {
         try {
             T target = createProxyService(iface, serviceHandler);
             return createProviderService(iface, target);
@@ -52,7 +52,7 @@ public abstract class AbstractServiceBuilder<Service> implements ServiceBuilder<
 
     abstract protected MethodCallTracer getOnCallMetadataExtender(Class serviceInterface);
 
-    abstract protected <T> Service createProviderService(Class<T> serviceInterface, T handler);
+    abstract protected <T> Srv createProviderService(Class<T> serviceInterface, T handler);
 
 
     protected <T> T createProxyService(Class<T> iface, T handler) {

@@ -26,6 +26,9 @@ public class WRunnable implements Runnable {
     }
 
     private WRunnable(Runnable runnable, TraceData traceData) {
+        if (runnable == null || traceData == null) {
+            throw new NullPointerException("Null arguments're not allowed");
+        }
         this.wrappedRunnable = runnable;
         this.traceData = traceData;
     }

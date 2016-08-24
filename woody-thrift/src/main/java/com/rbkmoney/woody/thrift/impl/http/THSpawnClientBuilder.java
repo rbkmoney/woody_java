@@ -1,8 +1,13 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.WoodyInstantiationException;
+import com.rbkmoney.woody.api.event.ClientEventListener;
+import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.api.proxy.InvocationTargetProvider;
 import com.rbkmoney.woody.api.proxy.SpawnTargetProvider;
+import org.apache.http.client.HttpClient;
+
+import java.net.URI;
 
 /**
  * Created by vpankrashkin on 09.06.16.
@@ -11,6 +16,26 @@ import com.rbkmoney.woody.api.proxy.SpawnTargetProvider;
  * It creates new Thrift client instance for every call which is dropped after call finishes.
  */
 public class THSpawnClientBuilder extends THClientBuilder {
+
+    @Override
+    public THSpawnClientBuilder withHttpClient(HttpClient httpClient) {
+        return (THSpawnClientBuilder) super.withHttpClient(httpClient);
+    }
+
+    @Override
+    public THSpawnClientBuilder withAddress(URI address) {
+        return (THSpawnClientBuilder) super.withAddress(address);
+    }
+
+    @Override
+    public THSpawnClientBuilder withEventListener(ClientEventListener listener) {
+        return (THSpawnClientBuilder) super.withEventListener(listener);
+    }
+
+    @Override
+    public THSpawnClientBuilder withIdGenerator(IdGenerator generator) {
+        return (THSpawnClientBuilder) super.withIdGenerator(generator);
+    }
 
     @Override
     public <T> T build(Class<T> iface) throws WoodyInstantiationException {

@@ -1,12 +1,15 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.WoodyInstantiationException;
+import com.rbkmoney.woody.api.event.ClientEventListener;
+import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.api.proxy.InvocationTargetProvider;
 import com.rbkmoney.woody.api.proxy.CPool2TargetProvider;
 import org.apache.commons.pool2.impl.AbandonedConfig;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.apache.http.client.HttpClient;
 
+import java.net.URI;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -50,6 +53,21 @@ public class THPooledClientBuilder extends THClientBuilder {
             return createHttpClient();
         }
 
+    }
+
+    @Override
+    public THPooledClientBuilder withAddress(URI address) {
+        return (THPooledClientBuilder) super.withAddress(address);
+    }
+
+    @Override
+    public THPooledClientBuilder withEventListener(ClientEventListener listener) {
+        return (THPooledClientBuilder) super.withEventListener(listener);
+    }
+
+    @Override
+    public THPooledClientBuilder withIdGenerator(IdGenerator generator) {
+        return (THPooledClientBuilder) super.withIdGenerator(generator);
     }
 
     /**
