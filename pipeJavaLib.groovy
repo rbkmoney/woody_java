@@ -5,7 +5,7 @@ def call(String buildImageTag, String mvnArgs = "") {
     env.MVN_ARGS = mvnArgs
 
     def buildContainer = docker.image("rbkmoney/build:${buildImageTag}")
-    runStage('Pull build container') {
+    runStage('Pull build image') {
         docker.withRegistry('https://dr.rbkmoney.com/v2/', 'dockerhub-rbkmoneycibot') {
             buildContainer.pull()
         }
