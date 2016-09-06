@@ -1,6 +1,13 @@
-def call(Closure body) {
-    def buildContainer = docker.image('dr.rbkmoney.com/rbkmoney/build:7372dc01bf066b5b26be13d6de0c7bed70648a26')
-    buildContainer.pull()
+//Default pipeline for Java library
+def call(String buildImageTag, Closure body) {
+
+    def buildContainer = docker.image("rbkmoney/build:${buildImageTag}")
+    runStage('Pull build container') {
+        docker.withRegistry('https://dr.rbkmoney.com/v2/', 'dockerhub-rbkmoneycibot') {
+            buildContainer.pull()
+        }
+        buildContainer = docker.image('dr.rbkmoney.com/rbkmoney/build:$BUILD_IMAGE_TAG')
+    }
 
     runStage('Execute build container') {
         docker.withRegistry('https://dr.rbkmoney.com/v2/', 'dockerhub-rbkmoneycibot') {
