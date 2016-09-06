@@ -5,7 +5,7 @@ build('woody_java', 'docker-host') {
 
     def javaLibPipeline
     runStage('load JavaLib pipeline') {
-        env.JENKINS_LIB = ""//"build_utils/jenkins_lib"
+        env.JENKINS_LIB = "build_utils/jenkins_lib"
         javaLibPipeline = load("pipeJavaLib.groovy")
     }
 
