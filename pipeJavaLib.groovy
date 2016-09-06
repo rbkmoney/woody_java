@@ -9,7 +9,7 @@ def call(String buildImageTag, String mvnArgs = "") {
         docker.withRegistry('https://dr.rbkmoney.com/v2/', 'dockerhub-rbkmoneycibot') {
             buildContainer.pull()
         }
-        buildContainer = docker.image('dr.rbkmoney.com/rbkmoney/build:$BUILD_IMAGE_TAG')
+        buildContainer = docker.image("dr.rbkmoney.com/rbkmoney/build:${buildImageTag}")
     }
 
     runStage('Execute build container') {
