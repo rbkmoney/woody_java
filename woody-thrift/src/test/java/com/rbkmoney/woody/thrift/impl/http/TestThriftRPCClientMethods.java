@@ -18,7 +18,7 @@ public class TestThriftRPCClientMethods {
 
 
     @Test
-    public void testServlet() throws TException, URISyntaxException {
+    public void testClientMethods() throws TException, URISyntaxException {
         String rpcServletUrl = "http://localhost:8080";
         OwnerServiceSrv.Iface tRPCClient1 = createThriftRPCClient(rpcServletUrl);
         OwnerServiceSrv.Iface tRPCClient2 = createThriftRPCClient(rpcServletUrl);
