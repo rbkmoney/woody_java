@@ -93,13 +93,6 @@ public final class ProxyInvocationHandler implements InvocationHandler {
             this.interceptor = interceptor;
         }
 
-        public InstanceMethodCaller getCaller() {
-            return caller;
-        }
-
-        public MethodCallInterceptor getInterceptor() {
-            return interceptor;
-        }
     }
 
 }
