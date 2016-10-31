@@ -16,6 +16,6 @@ public abstract class InstanceMethodCaller {
         return targetMethod;
     }
 
-    public abstract Object call(Object[] args) throws Throwable;
+    public abstract Object call(Object source, Object[] args) throws Throwable;
 
 }

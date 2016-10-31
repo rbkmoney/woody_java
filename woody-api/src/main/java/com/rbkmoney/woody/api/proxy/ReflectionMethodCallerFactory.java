@@ -12,7 +12,7 @@ public class ReflectionMethodCallerFactory implements MethodCallerFactory {
         method.setAccessible(true);
         return new InstanceMethodCaller(method) {
             @Override
-            public Object call(Object[] args) throws Throwable {
+            public Object call(Object source, Object[] args) throws Throwable {
                 Object target = targetProvider.getTarget();
                 try {
                     try {
