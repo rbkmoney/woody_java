@@ -20,7 +20,7 @@ public class HandleMethodCallerFactory implements MethodCallerFactory {
 
             return new InstanceMethodCaller(method) {
                 @Override
-                public Object call(Object[] args) throws Throwable {
+                public Object call(Object source, Object[] args) throws Throwable {
 
                     return mh.invokeWithArguments(target, args);
 

@@ -40,15 +40,18 @@ public abstract class AbstractClientBuilder implements ClientBuilder {
         return this;
     }
 
-    protected URI getAddress() {
+    @Override
+    public URI getAddress() {
         return address;
     }
 
-    protected ClientEventListener getEventListener() {
+    @Override
+    public ClientEventListener getEventListener() {
         return eventListener;
     }
 
-    protected IdGenerator getIdGenerator() {
+    @Override
+    public IdGenerator getIdGenerator() {
         return idGenerator;
     }
 

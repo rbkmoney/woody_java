@@ -36,7 +36,8 @@ public abstract class AbstractServiceBuilder<Srv> implements ServiceBuilder<Srv>
         }
     }
 
-    protected ServiceEventListener getEventListener() {
+    @Override
+    public ServiceEventListener getEventListener() {
         return eventListener;
     }
 

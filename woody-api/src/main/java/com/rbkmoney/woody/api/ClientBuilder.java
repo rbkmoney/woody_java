@@ -15,5 +15,11 @@ public interface ClientBuilder {
 
     ClientBuilder withIdGenerator(IdGenerator generator);
 
+    URI getAddress();
+
+    ClientEventListener getEventListener();
+
+    IdGenerator getIdGenerator();
+
     <T> T build(Class<T> iface);
 }
