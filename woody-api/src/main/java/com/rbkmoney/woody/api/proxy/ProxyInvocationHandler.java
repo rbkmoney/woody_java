@@ -58,6 +58,7 @@ public final class ProxyInvocationHandler implements InvocationHandler {
         };
 
         try {
+            //it's expected that this handler is bound only for one dedicated proxy
             Method objMethod = objTargetProvider.getClass().getMethod("hashCode");
             callerMap.putIfAbsent(objMethod, callerFactory.getInstance(objTargetProvider, objMethod,
                     (src, args) -> targetExtractor.apply(src, ProxyInvocationHandler.this).hashCode()));
