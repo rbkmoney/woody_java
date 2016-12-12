@@ -3,12 +3,12 @@ package com.rbkmoney.woody.thrift.impl.http;
 import com.rbkmoney.woody.api.event.CallType;
 import com.rbkmoney.woody.api.event.ClientEventListener;
 import com.rbkmoney.woody.api.event.ErrorType;
-import com.rbkmoney.woody.api.generator.IdGenerator;
+import com.rbkmoney.woody.api.trace.context.TraceContext;
 import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerServiceSrv;
 import com.rbkmoney.woody.rpc.test_error;
 import com.rbkmoney.woody.thrift.impl.http.event.THClientEvent;
-import com.rbkmoney.woody.thrift.impl.http.generator.TimestampIdGenerator;
+import com.rbkmoney.woody.api.generator.TimestampIdGenerator;
 import org.apache.thrift.TException;
 import org.junit.Test;
 
@@ -52,7 +52,7 @@ public class TestClientEventHandling extends AbstractTest {
                     assertArrayEquals(new Object[]{0}, thClientEvent.getCallArguments());
                     assertEquals("getErrOwner", thClientEvent.getCallName());
                     assertEquals(CallType.CALL, thClientEvent.getCallType());
-                    assertEquals(IdGenerator.NO_PARENT_ID, thClientEvent.getParentId());
+                    assertEquals(TraceContext.NO_PARENT_ID, thClientEvent.getParentId());
                     assertNotNull(thClientEvent.getTraceId());
                     assertEquals(thClientEvent.getTraceId(), thClientEvent.getSpanId());
                     assertNull(thClientEvent.getEndpoint());
@@ -98,7 +98,7 @@ public class TestClientEventHandling extends AbstractTest {
                     assertArrayEquals(new Object[]{1}, thClientEvent.getCallArguments());
                     assertEquals("getOwner", thClientEvent.getCallName());
                     assertEquals(CallType.CALL, thClientEvent.getCallType());
-                    assertEquals(IdGenerator.NO_PARENT_ID, thClientEvent.getParentId());
+                    assertEquals(TraceContext.NO_PARENT_ID, thClientEvent.getParentId());
                     assertNotNull(thClientEvent.getTraceId());
                     assertEquals(thClientEvent.getTraceId(), thClientEvent.getSpanId());
                     assertNull(thClientEvent.getEndpoint());
@@ -139,7 +139,7 @@ public class TestClientEventHandling extends AbstractTest {
                     assertArrayEquals(new Object[]{0}, thClientEvent.getCallArguments());
                     assertEquals("getOwner", thClientEvent.getCallName());
                     assertEquals(CallType.CALL, thClientEvent.getCallType());
-                    assertEquals(IdGenerator.NO_PARENT_ID, thClientEvent.getParentId());
+                    assertEquals(TraceContext.NO_PARENT_ID, thClientEvent.getParentId());
                     assertNotNull(thClientEvent.getTraceId());
                     assertEquals(thClientEvent.getTraceId(), thClientEvent.getSpanId());
                     assertNull(thClientEvent.getEndpoint());

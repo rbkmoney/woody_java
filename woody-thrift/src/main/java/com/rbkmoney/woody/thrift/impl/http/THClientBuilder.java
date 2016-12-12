@@ -2,6 +2,7 @@ package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.AbstractClientBuilder;
 import com.rbkmoney.woody.api.event.ClientEventListener;
+import com.rbkmoney.woody.api.flow.WFlow;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.api.interceptor.CommonInterceptor;
 import com.rbkmoney.woody.api.interceptor.CompositeInterceptor;
@@ -13,8 +14,6 @@ import com.rbkmoney.woody.api.trace.context.EmptyTracer;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
 import com.rbkmoney.woody.api.transport.TransportEventInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.event.THClientEvent;
-import com.rbkmoney.woody.thrift.impl.http.generator.SnowflakeIdGenerator;
-import com.rbkmoney.woody.thrift.impl.http.generator.TimestampIdGenerator;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THCMessageRequestInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THCMessageResponseInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THCRequestInterceptor;
@@ -37,13 +36,12 @@ import java.util.Optional;
  * Created by vpankrashkin on 28.04.16.
  */
 public class THClientBuilder extends AbstractClientBuilder {
-    private static final IdGenerator DEFAULT_ID_GENERATOR = new SnowflakeIdGenerator();
 
     private HttpClient httpClient;
 
     public THClientBuilder() {
         this.httpClient = createHttpClient();
-        super.withIdGenerator(DEFAULT_ID_GENERATOR);
+        super.withIdGenerator(WFlow.createDefaultIdGenerator());
     }
 
     public THClientBuilder withHttpClient(HttpClient httpClient) {

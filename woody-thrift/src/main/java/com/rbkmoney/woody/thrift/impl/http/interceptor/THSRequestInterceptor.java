@@ -23,7 +23,7 @@ public class THSRequestInterceptor implements RequestInterceptor {
     }
 
     protected boolean interceptHttpRequest(TraceData traceData, HttpServletRequest request, Object... contextParams) {
-        String errMethod = chechRequestMethod(request);
+        String errMethod = checkRequestMethod(request);
         if (errMethod != null) {
             return interceptRequest(traceData, new THRequestInterceptionException(TTransportErrorType.BAD_REQUEST_TYPE, errMethod));
         }
@@ -59,7 +59,7 @@ public class THSRequestInterceptor implements RequestInterceptor {
         return null;
     }
 
-    protected String chechRequestMethod(HttpServletRequest request) {
+    protected String checkRequestMethod(HttpServletRequest request) {
         String reqMethod = request.getMethod();
         return "POST".equals(reqMethod) ? null : reqMethod;
     }

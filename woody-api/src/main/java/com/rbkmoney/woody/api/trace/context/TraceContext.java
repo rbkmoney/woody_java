@@ -5,16 +5,29 @@ import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.api.trace.Span;
 import com.rbkmoney.woody.api.trace.TraceData;
 
-import static com.rbkmoney.woody.api.generator.IdGenerator.NO_PARENT_ID;
+import java.util.Optional;
 
 /**
  * Created by vpankrashkin on 25.04.16.
  */
 public class TraceContext {
+    public static final String NO_PARENT_ID = "undefined";
+
     private final static ThreadLocal<TraceData> currentTraceData = ThreadLocal.withInitial(() -> new TraceData());
 
     public static TraceData getCurrentTraceData() {
         return currentTraceData.get();
+    }
+
+    public static TraceData initNewServiceTrace(TraceData traceData, IdGenerator traceIdGenerator, IdGenerator spanIdGenerator) {
+        return initServiceTraceData(traceData, traceIdGenerator, spanIdGenerator);
+    }
+
+    public static TraceData initServiceTraceData(TraceData traceData, IdGenerator traceIdGenerator, IdGenerator spanIdGenerator) {
+        if ((traceData.isRoot())) {
+            initSpan(traceIdGenerator, spanIdGenerator, traceData, false);
+        }
+        return traceData;
     }
 
     public static void setCurrentTraceData(TraceData traceData) {
@@ -32,18 +45,18 @@ public class TraceContext {
         if (traceData != null) {
             traceData.reset();
         }
-
     }
 
     public static TraceContext forClient(IdGenerator idGenerator, Runnable postInit, Runnable preDestroy, Runnable preErrDestroy) {
         return new TraceContext(idGenerator, postInit, preDestroy, preErrDestroy);
     }
 
-    public static TraceContext forServer(Runnable postInit, Runnable preDestroy, Runnable preErrDestroy) {
+    public static TraceContext forService(Runnable postInit, Runnable preDestroy, Runnable preErrDestroy) {
         return new TraceContext(null, postInit, preDestroy, preErrDestroy);
     }
 
-    private final IdGenerator idGenerator;
+    private final IdGenerator traceIdGenerator;
+    private final IdGenerator spanIdGenerator;
     private final Runnable postInit;
     private final Runnable preDestroy;
     private final Runnable preErrDestroy;
@@ -51,28 +64,41 @@ public class TraceContext {
     private final boolean isClient;
 
     public TraceContext(IdGenerator idGenerator) {
-        this(idGenerator, () -> {
+        this(idGenerator, idGenerator);
+    }
+
+    public TraceContext(IdGenerator traceIdGenerator, IdGenerator spanIdGenerator) {
+        this(traceIdGenerator, spanIdGenerator, () -> {
         }, () -> {
         }, () -> {
         });
     }
 
     public TraceContext(IdGenerator idGenerator, Runnable postInit, Runnable preDestroy, Runnable preErrDestroy) {
-        this.idGenerator = idGenerator;
-        this.postInit = postInit;
-        this.preDestroy = preDestroy;
-        this.preErrDestroy = preErrDestroy;
-        this.isAuto = true;
-        this.isClient = false;
+        this(idGenerator, idGenerator, postInit, preDestroy, preErrDestroy);
+    }
+
+    public TraceContext(IdGenerator traceIdGenerator, IdGenerator spanIdGenerator, Runnable postInit, Runnable preDestroy, Runnable preErrDestroy) {
+        this(traceIdGenerator, spanIdGenerator, postInit, preDestroy, preErrDestroy, Optional.empty());
     }
 
     public TraceContext(IdGenerator idGenerator, Runnable postInit, Runnable preDestroy, Runnable preErrDestroy, boolean isClient) {
-        this.idGenerator = idGenerator;
+        this(idGenerator, idGenerator, postInit, preDestroy, preErrDestroy, Optional.of(isClient));
+    }
+
+    private TraceContext(IdGenerator traceIdGenerator, IdGenerator spanIdGenerator, Runnable postInit, Runnable preDestroy, Runnable preErrDestroy, Optional<Boolean> isClient) {
+        this.traceIdGenerator = traceIdGenerator;
+        this.spanIdGenerator = spanIdGenerator;
         this.postInit = postInit;
         this.preDestroy = preDestroy;
         this.preErrDestroy = preErrDestroy;
-        this.isAuto = false;
-        this.isClient = isClient;
+        if (isClient.isPresent()) {
+            this.isAuto = false;
+            this.isClient = isClient.get();
+        } else {
+            this.isAuto = true;
+            this.isClient = false;
+        }
     }
 
     /**
@@ -83,7 +109,7 @@ public class TraceContext {
         if (isClientInit(traceData)) {
             initClientContext(traceData);
         } else {
-            initServerContext(traceData);
+            initServiceContext(traceData);
         }
 
         MDCUtils.putContextIds(traceData.getActiveSpan().getSpan());
@@ -98,7 +124,7 @@ public class TraceContext {
     public void destroy(boolean onError) {
         TraceData traceData = getCurrentTraceData();
         boolean isClient = isClientDestroy(traceData);
-        setDuration(isClient ? traceData.getClientSpan().getSpan() : traceData.getServiceSpan().getSpan());
+        setDuration(traceData, isClient);
         try {
             if (onError) {
                 preErrDestroy.run();
@@ -109,7 +135,7 @@ public class TraceContext {
             if (isClient) {
                 destroyClientContext(traceData);
             } else {
-                destroyServerContext(traceData);
+                destroyServiceContext(traceData);
             }
 
             if (traceData.getServiceSpan().isFilled()) {
@@ -122,44 +148,53 @@ public class TraceContext {
     }
 
     public void setDuration() {
-        TraceData traceData = getCurrentTraceData();
-        setDuration(isClient ? traceData.getClientSpan().getSpan() : traceData.getServiceSpan().getSpan());
+        setDuration(getCurrentTraceData(), isClient);
     }
 
     private void initClientContext(TraceData traceData) {
-        assert idGenerator != null;
+        initSpan(traceIdGenerator, spanIdGenerator, traceData, true);
+    }
+
+    private static TraceData initSpan(IdGenerator traceIdGenerator, IdGenerator spanIdGenerator, TraceData traceData, boolean isClient) {
 
         long timestamp = System.currentTimeMillis();
         Span clientSpan = traceData.getClientSpan().getSpan();
-        Span serverSpan = traceData.getServiceSpan().getSpan();
+        Span serviceSpan = traceData.getServiceSpan().getSpan();
+
+        Span initSpan = isClient ? clientSpan : serviceSpan;
 
         boolean root = traceData.isRoot();
-        String traceId = root ? idGenerator.generateId(timestamp) : serverSpan.getTraceId();
+        String traceId = root ? traceIdGenerator.generateId() : serviceSpan.getTraceId();
         if (root) {
-            clientSpan.setId(traceId);
-            clientSpan.setParentId(NO_PARENT_ID);
+            initSpan.setId(spanIdGenerator.generateId());
+            initSpan.setParentId(NO_PARENT_ID);
         } else {
-            clientSpan.setId(idGenerator.generateId(timestamp, traceData.getServiceSpan().getCounter().incrementAndGet()));
-            clientSpan.setParentId(serverSpan.getId());
+            initSpan.setId(spanIdGenerator.generateId("", traceData.getServiceSpan().getCounter().incrementAndGet()));
+            initSpan.setParentId(serviceSpan.getId());
         }
-        clientSpan.setTraceId(traceId);
-        clientSpan.setTimestamp(timestamp);
+        initSpan.setTraceId(traceId);
+        initTime(traceData, timestamp, isClient);
+        return traceData;
+    }
+
+    private static void initTime(TraceData traceData, long timestamp, boolean isClient) {
+        (isClient ? traceData.getClientSpan() : traceData.getServiceSpan()).getSpan().setTimestamp(timestamp);
     }
 
     private void destroyClientContext(TraceData traceData) {
         traceData.getClientSpan().reset();
     }
 
-    private void initServerContext(TraceData traceData) {
-        long timestamp = System.currentTimeMillis();
-        traceData.getServiceSpan().getSpan().setTimestamp(timestamp);
+    private void initServiceContext(TraceData traceData) {
+        initTime(traceData, System.currentTimeMillis(), false);
     }
 
-    private void destroyServerContext(TraceData traceData) {
+    private void destroyServiceContext(TraceData traceData) {
         TraceContext.reset();
     }
 
-    private void setDuration(Span span) {
+    private void setDuration(TraceData traceData, boolean isClient) {
+        Span span = (isClient ? traceData.getClientSpan().getSpan() : traceData.getServiceSpan().getSpan());
         span.setDuration(System.currentTimeMillis() - span.getTimestamp());
     }
 
@@ -178,14 +213,12 @@ public class TraceContext {
         assert !(traceData.getClientSpan().isFilled() & traceData.getServiceSpan().isFilled());
 
         return serverSpan.isFilled() ? serverSpan.isStarted() : true;
-
     }
 
     private boolean isClientDestroyAuto(TraceData traceData) {
         assert (traceData.getClientSpan().isStarted() || traceData.getServiceSpan().isStarted());
 
         return traceData.getServiceSpan().isStarted() ? traceData.getClientSpan().isStarted() : true;
-
     }
 
 }

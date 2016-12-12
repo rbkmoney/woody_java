@@ -20,7 +20,7 @@ public class THSResponseInterceptor implements ResponseInterceptor {
     public static final Function<Object, String> THRFIT_TRANSPORT_ERROR_FUNC = obj -> "thrift transport error";
     public static final Function<Object, String> THRFIT_PROTOCOL_ERROR_FUNC = obj -> "thrift protocol error";
     public static final Function<Object, String> UNKNOWN_PROVIDER_ERROR_FUNC = obj -> "unknown provider error";
-    public static final Function<Object, String> UNKNOWN_CALL_FUNC = callName -> "Unknown method:" + callName;
+    public static final Function<Object, String> UNKNOWN_CALL_FUNC = callName -> "unknown method:" + callName;
     public static final Function<String, String> BAD_CONTENT_TYPE_FUNC = cType -> "content type wrong/missing";
     public static final Function<THttpHeader, String> BAD_REQUEST_HEADERS_FUNC = tHttpHeader -> (tHttpHeader == null ? "Trace header" : tHttpHeader.getKeyValue()) + " missing";
     public static final Function<String, String> BAD_REQUEST_METHOD_FUNC = rewMethod -> "http method wrong";

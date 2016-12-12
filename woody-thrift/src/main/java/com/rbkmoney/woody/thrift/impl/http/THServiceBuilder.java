@@ -1,7 +1,6 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.AbstractServiceBuilder;
-import com.rbkmoney.woody.api.ServiceBuilder;
 import com.rbkmoney.woody.api.event.ServiceEventListener;
 import com.rbkmoney.woody.api.interceptor.CommonInterceptor;
 import com.rbkmoney.woody.api.interceptor.CompositeInterceptor;
@@ -112,7 +111,7 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
     }
 
     protected TraceContext createTraceContext() {
-        return TraceContext.forServer(() -> {
+        return TraceContext.forService(() -> {
         }, getOnSendEventListener(), getErrorListener());
 
     }

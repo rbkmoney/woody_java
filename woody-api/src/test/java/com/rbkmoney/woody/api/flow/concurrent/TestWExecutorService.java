@@ -1,4 +1,4 @@
-package com.rbkmoney.woody.api.concurrent;
+package com.rbkmoney.woody.api.flow.concurrent;
 
 import com.rbkmoney.woody.api.trace.TraceData;
 import com.rbkmoney.woody.api.trace.context.TraceContext;

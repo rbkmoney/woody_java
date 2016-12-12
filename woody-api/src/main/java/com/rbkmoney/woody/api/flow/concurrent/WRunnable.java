@@ -1,4 +1,4 @@
-package com.rbkmoney.woody.api.concurrent;
+package com.rbkmoney.woody.api.flow.concurrent;
 
 import com.rbkmoney.woody.api.MDCUtils;
 import com.rbkmoney.woody.api.trace.TraceData;
@@ -9,23 +9,7 @@ public class WRunnable implements Runnable {
     private final TraceData traceData;
     private final Runnable wrappedRunnable;
 
-    public static WRunnable create(Runnable runnable) {
-        return new WRunnable(runnable);
-    }
-
-    public static WRunnable create(Runnable runnable, TraceData traceData) {
-        return new WRunnable(runnable, traceData);
-    }
-
-    public static WRunnable createFork(Runnable runnable) {
-        return create(runnable, new TraceData());
-    }
-
-    private WRunnable(Runnable runnable) {
-        this(runnable, TraceContext.getCurrentTraceData());
-    }
-
-    private WRunnable(Runnable runnable, TraceData traceData) {
+    public WRunnable(Runnable runnable, TraceData traceData) {
         if (runnable == null || traceData == null) {
             throw new NullPointerException("Null arguments're not allowed");
         }

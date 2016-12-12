@@ -1,4 +1,6 @@
-package com.rbkmoney.woody.api.concurrent;
+package com.rbkmoney.woody.api.flow.concurrent;
+
+import com.rbkmoney.woody.api.flow.WFlow;
 
 import java.io.Closeable;
 import java.util.ArrayList;
@@ -24,7 +26,7 @@ public class WExecutorService implements ExecutorService, Closeable {
      */
     @Override
     public void execute(final Runnable arg0) {
-        final WRunnable wRunnable = WRunnable.create(arg0);
+        final WRunnable wRunnable = WFlow.create(arg0);
         wrappedExecutor.execute(wRunnable);
     }
 
@@ -108,7 +110,7 @@ public class WExecutorService implements ExecutorService, Closeable {
      */
     @Override
     public <T> Future<T> submit(final Callable<T> arg0) {
-        final WCallable<T> wCallable = WCallable.create(arg0);
+        final WCallable<T> wCallable = WFlow.create(arg0);
         return wrappedExecutor.submit(wCallable);
     }
 
@@ -117,7 +119,7 @@ public class WExecutorService implements ExecutorService, Closeable {
      */
     @Override
     public Future<?> submit(final Runnable arg0) {
-        final WRunnable wRunnable = WRunnable.create(arg0);
+        final WRunnable wRunnable = WFlow.create(arg0);
         return wrappedExecutor.submit(wRunnable);
     }
 
@@ -126,7 +128,7 @@ public class WExecutorService implements ExecutorService, Closeable {
      */
     @Override
     public <T> Future<T> submit(final Runnable arg0, final T arg1) {
-        final WRunnable wRunnable = WRunnable.create(arg0);
+        final WRunnable wRunnable = WFlow.create(arg0);
         return wrappedExecutor.submit(wRunnable, arg1);
     }
 
@@ -134,7 +136,7 @@ public class WExecutorService implements ExecutorService, Closeable {
             final Collection<? extends Callable<T>> originalCollection) {
         final Collection<Callable<T>> collection = new ArrayList<Callable<T>>();
         for (final Callable<T> t : originalCollection) {
-            collection.add(WCallable.create(t));
+            collection.add(WFlow.create(t));
         }
         return collection;
     }

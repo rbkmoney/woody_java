@@ -7,14 +7,15 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class ServiceSpan extends ContextSpan {
 
-    private final AtomicInteger counter = new AtomicInteger();
+    private final AtomicInteger counter;
 
     public ServiceSpan() {
+        counter = new AtomicInteger();
     }
 
     protected ServiceSpan(ServiceSpan serviceSpan) {
         super(serviceSpan);
-        this.counter.set(serviceSpan.counter.get());
+        this.counter = serviceSpan.counter;
     }
 
     public ServiceSpan cloneObject() {
