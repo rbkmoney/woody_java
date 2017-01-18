@@ -1,8 +1,7 @@
-package com.rbkmoney.woody.api.trace.context;
+package com.rbkmoney.woody.api.proxy.tracer;
 
 
 import com.rbkmoney.woody.api.proxy.InstanceMethodCaller;
-import com.rbkmoney.woody.api.proxy.MethodCallTracer;
 
 /**
  * Created by vpankrashkin on 25.04.16.

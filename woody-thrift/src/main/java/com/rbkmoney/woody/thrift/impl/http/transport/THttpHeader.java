@@ -7,16 +7,16 @@ public enum THttpHeader {
     TRACE_ID("x-rbk-trace-id"),
     SPAN_ID("x-rbk-span-id"),
     PARENT_ID("x-rbk-parent-id"),
-    ERROR_LOGIC("x-rbk-rpc-error-logic"),
-    ERROR_THRIFT("x-rbk-rpc-error-thrift");
+    ERROR_CLASS("x-rbk-error-class"),
+    ERROR_REASON("x-rbk-error-reason");
 
-    private String value;
+    private String key;
 
     THttpHeader(String name) {
-        this.value = name;
+        this.key = name;
     }
 
-    public String getKeyValue() {
-        return value;
+    public String getKey() {
+        return key;
     }
 }

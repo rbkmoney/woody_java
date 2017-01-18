@@ -2,6 +2,7 @@ package com.rbkmoney.woody.api.trace.context;
 
 import com.rbkmoney.woody.api.MDCUtils;
 import com.rbkmoney.woody.api.generator.IdGenerator;
+import com.rbkmoney.woody.api.trace.ContextSpan;
 import com.rbkmoney.woody.api.trace.Span;
 import com.rbkmoney.woody.api.trace.TraceData;
 
@@ -45,6 +46,14 @@ public class TraceContext {
         if (traceData != null) {
             traceData.reset();
         }
+    }
+
+    public static TraceContext forClient(IdGenerator idGenerator) {
+        return new TraceContext(idGenerator);
+    }
+
+    public static TraceContext forService() {
+        return new TraceContext(null);
     }
 
     public static TraceContext forClient(IdGenerator idGenerator, Runnable postInit, Runnable preDestroy, Runnable preErrDestroy) {
@@ -173,12 +182,12 @@ public class TraceContext {
             initSpan.setParentId(serviceSpan.getId());
         }
         initSpan.setTraceId(traceId);
-        initTime(traceData, timestamp, isClient);
+        initTime(initSpan, timestamp);
         return traceData;
     }
 
-    private static void initTime(TraceData traceData, long timestamp, boolean isClient) {
-        (isClient ? traceData.getClientSpan() : traceData.getServiceSpan()).getSpan().setTimestamp(timestamp);
+    private static void initTime(Span span, long timestamp) {
+        span.setTimestamp(timestamp);
     }
 
     private void destroyClientContext(TraceData traceData) {
@@ -186,7 +195,7 @@ public class TraceContext {
     }
 
     private void initServiceContext(TraceData traceData) {
-        initTime(traceData, System.currentTimeMillis(), false);
+        initTime(traceData.getServiceSpan().getSpan(), System.currentTimeMillis());
     }
 
     private void destroyServiceContext(TraceData traceData) {

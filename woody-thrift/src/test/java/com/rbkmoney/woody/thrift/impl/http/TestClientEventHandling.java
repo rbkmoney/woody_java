@@ -2,7 +2,7 @@ package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.event.CallType;
 import com.rbkmoney.woody.api.event.ClientEventListener;
-import com.rbkmoney.woody.api.event.ErrorType;
+import com.rbkmoney.woody.api.flow.error.WErrorType;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
 import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerServiceSrv;
@@ -70,8 +70,8 @@ public class TestClientEventHandling extends AbstractTest {
                     break;
                 case ERROR:
                     assertFalse(thClientEvent.isSuccessfullCall());
-                    assertEquals(ErrorType.APPLICATION_KNOWN_ERROR, thClientEvent.getErrorType());
-                    assertEquals("test_error", thClientEvent.getErrorName());
+                    assertEquals(WErrorType.BUSINESS_ERROR, thClientEvent.getErrorDefinition().getErrorType());
+                    assertEquals("test_error", thClientEvent.getErrorDefinition().getErrorName());
                     assertNull(thClientEvent.getThriftErrorType());
                     break;
                 default:
@@ -157,7 +157,7 @@ public class TestClientEventHandling extends AbstractTest {
                     break;
                 case ERROR:
                     assertFalse(thClientEvent.isSuccessfullCall());
-                    assertEquals(ErrorType.PROVIDER_ERROR, thClientEvent.getErrorType());
+                    assertEquals(WErrorType.PROVIDER_ERROR, thClientEvent.getErrorDefinition());
                     assertEquals(TErrorType.TRANSPORT, thClientEvent.getThriftErrorType());
                     break;
                 default:

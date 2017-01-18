@@ -7,7 +7,7 @@ public class ConfiguredSnowflakeIdGenerator extends SnowflakeIdGenerator {
     public static final String NODE_ID_ENV_PARAM = "woody.node_id";
 
     public ConfiguredSnowflakeIdGenerator() {
-        this(DEFAULT_SUFFIX);
+        super(getNodeIdParam());
     }
 
     public ConfiguredSnowflakeIdGenerator(String suffix) {

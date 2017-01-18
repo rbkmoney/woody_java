@@ -2,6 +2,7 @@ package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.WoodyInstantiationException;
 import com.rbkmoney.woody.api.event.ClientEventListener;
+import com.rbkmoney.woody.api.flow.error.WErrorMapper;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.api.proxy.InvocationTargetProvider;
 import com.rbkmoney.woody.api.proxy.CPool2TargetProvider;
@@ -28,6 +29,12 @@ public class THPooledClientBuilder extends THClientBuilder {
     private boolean destroyed = false;
     private final ConcurrentLinkedQueue<CPool2TargetProvider> collectedProviders = new ConcurrentLinkedQueue<>();
     private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+
+
+    @Override
+    public THPooledClientBuilder withErrorMapper(WErrorMapper errorMapper) {
+        return (THPooledClientBuilder) super.withErrorMapper(errorMapper);
+    }
 
     @Override
     public THPooledClientBuilder withHttpClient(HttpClient httpClient) {

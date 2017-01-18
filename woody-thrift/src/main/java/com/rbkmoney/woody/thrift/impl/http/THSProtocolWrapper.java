@@ -26,14 +26,14 @@ public class THSProtocolWrapper extends TProtocolDecorator {
     @Override
     public TMessage readMessageBegin() throws TException {
         TMessage tMessage = super.readMessageBegin();
-        //todo process errors
+        //todo process state
         interceptor.interceptRequest(TraceContext.getCurrentTraceData(), tMessage);
         return tMessage;
     }
 
     @Override
     public void writeMessageBegin(TMessage tMessage) throws TException {
-        //todo process errors
+        //todo process state
         interceptor.interceptResponse(TraceContext.getCurrentTraceData(), tMessage);
         super.writeMessageBegin(tMessage);
     }

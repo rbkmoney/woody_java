@@ -4,6 +4,8 @@ import com.rbkmoney.woody.api.event.ServiceEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 /**
  * Created by vpankrashkin on 12.05.16.
  */
@@ -27,7 +29,7 @@ public class ServiceEventLogListener implements ServiceEventListener<THServiceEv
                     log.info("SERVER Event: {}, Status: {}, Time: {}, Duration: {}", event.getEventType(), event.isSuccessfullCall() ? "ok" : "error", event.getTimeStamp(), event.getDuration());
                     break;
                 case ERROR:
-                    log.info("SERVER Event: {}, ErrType: {}, TErrType: {}, ErrName: {},  Time: {}", event.getEventType(), event.getErrorType(), event.getThriftErrorType(), event.getErrorName(), event.getTimeStamp());
+                    log.info("SERVER Event: {}, ErrType: {}, TErrType: {}, ErrName: {},  Time: {}", event.getEventType(), event.getErrorDefinition(), event.getThriftErrorType(), Optional.ofNullable(event.getErrorDefinition()).map(ed -> ed.getErrorName()).orElse(""), event.getTimeStamp());
                     break;
                 default:
                     log.info("SERVER Unknown error: {}", event);

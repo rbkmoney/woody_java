@@ -1,5 +1,6 @@
 package com.rbkmoney.woody.api.proxy;
 
+import com.rbkmoney.woody.api.proxy.tracer.MethodCallTracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,7 +9,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MethodCallInterceptors {
 
-    private static Logger log = LoggerFactory.getLogger(MethodCallInterceptors.class);
+    private static final Logger log = LoggerFactory.getLogger(MethodCallInterceptors.class);
 
     public static MethodCallInterceptor directCallInterceptor() {
         return (src, args, caller) -> caller.call(src, args);
@@ -16,16 +17,17 @@ public class MethodCallInterceptors {
 
     public static MethodCallInterceptor trackedCallInterceptor(MethodCallTracer callTracer) {
         return (src, args, caller) -> {
+            Object result;
             callTracer.beforeCall(args, caller);
             try {
-                Object result = caller.call(src, args);
-                callTracer.afterCall(args, caller, result);
-                return result;
+                result = caller.call(src, args);
             } catch (Throwable t) {
                 log.debug("Call Error", t);
                 callTracer.callError(args, caller, t);
                 throw t;
             }
+            callTracer.afterCall(args, caller, result);
+            return result;
         };
     }
 }

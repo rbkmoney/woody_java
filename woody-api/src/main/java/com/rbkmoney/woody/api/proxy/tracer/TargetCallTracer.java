@@ -1,39 +1,39 @@
-package com.rbkmoney.woody.api.trace.context;
+package com.rbkmoney.woody.api.proxy.tracer;
 
 import com.rbkmoney.woody.api.event.ClientEventType;
 import com.rbkmoney.woody.api.event.ServiceEventType;
 import com.rbkmoney.woody.api.proxy.InstanceMethodCaller;
-import com.rbkmoney.woody.api.proxy.MethodCallTracer;
 import com.rbkmoney.woody.api.trace.ContextSpan;
 import com.rbkmoney.woody.api.trace.ContextUtils;
 import com.rbkmoney.woody.api.trace.Metadata;
 import com.rbkmoney.woody.api.trace.MetadataProperties;
+import com.rbkmoney.woody.api.trace.context.TraceContext;
 
 /**
  * Created by vpankrashkin on 25.04.16.
  */
-public class MetadataTracer implements MethodCallTracer {
+public class TargetCallTracer implements MethodCallTracer {
     private final boolean isClient;
     private final boolean isAuto;
 
-    public static MetadataTracer forClient() {
-        return new MetadataTracer(true);
+    public static TargetCallTracer forClient() {
+        return new TargetCallTracer(true);
     }
 
-    public static MetadataTracer forServer() {
-        return new MetadataTracer(false);
+    public static TargetCallTracer forServer() {
+        return new TargetCallTracer(false);
     }
 
-    public static MetadataTracer forAuto() {
-        return new MetadataTracer();
+    public static TargetCallTracer forAuto() {
+        return new TargetCallTracer();
     }
 
-    public MetadataTracer() {
+    public TargetCallTracer() {
         this.isAuto = true;
         this.isClient = false;
     }
 
-    public MetadataTracer(boolean isClient) {
+    public TargetCallTracer(boolean isClient) {
         this.isAuto = false;
         this.isClient = isClient;
     }
@@ -68,7 +68,6 @@ public class MetadataTracer implements MethodCallTracer {
 
     private void setBeforeCall(Metadata metadata, Object[] args, InstanceMethodCaller caller, boolean isClient) {
         metadata.putValue(MetadataProperties.CALL_ARGUMENTS, args);
-        metadata.putValue(MetadataProperties.INSTANCE_METHOD_CALLER, caller);
         metadata.putValue(MetadataProperties.EVENT_TYPE, isClient ? ClientEventType.CALL_SERVICE : ServiceEventType.CALL_HANDLER);
     }
 

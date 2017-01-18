@@ -2,6 +2,7 @@ package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.WoodyInstantiationException;
 import com.rbkmoney.woody.api.event.ClientEventListener;
+import com.rbkmoney.woody.api.flow.error.WErrorMapper;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.api.proxy.InvocationTargetProvider;
 import com.rbkmoney.woody.api.proxy.SpawnTargetProvider;
@@ -16,6 +17,11 @@ import java.net.URI;
  * It creates new Thrift client instance for every call which is dropped after call finishes.
  */
 public class THSpawnClientBuilder extends THClientBuilder {
+
+    @Override
+    public THSpawnClientBuilder withErrorMapper(WErrorMapper errorMapper) {
+        return (THSpawnClientBuilder) super.withErrorMapper(errorMapper);
+    }
 
     @Override
     public THSpawnClientBuilder withHttpClient(HttpClient httpClient) {

@@ -4,7 +4,7 @@ typedef i32 int // We can use typedef to get pretty names for the types we are u
 struct Owner {
 1:int id,
 2:string name,
-3:optional string value;
+3:optional string key;
 }
 
 exception test_error {

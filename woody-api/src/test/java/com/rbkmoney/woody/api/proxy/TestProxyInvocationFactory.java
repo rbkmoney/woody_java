@@ -1,6 +1,7 @@
 package com.rbkmoney.woody.api.proxy;
 
-import com.rbkmoney.woody.api.trace.context.EventTracer;
+import com.rbkmoney.woody.api.proxy.tracer.EventTracer;
+import com.rbkmoney.woody.api.proxy.tracer.MethodCallTracer;
 import org.junit.Ignore;
 import org.junit.Test;
 
