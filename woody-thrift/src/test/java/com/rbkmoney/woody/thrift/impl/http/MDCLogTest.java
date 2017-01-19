@@ -35,7 +35,6 @@ public class MDCLogTest extends AbstractTest {
         assertNotNull(MDC.get(MDCUtils.TRACE_ID));
         assertNotNull(MDC.get(MDCUtils.PARENT_ID));
 
-        log.info("{} {} {}", event.getTraceId(), event.getSpanId(), event.getParentId());
         assertEquals(MDC.get(MDCUtils.SPAN_ID), event.getSpanId());
         assertEquals(MDC.get(MDCUtils.TRACE_ID), event.getTraceId());
         assertEquals(MDC.get(MDCUtils.PARENT_ID), event.getParentId());
@@ -51,8 +50,8 @@ public class MDCLogTest extends AbstractTest {
         assertEquals(MDC.get(MDCUtils.PARENT_ID), event.getParentId());
     };
 
-    OwnerServiceSrv.Iface client1 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), clientEventListener, getUrlString("/rpc"));
-    OwnerServiceSrv.Iface client2 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), clientEventListener, getUrlString("/rpc"));
+    OwnerServiceSrv.Iface client1 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(new HttpClientEventLogListener(), new ClientEventLogListener(), clientEventListener), getUrlString("/rpc"));
+    OwnerServiceSrv.Iface client2 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(new HttpClientEventLogListener(), new ClientEventLogListener(), clientEventListener), getUrlString("/rpc"));
     OwnerServiceSrv.Iface handler = new OwnerServiceStub() {
         @Override
         public Owner getErrOwner(int id) throws TException, test_error {
@@ -71,7 +70,7 @@ public class MDCLogTest extends AbstractTest {
         }
     };
 
-    Servlet servlet = createThrftRPCService(OwnerServiceSrv.Iface.class, handler, serviceEventListener);
+    Servlet servlet = createThrftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener(new HttpServiceEventLogListener(), new ServiceEventLogListener(), serviceEventListener));
 
     @Before
     public void before() {

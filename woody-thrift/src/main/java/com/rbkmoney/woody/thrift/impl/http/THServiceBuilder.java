@@ -3,6 +3,7 @@ package com.rbkmoney.woody.thrift.impl.http;
 import com.rbkmoney.woody.api.AbstractServiceBuilder;
 import com.rbkmoney.woody.api.event.ServiceEventListener;
 import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
+import com.rbkmoney.woody.api.flow.error.WErrorType;
 import com.rbkmoney.woody.api.interceptor.*;
 import com.rbkmoney.woody.api.provider.ProviderEventInterceptor;
 import com.rbkmoney.woody.api.trace.ContextSpan;
@@ -37,8 +38,10 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
     }
 
     protected BiConsumer<WErrorDefinition, ContextSpan> getErrorDefinitionConsumer() {
-        return (eDef, contextSpan) ->
+        return (eDef, contextSpan) -> {
+            if (eDef.getErrorType() != WErrorType.BUSINESS_ERROR)
                 contextSpan.getMetadata().removeValue(THMetadataProperties.TH_TRANSPORT_RESPONSE_SET_FLAG);
+        };
     }
 
     @Override
