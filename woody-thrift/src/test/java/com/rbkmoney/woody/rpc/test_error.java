@@ -93,7 +93,7 @@ public class test_error extends org.apache.thrift.TException implements org.apac
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
     tmpMap.put(_Fields.ID, new org.apache.thrift.meta_data.FieldMetaData("id", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32        , "int")));
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
     metaDataMap = Collections.unmodifiableMap(tmpMap);
     org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(test_error.class, metaDataMap);
   }
@@ -242,6 +242,14 @@ public class test_error extends org.apache.thrift.TException implements org.apac
 
   public _Fields fieldForId(int fieldId) {
     return _Fields.findByThriftId(fieldId);
+  }
+
+  public _Fields[] getFields() {
+    return _Fields.values();
+  }
+
+  public Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> getFieldMetaData() {
+    return metaDataMap;
   }
 
   public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {

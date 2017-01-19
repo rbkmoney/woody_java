@@ -104,7 +104,7 @@ public class Owner implements org.apache.thrift.TBase<Owner, Owner._Fields>, jav
   static {
     Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
     tmpMap.put(_Fields.ID, new org.apache.thrift.meta_data.FieldMetaData("id", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32        , "int")));
+        new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
     tmpMap.put(_Fields.NAME, new org.apache.thrift.meta_data.FieldMetaData("name", org.apache.thrift.TFieldRequirementType.DEFAULT, 
         new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
     tmpMap.put(_Fields.KEY, new org.apache.thrift.meta_data.FieldMetaData("key", org.apache.thrift.TFieldRequirementType.OPTIONAL, 
@@ -387,6 +387,14 @@ public class Owner implements org.apache.thrift.TBase<Owner, Owner._Fields>, jav
 
   public _Fields fieldForId(int fieldId) {
     return _Fields.findByThriftId(fieldId);
+  }
+
+  public _Fields[] getFields() {
+    return _Fields.values();
+  }
+
+  public Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> getFieldMetaData() {
+    return metaDataMap;
   }
 
   public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {

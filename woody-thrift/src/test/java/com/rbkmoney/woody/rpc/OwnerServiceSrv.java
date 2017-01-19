@@ -1083,6 +1083,14 @@ public class OwnerServiceSrv {
       return _Fields.findByThriftId(fieldId);
     }
 
+    public _Fields[] getFields() {
+      return _Fields.values();
+    }
+
+    public Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> getFieldMetaData() {
+      return metaDataMap;
+    }
+
     public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
       scheme(iprot).read(iprot, this);
     }
@@ -1410,6 +1418,14 @@ public class OwnerServiceSrv {
       return _Fields.findByThriftId(fieldId);
     }
 
+    public _Fields[] getFields() {
+      return _Fields.values();
+    }
+
+    public Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> getFieldMetaData() {
+      return metaDataMap;
+    }
+
     public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
       scheme(iprot).read(iprot, this);
     }
@@ -1617,7 +1633,7 @@ public class OwnerServiceSrv {
     static {
       Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.ID, new org.apache.thrift.meta_data.FieldMetaData("id", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32          , "int")));
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(getOwner_args.class, metaDataMap);
     }
@@ -1766,6 +1782,14 @@ public class OwnerServiceSrv {
 
     public _Fields fieldForId(int fieldId) {
       return _Fields.findByThriftId(fieldId);
+    }
+
+    public _Fields[] getFields() {
+      return _Fields.values();
+    }
+
+    public Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> getFieldMetaData() {
+      return metaDataMap;
     }
 
     public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
@@ -2124,6 +2148,14 @@ public class OwnerServiceSrv {
       return _Fields.findByThriftId(fieldId);
     }
 
+    public _Fields[] getFields() {
+      return _Fields.values();
+    }
+
+    public Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> getFieldMetaData() {
+      return metaDataMap;
+    }
+
     public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
       scheme(iprot).read(iprot, this);
     }
@@ -2338,7 +2370,7 @@ public class OwnerServiceSrv {
     static {
       Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       tmpMap.put(_Fields.ID, new org.apache.thrift.meta_data.FieldMetaData("id", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32          , "int")));
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(getErrOwner_args.class, metaDataMap);
     }
@@ -2487,6 +2519,14 @@ public class OwnerServiceSrv {
 
     public _Fields fieldForId(int fieldId) {
       return _Fields.findByThriftId(fieldId);
+    }
+
+    public _Fields[] getFields() {
+      return _Fields.values();
+    }
+
+    public Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> getFieldMetaData() {
+      return metaDataMap;
     }
 
     public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
@@ -2918,6 +2958,14 @@ public class OwnerServiceSrv {
       return _Fields.findByThriftId(fieldId);
     }
 
+    public _Fields[] getFields() {
+      return _Fields.values();
+    }
+
+    public Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> getFieldMetaData() {
+      return metaDataMap;
+    }
+
     public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
       scheme(iprot).read(iprot, this);
     }
@@ -3316,6 +3364,14 @@ public class OwnerServiceSrv {
       return _Fields.findByThriftId(fieldId);
     }
 
+    public _Fields[] getFields() {
+      return _Fields.values();
+    }
+
+    public Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> getFieldMetaData() {
+      return metaDataMap;
+    }
+
     public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
       scheme(iprot).read(iprot, this);
     }
@@ -3600,6 +3656,14 @@ public class OwnerServiceSrv {
 
     public _Fields fieldForId(int fieldId) {
       return _Fields.findByThriftId(fieldId);
+    }
+
+    public _Fields[] getFields() {
+      return _Fields.values();
+    }
+
+    public Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> getFieldMetaData() {
+      return metaDataMap;
     }
 
     public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
@@ -3929,6 +3993,14 @@ public class OwnerServiceSrv {
       return _Fields.findByThriftId(fieldId);
     }
 
+    public _Fields[] getFields() {
+      return _Fields.values();
+    }
+
+    public Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> getFieldMetaData() {
+      return metaDataMap;
+    }
+
     public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
       scheme(iprot).read(iprot, this);
     }
@@ -4150,7 +4222,7 @@ public class OwnerServiceSrv {
       tmpMap.put(_Fields.OWNER, new org.apache.thrift.meta_data.FieldMetaData("owner", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, Owner.class)));
       tmpMap.put(_Fields.ID, new org.apache.thrift.meta_data.FieldMetaData("id", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32          , "int")));
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I32)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
       org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(setErrOwner_args.class, metaDataMap);
     }
@@ -4365,6 +4437,14 @@ public class OwnerServiceSrv {
 
     public _Fields fieldForId(int fieldId) {
       return _Fields.findByThriftId(fieldId);
+    }
+
+    public _Fields[] getFields() {
+      return _Fields.values();
+    }
+
+    public Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> getFieldMetaData() {
+      return metaDataMap;
     }
 
     public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
@@ -4830,6 +4910,14 @@ public class OwnerServiceSrv {
 
     public _Fields fieldForId(int fieldId) {
       return _Fields.findByThriftId(fieldId);
+    }
+
+    public _Fields[] getFields() {
+      return _Fields.values();
+    }
+
+    public Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> getFieldMetaData() {
+      return metaDataMap;
     }
 
     public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {

@@ -61,7 +61,7 @@
     </dependencies>
     <profiles>
         <profile>
-            <id>dev</id>
+            <id>dev_thrift_gen</id>
             <build>
                 <plugins>
                     <plugin>
