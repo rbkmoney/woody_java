@@ -25,10 +25,9 @@ public class ContextInterceptor implements CommonInterceptor {
     @Override
     public boolean interceptResponse(TraceData traceData, Object providerContext, Object... contextParams) {
         try {
-            interceptor.interceptResponse(traceData, providerContext, contextParams);
+            return interceptor.interceptResponse(traceData, providerContext, contextParams);
         } finally {
             traceContext.destroy(ContextUtils.hasCallErrors(traceData.getActiveSpan()));
         }
-        return false;
     }
 }

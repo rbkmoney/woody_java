@@ -1,5 +1,7 @@
 package com.rbkmoney.woody.api.flow.error;
 
+import java.util.Objects;
+
 /**
  * Created by vpankrashkin on 12.12.16.
  */
@@ -13,6 +15,10 @@ public class WErrorDefinition {
 
     public WErrorDefinition(WErrorSource generationSource) {
         this.generationSource = generationSource;
+    }
+
+    public WErrorDefinition() {
+        this(WErrorSource.INTERNAL);
     }
 
     public WErrorSource getGenerationSource() {
@@ -57,6 +63,24 @@ public class WErrorDefinition {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof WErrorDefinition)) return false;
+        WErrorDefinition that = (WErrorDefinition) o;
+        return generationSource == that.generationSource &&
+                errorType == that.errorType &&
+                errorSource == that.errorSource &&
+                Objects.equals(errorReason, that.errorReason) &&
+                Objects.equals(errorName, that.errorName) &&
+                Objects.equals(errorMessage, that.errorMessage);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(generationSource, errorType, errorSource, errorReason, errorName, errorMessage);
     }
 
     @Override

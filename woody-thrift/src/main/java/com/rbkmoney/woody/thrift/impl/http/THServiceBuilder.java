@@ -100,10 +100,10 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
         ));
 
         if (isTransportLevel) {
-            interceptors.add(new ProviderEventInterceptor(getOnSendEventListener(), null));
+            //interceptors.add(new ProviderEventInterceptor(getOnSendEventListener(), null));
             interceptors.add(new ContextInterceptor(
                     TraceContext.forService(),
-                    new TransportEventInterceptor(getOnReceiveEventListener(), null, getErrorListener())
+                    new TransportEventInterceptor(getOnReceiveEventListener(), getOnReceiveEventListener(), getErrorListener())
             ));
         }
         return new CompositeInterceptor(interceptors.toArray(new CommonInterceptor[interceptors.size()]));
@@ -112,9 +112,9 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
 
     protected Servlet createThriftServlet(TProcessor tProcessor, CommonInterceptor servletInterceptor, THErrorMapProcessor errorMapProcessor) {
         TProtocolFactory tProtocolFactory = createTransferProtocolFactory();
-        BuilderUtils.wrapProtocolFactory(tProtocolFactory, createInterceptor(errorMapProcessor, false));
+        TProtocolFactory wtProtocolFactory = BuilderUtils.wrapProtocolFactory(tProtocolFactory, createInterceptor(errorMapProcessor, false), false);
 
-        return new TServlet(tProcessor, tProtocolFactory, servletInterceptor);
+        return new TServlet(tProcessor, wtProtocolFactory, servletInterceptor);
     }
 
     protected <T> TProcessor createThriftProcessor(Class<T> serviceInterface, T handler) {

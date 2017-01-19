@@ -5,17 +5,17 @@ package com.rbkmoney.woody.api.flow.error;
  */
 public class WUnavailableResultException extends WRuntimeException {
 
-    private static WErrorDefinition createErrDef(String msg, Throwable cause) {
+    private static WErrorDefinition createErrDef(String reason, Throwable cause) {
         WErrorDefinition errorDefinition = new WErrorDefinition(WErrorSource.INTERNAL);
         errorDefinition.setErrorType(WErrorType.UNAVAILABLE_RESULT);
         errorDefinition.setErrorSource(WErrorSource.INTERNAL);
-        errorDefinition.setErrorReason(msg);
+        errorDefinition.setErrorReason(reason);
         if (cause != null) {
             errorDefinition.setErrorName(cause.getClass().getSimpleName());
             errorDefinition.setErrorMessage(cause.getMessage());
         } else {
             errorDefinition.setErrorName(WUnavailableResultException.class.getSimpleName());
-            errorDefinition.setErrorMessage(msg);
+            errorDefinition.setErrorMessage(reason);
         }
         return errorDefinition;
     }

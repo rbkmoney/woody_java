@@ -16,7 +16,7 @@ public class THDefaultErrorMapper implements WErrorMapper {
             WErrorDefinition errorDefinition = new WErrorDefinition(WErrorSource.INTERNAL);
             errorDefinition.setErrorType(WErrorType.UNEXPECTED_ERROR);
             errorDefinition.setErrorSource(WErrorSource.INTERNAL);
-            errorDefinition.setErrorReason(t.getMessage());
+            errorDefinition.setErrorReason(t.getClass().getSimpleName() + ":" + t.getMessage());
             errorDefinition.setErrorName(t.getClass().getSimpleName());
             errorDefinition.setErrorMessage(t.getMessage());
             return errorDefinition;

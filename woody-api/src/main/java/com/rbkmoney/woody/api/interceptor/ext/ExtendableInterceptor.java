@@ -36,7 +36,7 @@ public class ExtendableInterceptor implements Interceptor {
         );
     }
 
-    public ExtendableInterceptor(Function<Boolean, List<ExtensionBundle>> primaryBundlesProvider, List<ExtensionBundle> secondaryBundles, boolean isRequest, boolean isClient) {
+    public ExtendableInterceptor(Function<Boolean, List<ExtensionBundle>> primaryBundlesProvider, List<ExtensionBundle> secondaryBundles, boolean isClient, boolean isRequest) {
         this(
                 concatBundleLists(
                         primaryBundlesProvider.apply(isClient),

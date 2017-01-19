@@ -1,6 +1,7 @@
 package com.rbkmoney.woody.thrift.impl.http.interceptor.ext;
 
 import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
+import com.rbkmoney.woody.api.flow.error.WErrorType;
 import com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle;
 import com.rbkmoney.woody.api.interceptor.ext.InterceptorExtension;
 import com.rbkmoney.woody.api.trace.*;
@@ -156,6 +157,9 @@ public class TransportExtensionBundles {
                         });
 
                         metadata.putValue(MetadataProperties.ERROR_DEFINITION, errorDefinition);
+                        if (errorDefinition != null && errorDefinition.getErrorType() != WErrorType.BUSINESS_ERROR) {
+                            metadata.putValue(MetadataProperties.RESPONSE_SKIP_READING_FLAG, true);
+                        }
                     }
             ),
             createCtxBundle(
@@ -167,7 +171,6 @@ public class TransportExtensionBundles {
                             return;
                         }
                         logIfError(serviceSpan);
-                        WErrorDefinition errorDefinition = serviceSpan.getMetadata().getValue(MetadataProperties.ERROR_DEFINITION);
                         HttpServletResponse response = respSCtx.getProviderResponse();
                         if (response.isCommitted()) {
                             log.error("Can't perform response mapping: Transport response is already committed");
@@ -176,8 +179,8 @@ public class TransportExtensionBundles {
                             response.setStatus(responseInfo.getStatus());
                             Optional.ofNullable(responseInfo.getErrClass()).ifPresent(val -> response.setHeader(THttpHeader.ERROR_CLASS.getKey(), val));
                             Optional.ofNullable(responseInfo.getErrReason()).ifPresent(val -> response.setHeader(THttpHeader.ERROR_REASON.getKey(), val));
+                            serviceSpan.getMetadata().putValue(THMetadataProperties.TH_TRANSPORT_RESPONSE_SET_FLAG, true);
                         }
-                        serviceSpan.getMetadata().putValue(THMetadataProperties.TH_TRANSPORT_RESPONSE_SET_FLAG, true);
                     }
             )
     );
@@ -212,7 +215,7 @@ public class TransportExtensionBundles {
     private static void logIfError(ContextSpan contextSpan) {
         Throwable t = ContextUtils.getCallError(contextSpan);
         if (t != null) {
-            log.warn("Response has error:", t.toString());
+            log.debug("Response has error:", t);
         }
     }
 }

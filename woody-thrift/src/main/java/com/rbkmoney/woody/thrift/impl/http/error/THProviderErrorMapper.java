@@ -157,7 +157,7 @@ public class THProviderErrorMapper implements WErrorMapper {
 
     @Override
     public WErrorDefinition mapToDef(Throwable t, ContextSpan contextSpan) {
-        if (isWrappedError(t)) {
+        if (isThriftError(t) || isInternalTransportErr(t)) {
             WErrorDefinition errorDefinition = contextSpan.getMetadata().getValue(MetadataProperties.ERROR_DEFINITION);
             //If transport interceptor has already read error def data, this data has more priority than thrift error
             //Woody error def always overrides other errors on provider level (except woody transport error)
@@ -174,12 +174,12 @@ public class THProviderErrorMapper implements WErrorMapper {
         return null;
     }
 
-    private boolean isWrappedError(Throwable t) {
+    private boolean isThriftError(Throwable t) {
         return t instanceof TException;
     }
 
     private boolean isInternalTransportErr(Throwable t) {
-        return t instanceof TTransportException && t.getCause() instanceof THRequestInterceptionException;
+        return t instanceof THRequestInterceptionException;
     }
 
     private WErrorDefinition createDefFromWrappedError(Metadata metadata, Throwable err) {
@@ -209,10 +209,12 @@ public class THProviderErrorMapper implements WErrorMapper {
             tErrorType = TErrorType.PROTOCOL;
             errReason = THRIFT_PROTOCOL_ERROR_REASON_FUNC.apply(err);
         } else if (err instanceof TTransportException) {
+                tErrorType = TErrorType.TRANSPORT;
+                errReason = THRIFT_TRANSPORT_ERROR_REASON_FUNC.apply(err);
+        } else if (err instanceof  THRequestInterceptionException) {
             tErrorType = TErrorType.TRANSPORT;
-            if (isInternalTransportErr(err)) {
-                TTransportErrorType ttErrType = ((THRequestInterceptionException) err.getCause()).getErrorType();
-                String reason = String.valueOf(((THRequestInterceptionException) err.getCause()).getReason());
+                TTransportErrorType ttErrType = ((THRequestInterceptionException) err).getErrorType();
+                String reason = String.valueOf(((THRequestInterceptionException) err).getReason());
                 ttErrType = ttErrType == null ? TTransportErrorType.UNKNOWN : ttErrType;
 
                 metadata.putValue(THMetadataProperties.TH_ERROR_SUBTYPE, ttErrType);
@@ -234,10 +236,7 @@ public class THProviderErrorMapper implements WErrorMapper {
                         errReason = THRIFT_TRANSPORT_ERROR_REASON_FUNC.apply(reason);
                         break;
                 }
-            } else {
-                tErrorType = TErrorType.TRANSPORT;
-                errReason = THRIFT_TRANSPORT_ERROR_REASON_FUNC.apply(err);
-            }
+
         } else {
             tErrorType = TErrorType.UNKNOWN;
             errReason = UNKNOWN_ERROR_MESSAGE;

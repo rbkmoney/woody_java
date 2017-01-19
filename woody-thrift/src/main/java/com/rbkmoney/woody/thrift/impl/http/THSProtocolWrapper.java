@@ -11,6 +11,7 @@ import org.apache.thrift.protocol.TProtocolDecorator;
  * Created by vpankrashkin on 10.05.16.
  */
 public class THSProtocolWrapper extends TProtocolDecorator {
+    private final boolean isCLient;
     private final CommonInterceptor interceptor;
 
     /**
@@ -18,23 +19,32 @@ public class THSProtocolWrapper extends TProtocolDecorator {
      *
      * @param protocol All operations will be forward to this protocol.  Must be non-null.
      */
-    public THSProtocolWrapper(TProtocol protocol, CommonInterceptor interceptor) {
+    public THSProtocolWrapper(TProtocol protocol, CommonInterceptor interceptor, boolean isCLient) {
         super(protocol);
         this.interceptor = interceptor;
+        this.isCLient = isCLient;
     }
 
     @Override
     public TMessage readMessageBegin() throws TException {
         TMessage tMessage = super.readMessageBegin();
         //todo process state
-        interceptor.interceptRequest(TraceContext.getCurrentTraceData(), tMessage);
+        if (isCLient) {
+            interceptor.interceptResponse(TraceContext.getCurrentTraceData(), tMessage);
+        } else {
+            interceptor.interceptRequest(TraceContext.getCurrentTraceData(), tMessage);
+        }
         return tMessage;
     }
 
     @Override
     public void writeMessageBegin(TMessage tMessage) throws TException {
         //todo process state
-        interceptor.interceptResponse(TraceContext.getCurrentTraceData(), tMessage);
+        if (isCLient) {
+            interceptor.interceptRequest(TraceContext.getCurrentTraceData(), tMessage);
+        } else {
+            interceptor.interceptResponse(TraceContext.getCurrentTraceData(), tMessage);
+        }
         super.writeMessageBegin(tMessage);
     }
 

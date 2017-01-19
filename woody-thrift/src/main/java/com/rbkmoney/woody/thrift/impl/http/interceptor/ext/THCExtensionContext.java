@@ -23,7 +23,8 @@ public class THCExtensionContext extends ExtensionContext {
     private static final int RESP_URL_CONNECTION_TYPE = 3;
     private static final int RESP_HTTP_CLIENT_TYPE = 4;
 
-    private int contextType = 0;
+    private int reqContextType = 0;
+    private int respContextType = 0;
 
     public THCExtensionContext(TraceData traceData, Object providerContext, Object[] contextParameters) {
         super(traceData, providerContext, contextParameters);
@@ -48,10 +49,10 @@ public class THCExtensionContext extends ExtensionContext {
      * */
     public String getResponseHeader(String key) {
         Object providerContext = getProviderContext();
-        switch (getRequestContextType(providerContext)) {
+        switch (getResponseContextType(providerContext)) {
             case RESP_URL_CONNECTION_TYPE:
                 return ((HttpURLConnection) providerContext).getHeaderField(key);
-            case REQ_HTTP_CLIENT_TYPE:
+            case RESP_HTTP_CLIENT_TYPE:
                 Header header =((HttpResponse) providerContext).getLastHeader(key);
                 return header == null ? null : header.getValue();
             default:
@@ -61,10 +62,10 @@ public class THCExtensionContext extends ExtensionContext {
 
     public Collection<String> getResponseHeaderKeys() {
         Object providerContext = getProviderContext();
-        switch (getRequestContextType(providerContext)) {
+        switch (getResponseContextType(providerContext)) {
             case RESP_URL_CONNECTION_TYPE:
                 return ((HttpURLConnection) providerContext).getHeaderFields().keySet();
-            case REQ_HTTP_CLIENT_TYPE:
+            case RESP_HTTP_CLIENT_TYPE:
                 return Arrays.stream(((HttpResponse) providerContext).getAllHeaders()).map(header -> header.getName()).collect(Collectors.toSet());
             default:
                 throw new RuntimeException("Unknown type:" + providerContext.getClass());
@@ -119,28 +120,28 @@ public class THCExtensionContext extends ExtensionContext {
 
 
     private int getRequestContextType(Object providerContext) {
-        if (contextType == 0) {
+        if (reqContextType == 0) {
             if (providerContext instanceof HttpRequestBase) {
-                contextType = REQ_HTTP_CLIENT_TYPE;
+                reqContextType = REQ_HTTP_CLIENT_TYPE;
             } else if (providerContext instanceof HttpURLConnection) {
-                contextType = REQ_URL_CONNECTION_TYPE;
+                reqContextType = REQ_URL_CONNECTION_TYPE;
             } else {
-                contextType = -1;
+                reqContextType = -1;
             }
         }
-        return contextType;
+        return reqContextType;
     }
 
     private int getResponseContextType(Object providerContext) {
-        if (contextType == 0) {
+        if (respContextType == 0) {
             if (providerContext instanceof HttpResponse) {
-                contextType = RESP_HTTP_CLIENT_TYPE;
+                respContextType = RESP_HTTP_CLIENT_TYPE;
             } else if (providerContext instanceof HttpURLConnection) {
-                contextType = RESP_URL_CONNECTION_TYPE;
+                respContextType = RESP_URL_CONNECTION_TYPE;
             } else {
-                contextType = -1;
+                respContextType = -1;
             }
         }
-        return contextType;
+        return respContextType;
     }
 }

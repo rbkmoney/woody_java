@@ -40,4 +40,13 @@ public class WRuntimeException extends RuntimeException {
     public WErrorDefinition getErrorDefinition() {
         return errorDefinition;
     }
+
+    @Override
+    public String toString() {
+        String msg = super.toString();
+        return "WRuntimeException{" +
+                "errorDefinition=" + errorDefinition +
+                ", " + msg +
+                "}";
+    }
 }

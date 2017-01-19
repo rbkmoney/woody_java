@@ -6,12 +6,14 @@ import com.rbkmoney.woody.api.flow.WFlow;
 import com.rbkmoney.woody.api.flow.error.ErrorMapProcessor;
 import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
 import com.rbkmoney.woody.api.flow.error.WErrorMapper;
+import com.rbkmoney.woody.api.flow.error.WErrorType;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.api.interceptor.CommonInterceptor;
 import com.rbkmoney.woody.api.interceptor.CompositeInterceptor;
 import com.rbkmoney.woody.api.interceptor.ContainerCommonInterceptor;
 import com.rbkmoney.woody.api.provider.ProviderEventInterceptor;
 import com.rbkmoney.woody.api.trace.ContextSpan;
+import com.rbkmoney.woody.api.trace.MetadataProperties;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
 import com.rbkmoney.woody.api.transport.TransportEventInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.error.THErrorMapProcessor;
@@ -127,7 +129,7 @@ public class THClientBuilder extends AbstractClientBuilder {
     }
 
     protected TProtocol createProtocol(TTransport tTransport) {
-        return BuilderUtils.wrapProtocolFactory(createTransferProtocolFactory(), createMessageInterceptor()).getProtocol(tTransport);
+        return BuilderUtils.wrapProtocolFactory(createTransferProtocolFactory(), createMessageInterceptor(), true).getProtocol(tTransport);
     }
 
     protected HttpClient createHttpClient() {

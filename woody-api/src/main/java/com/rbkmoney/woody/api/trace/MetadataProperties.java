@@ -4,7 +4,7 @@ package com.rbkmoney.woody.api.trace;
  * Created by vpankrashkin on 25.04.16.
  */
 public class MetadataProperties {
-    public static final String INSTANCE_METHOD_CALLER_DEL = "md_instance_method_caller";
+    public static final String INSTANCE_METHOD_CALLER = "md_instance_method_caller";
     public static final String CALL_ARGUMENTS = "md_call_args";
     public static final String CALL_RESULT = "md_call_result";
     public static final String CALL_ERROR = "md_call_error";
@@ -21,4 +21,5 @@ public class MetadataProperties {
     public static final String INTERCEPTION_ERROR_REASON = "md_interception_error_reason";
 
     public static final String CALL_REQUEST_PROCESSED_FLAG = "md_request_processed";
+    public static final String RESPONSE_SKIP_READING_FLAG = "response_skip_reading";
 }

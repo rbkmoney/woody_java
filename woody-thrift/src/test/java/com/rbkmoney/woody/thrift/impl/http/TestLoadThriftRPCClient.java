@@ -7,7 +7,7 @@ import com.rbkmoney.woody.thrift.impl.http.event.ClientEventListenerImpl;
 import com.rbkmoney.woody.thrift.impl.http.event.ServiceEventListenerImpl;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.thrift.TException;
-import org.apache.thrift.protocol.TCompactProtocol;
+import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.server.TServlet;
 import org.apache.thrift.transport.THttpClient;
@@ -79,16 +79,16 @@ public class TestLoadThriftRPCClient {
             }
         });
         int testCount = 20000;
-        runHtriftRPC(testCount, tRPCClient);
+        runThriftRPC(testCount, tRPCClient);
         runThrift(testCount, tClient);
         System.out.println("Warmup ended.");
         testCount = 10000;
-        runHtriftRPC(testCount, tRPCClient);
+        runThriftRPC(testCount, tRPCClient);
         runThrift(testCount, tClient);
 
         testCount = 10000;
         runThrift(testCount, tClient);
-        runHtriftRPC(testCount, tRPCClient);
+        runThriftRPC(testCount, tRPCClient);
 
     }
 
@@ -105,7 +105,7 @@ public class TestLoadThriftRPCClient {
 
     }
 
-    private void runHtriftRPC(int testCount, OwnerServiceSrv.Iface tRPCClient) {
+    private void runThriftRPC(int testCount, OwnerServiceSrv.Iface tRPCClient) {
         long start = System.currentTimeMillis();
         IntStream.range(1, testCount).forEach(i -> {
             try {
@@ -122,14 +122,14 @@ public class TestLoadThriftRPCClient {
             super(
                     new OwnerServiceSrv.Processor(
                             new OwnerServiceImpl()),
-                    new TCompactProtocol.Factory()
+                    new TBinaryProtocol.Factory()
             );
         }
     }
 
     private OwnerServiceSrv.Iface createThriftClient(String url) throws TTransportException {
         THttpClient thc = new THttpClient(url, HttpClientBuilder.create().build());
-        TProtocol loPFactory = new TCompactProtocol(thc);
+        TProtocol loPFactory = new TBinaryProtocol(thc);
         return new OwnerServiceSrv.Client(loPFactory);
     }
 

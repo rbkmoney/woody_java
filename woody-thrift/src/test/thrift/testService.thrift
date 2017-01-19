@@ -13,6 +13,7 @@ exception test_error {
 
 service OwnerService
 {
+        i32 getIntValue()
         Owner getOwner(1:int id),
         Owner getErrOwner(1:int id) throws (1:test_error err),
         void setOwner(1:Owner owner),

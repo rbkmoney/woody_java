@@ -10,13 +10,14 @@ import java.util.function.BiFunction;
  * Created by vpankrashkin on 17.01.17.
  */
 class BuilderUtils {
-    private static final BiFunction<TProtocolFactory, CommonInterceptor, TProtocolFactory> T_PROT_FACTORY_FUNC = (factory, protInterceptor) ->
-            tTransport -> {
-                TProtocol tProtocol = factory.getProtocol(tTransport);
-                return new THSProtocolWrapper(tProtocol, protInterceptor);
-            };
 
-    static TProtocolFactory wrapProtocolFactory(TProtocolFactory protocolFactory, CommonInterceptor interceptor) {
-        return T_PROT_FACTORY_FUNC.apply(protocolFactory, interceptor);
+    static TProtocolFactory wrapProtocolFactory(TProtocolFactory protocolFactory, CommonInterceptor interceptor, boolean isClient) {
+        BiFunction<TProtocolFactory, CommonInterceptor, TProtocolFactory> tProtocolFactoryFunc = (factory, protInterceptor) ->
+                tTransport -> {
+                    TProtocol tProtocol = factory.getProtocol(tTransport);
+                    return new THSProtocolWrapper(tProtocol, protInterceptor, isClient);
+                };
+
+        return tProtocolFactoryFunc.apply(protocolFactory, interceptor);
     }
 }

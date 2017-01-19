@@ -73,13 +73,8 @@ public class AbstractTest {
         return new TServlet(tProcessor, new TBinaryProtocol.Factory());
     }
 
-    public TServlet createMutableTervlet() {
-        return new TServlet(new TProcessor() {
-            @Override
-            public boolean process(TProtocol in, TProtocol out) throws TException {
-                return tProcessor.process(in, out);
-            }
-        }, new TBinaryProtocol.Factory());
+    public <T> Servlet createMutableTServlet(Class<T> type, T handler) {
+        return new THServiceBuilder().build(type, handler);
     }
 
     protected <T> Servlet createThrftRPCService(Class<T> iface, T handler, ServiceEventListener eventListener) {
@@ -96,7 +91,7 @@ public class AbstractTest {
         try {
             THttpClient thc = new THttpClient(getUrlString(), HttpClientBuilder.create().build());
             TProtocol tProtocol = new TBinaryProtocol(thc);
-            return THClientBuilder.createThriftClient(iface, tProtocol, null);
+            return THClientBuilder.createThriftClient(iface, tProtocol);
         } catch (TTransportException e) {
             throw new RuntimeException(e);
         }

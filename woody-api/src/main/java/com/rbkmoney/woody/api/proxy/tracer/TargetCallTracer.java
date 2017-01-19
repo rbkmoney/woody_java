@@ -68,6 +68,7 @@ public class TargetCallTracer implements MethodCallTracer {
 
     private void setBeforeCall(Metadata metadata, Object[] args, InstanceMethodCaller caller, boolean isClient) {
         metadata.putValue(MetadataProperties.CALL_ARGUMENTS, args);
+        metadata.putValue(MetadataProperties.INSTANCE_METHOD_CALLER, caller);
         metadata.putValue(MetadataProperties.EVENT_TYPE, isClient ? ClientEventType.CALL_SERVICE : ServiceEventType.CALL_HANDLER);
     }
 
