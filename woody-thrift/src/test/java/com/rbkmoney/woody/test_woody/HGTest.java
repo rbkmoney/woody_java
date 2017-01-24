@@ -35,14 +35,9 @@ public class HGTest {
             .file("src/test/resources/docker-compose.yml")
                 .build();
 
-
-    EventSinkSrv.Iface eventSink =  new EventSink().eventSinkSrv();
-
-    public HGTest() throws IOException, URISyntaxException {
-    }
-
     @Test
-    public void testPolling() throws TException, InterruptedException, IOException {
+    public void testHG() throws TException, InterruptedException, IOException, URISyntaxException {
+        EventSinkSrv.Iface eventSink =  new EventSink().eventSinkSrv();
         // check bm -> hg
         EventRange eventRange = new EventRange();
         eventRange.setLimit(10);

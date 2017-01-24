@@ -31,17 +31,12 @@ public class ShumwayFailTest {
             .file("src/test/resources/docker-compose-without-shumway.yml")
                 .build();
 
-    EventSinkSrv.Iface eventSink =  new EventSink().eventSinkSrv();
-
-    public ShumwayFailTest() throws IOException, URISyntaxException {
-    }
-
     @Test
-    public void testPolling() throws TException, InterruptedException, IOException {
+    public void testFailShumway() throws TException, InterruptedException, IOException, URISyntaxException {
         //check fail hg -> shumway
         //TODO REMOVE! docker.waitingForService(shumway) NOT working
         Thread.sleep(8000);
-
+        EventSinkSrv.Iface eventSink =  new EventSink().eventSinkSrv();
         try {
             docker.exec(ImmutableDockerComposeExecOption.of(new ArrayList<>()),
                     "inspector",

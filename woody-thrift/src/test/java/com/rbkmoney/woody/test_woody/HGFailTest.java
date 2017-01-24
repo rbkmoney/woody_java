@@ -28,15 +28,9 @@ public class HGFailTest {
             .file("src/test/resources/docker-compose-only-hg.yml")
                 .build();
 
-
-    EventSinkSrv.Iface eventSink = new EventSink().eventSinkSrv();
-
-    public HGFailTest() throws IOException, URISyntaxException {
-    }
-
     @Test
-    public void testPolling() throws TException, InterruptedException {
-
+    public void testFailHG() throws TException, InterruptedException, IOException, URISyntaxException {
+        EventSinkSrv.Iface eventSink = new EventSink().eventSinkSrv();
         EventRange eventRange = new EventRange();
         eventRange.setLimit(10);
         log.debug("Start polling events after= {}, limit={}", eventRange.getAfter(), eventRange.getLimit());
