@@ -1,0 +1,23 @@
+version: '2'
+services:
+  # To init base configuration run:
+  # docker exec -ti  infrastructurem_inspector_1 bash
+  # ./scripts/dominant/commit-base-fixture.sh -v
+  inspector:
+    image: dr.rbkmoney.com/rbkmoney/inspector:87c553e38fb05b97fc45221f46500509d9b63958
+    container_name: inspector
+
+  hellgate:
+    image: dr.rbkmoney.com/rbkmoney/hellgate:e4c62bee3747272c38dfd6405f8f08b96e62651c
+    command: [ "/opt/hellgate/bin/hellgate",  "foreground"]
+    ports:
+      - "8022:8022"
+    volumes:
+      - ./hellgate/sys.config:/opt/hellgate/releases/1/sys.config
+
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
