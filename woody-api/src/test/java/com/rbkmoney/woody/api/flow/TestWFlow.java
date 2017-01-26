@@ -1,4 +1,5 @@
 package com.rbkmoney.woody.api.flow;
+
 import com.rbkmoney.woody.api.trace.Span;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
 import org.junit.Test;

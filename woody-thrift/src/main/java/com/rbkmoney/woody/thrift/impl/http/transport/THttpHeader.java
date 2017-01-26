@@ -8,7 +8,8 @@ public enum THttpHeader {
     SPAN_ID("x-rbk-span-id"),
     PARENT_ID("x-rbk-parent-id"),
     ERROR_CLASS("x-rbk-error-class"),
-    ERROR_REASON("x-rbk-error-reason");
+    ERROR_REASON("x-rbk-error-reason"),
+    META("x-rbk-meta-");
 
     private String key;
 

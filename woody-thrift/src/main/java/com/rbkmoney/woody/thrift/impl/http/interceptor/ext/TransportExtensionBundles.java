@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 import static com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle.ContextBundle.createCtxBundle;
 import static com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle.createExtBundle;
-import static com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle.createServiceExtBuldle;
+import static com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle.createServiceExtBundle;
 import static java.util.AbstractMap.SimpleEntry;
 
 /**
@@ -36,7 +36,7 @@ import static java.util.AbstractMap.SimpleEntry;
 public class TransportExtensionBundles {
     private static final Logger log = LoggerFactory.getLogger(TransportExtensionBundles.class);
 
-    public static final ExtensionBundle TRANSPORT_CONFIG_BUNDLE = createServiceExtBuldle(
+    public static final ExtensionBundle TRANSPORT_CONFIG_BUNDLE = createServiceExtBundle(
             createCtxBundle(
                     (InterceptorExtension<THSExtensionContext>) reqSCtx -> {
                         String reqMethod = reqSCtx.getProviderRequest().getMethod();
@@ -132,7 +132,7 @@ public class TransportExtensionBundles {
             ),
             createCtxBundle(
                     (InterceptorExtension<THSExtensionContext>) reqSCtx -> {
-                        HttpServletResponse response = ContextUtils.getContextParameter(HttpServletResponse.class, reqSCtx.getContextParameters(), 0);
+                        HttpServletResponse response = ContextUtils.getContextValue(HttpServletResponse.class, reqSCtx.getContextParameters(), 0);
                         ServiceSpan serviceSpan = reqSCtx.getTraceData().getServiceSpan();
                         serviceSpan.getMetadata().putValue(THMetadataProperties.TH_TRANSPORT_REQUEST, reqSCtx.getProviderRequest());
                         serviceSpan.getMetadata().putValue(THMetadataProperties.TH_TRANSPORT_RESPONSE, response);
@@ -152,7 +152,7 @@ public class TransportExtensionBundles {
                         metadata.putValue(THMetadataProperties.TH_RESPONSE_STATUS, status);
                         metadata.putValue(THMetadataProperties.TH_RESPONSE_MESSAGE, respCCtx.getResponseMessage());
 
-                        WErrorDefinition errorDefinition = THProviderErrorMapper.createErrorDefinition(new THResponseInfo(status, respCCtx.getResponseHeader(THttpHeader.ERROR_CLASS.getKey()), respCCtx.getResponseHeader(THttpHeader.ERROR_REASON.getKey())), () -> {
+                        WErrorDefinition errorDefinition = THProviderErrorMapper.createErrorDefinition(new THResponseInfo(status, respCCtx.getResponseHeader(THttpHeader.ERROR_CLASS.getKey()), respCCtx.getResponseHeader(THttpHeader.ERROR_REASON.getKey()), respCCtx.getResponseMessage()), () -> {
                             throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, THttpHeader.ERROR_CLASS.getKey());
                         });
 

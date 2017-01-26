@@ -9,7 +9,6 @@ import com.rbkmoney.woody.rpc.test_error;
 import com.rbkmoney.woody.thrift.impl.http.event.*;
 import com.rbkmoney.woody.api.generator.TimestampIdGenerator;
 import org.apache.thrift.TException;
-import org.apache.thrift.transport.TTransportException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,7 +69,7 @@ public class MDCLogTest extends AbstractTest {
         }
     };
 
-    Servlet servlet = createThrftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener(new HttpServiceEventLogListener(), new ServiceEventLogListener(), serviceEventListener));
+    Servlet servlet = createThriftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener(new HttpServiceEventLogListener(), new ServiceEventLogListener(), serviceEventListener));
 
     @Before
     public void before() {

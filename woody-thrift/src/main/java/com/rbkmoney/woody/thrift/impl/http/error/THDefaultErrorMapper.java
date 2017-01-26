@@ -1,9 +1,6 @@
 package com.rbkmoney.woody.thrift.impl.http.error;
 
-import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
-import com.rbkmoney.woody.api.flow.error.WErrorMapper;
-import com.rbkmoney.woody.api.flow.error.WErrorSource;
-import com.rbkmoney.woody.api.flow.error.WErrorType;
+import com.rbkmoney.woody.api.flow.error.*;
 import com.rbkmoney.woody.api.trace.ContextSpan;
 
 /**
@@ -24,6 +21,9 @@ public class THDefaultErrorMapper implements WErrorMapper {
 
     @Override
     public Exception mapToError(WErrorDefinition eDefinition, ContextSpan contextSpan) {
+        if (eDefinition.getErrorType() != WErrorType.BUSINESS_ERROR) {
+            return new WRuntimeException(eDefinition);
+        }
         return null;
     }
 }

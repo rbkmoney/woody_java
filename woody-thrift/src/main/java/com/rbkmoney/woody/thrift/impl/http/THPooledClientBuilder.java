@@ -6,11 +6,13 @@ import com.rbkmoney.woody.api.flow.error.WErrorMapper;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.api.proxy.InvocationTargetProvider;
 import com.rbkmoney.woody.api.proxy.CPool2TargetProvider;
+import com.rbkmoney.woody.api.trace.context.metadata.MetadataExtensionKit;
 import org.apache.commons.pool2.impl.AbandonedConfig;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.apache.http.client.HttpClient;
 
 import java.net.URI;
+import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -40,6 +42,11 @@ public class THPooledClientBuilder extends THClientBuilder {
     public THPooledClientBuilder withHttpClient(HttpClient httpClient) {
         httpClientSet = true;
         return (THPooledClientBuilder) super.withHttpClient(httpClient);
+    }
+
+    @Override
+    public THPooledClientBuilder withMetaExtensions(List<MetadataExtensionKit> extensionKits) {
+        return (THPooledClientBuilder) super.withMetaExtensions(extensionKits);
     }
 
     /**

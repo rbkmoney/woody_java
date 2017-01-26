@@ -39,7 +39,7 @@ public abstract class AbstractConcurrentClientTest extends AbstractTest {
 
     @Test
     public void testPool() throws InterruptedException {
-        Servlet servlet = createThrftRPCService(OwnerServiceSrv.Iface.class, new OwnerServiceStub() {
+        Servlet servlet = createThriftRPCService(OwnerServiceSrv.Iface.class, new OwnerServiceStub() {
             @Override
             public Owner getOwner(int id) throws TException {
                 serverAccepts.incrementAndGet();
@@ -112,8 +112,8 @@ public abstract class AbstractConcurrentClientTest extends AbstractTest {
     }
 
     @Override
-    protected <T> Servlet createThrftRPCService(Class<T> iface, T handler, ServiceEventListener eventListener) {
-        return super.createThrftRPCService(iface, handler, serviceEventStub);
+    protected <T> Servlet createThriftRPCService(Class<T> iface, T handler, ServiceEventListener eventListener) {
+        return super.createThriftRPCService(iface, handler, serviceEventStub);
     }
 
     abstract protected <T> T createThriftRPCClient(Class<T> iface, IdGenerator idGenerator, ClientEventListener eventListener, String url);

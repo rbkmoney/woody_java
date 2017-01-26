@@ -11,27 +11,50 @@ public class Metadata {
     private static final int DEFAULT_INIT_SIZE = 16;
     private static final float DEFAULT_LOAD_FACTOR = 0.75f;
 
+    private final boolean overrideKeys;
+
     private Map<String, Object> values;
 
     public Metadata() {
+        this(true);
+    }
+
+    public Metadata(boolean overrideKeys) {
+        this.overrideKeys = overrideKeys;
         this.values = createStore(DEFAULT_INIT_SIZE, DEFAULT_LOAD_FACTOR);
     }
 
     protected Metadata(Metadata oldMetadata) {
+        this.overrideKeys = oldMetadata.overrideKeys;
         this.values = cloneStore(oldMetadata.values);
     }
-
 
     public <T> T getValue(String key) {
         return (T) values.get(key);
     }
 
     public <T> T removeValue(String key) {
-        return (T) values.remove(key);
+        if (overrideKeys) {
+            return (T) values.remove(key);
+        } else if (values.containsKey(key)) {
+            throw new IllegalStateException("Value overriding is not allowed");
+        } else {
+            return null;
+        }
     }
 
     public <T> T putValue(String key, Object value) {
-        return (T) values.put(key, value);
+        if (overrideKeys) {
+            return (T) values.put(key, value);
+        } else if (values.containsKey(key)) {
+            throw new IllegalStateException("Value overriding is not allowed");
+        } else {
+            return (T) values.put(key, value);
+        }
+    }
+
+    public boolean isOverrideKeys() {
+        return overrideKeys;
     }
 
     public boolean containsKey(String key) {

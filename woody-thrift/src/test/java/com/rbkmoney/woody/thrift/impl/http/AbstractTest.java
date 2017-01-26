@@ -3,8 +3,8 @@ package com.rbkmoney.woody.thrift.impl.http;
 import com.rbkmoney.woody.api.event.ClientEventListener;
 import com.rbkmoney.woody.api.event.ServiceEventListener;
 import com.rbkmoney.woody.api.generator.IdGenerator;
+import com.rbkmoney.woody.api.trace.context.metadata.MetadataExtensionKit;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.thrift.TException;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
@@ -21,6 +21,10 @@ import org.junit.Before;
 import javax.servlet.Servlet;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by vpankrashkin on 06.05.16.
@@ -55,6 +59,27 @@ public class AbstractTest {
         }
     }
 
+    protected void addServlets(Map.Entry<String, Servlet>... mapping) {
+
+        try {
+            Arrays.stream(mapping).map(entry -> {
+                ServletContextHandler context = new ServletContextHandler();
+                ServletHolder defaultServ = new ServletHolder(entry.getKey(), entry.getValue());
+                context.addServlet(defaultServ, entry.getKey());
+                handlerCollection.addHandler(context);
+                return context;
+            }).sorted(Comparator.comparingInt(o -> o.hashCode())).forEach(context -> {
+                try {
+                    context.start();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @After
     public void stopJetty() {
         try {
@@ -77,9 +102,14 @@ public class AbstractTest {
         return new THServiceBuilder().build(type, handler);
     }
 
-    protected <T> Servlet createThrftRPCService(Class<T> iface, T handler, ServiceEventListener eventListener) {
+    protected <T> Servlet createThriftRPCService(Class<T> iface, T handler, ServiceEventListener eventListener) {
+        return createThriftRPCService(iface, handler, eventListener, null);
+    }
+
+    protected <T> Servlet createThriftRPCService(Class<T> iface, T handler, ServiceEventListener eventListener, List<MetadataExtensionKit> extensionKits) {
         THServiceBuilder serviceBuilder = new THServiceBuilder();
         serviceBuilder.withEventListener(eventListener);
+        serviceBuilder.withMetaExtensions(extensionKits);
         return serviceBuilder.build(iface, handler);
     }
 
@@ -103,17 +133,20 @@ public class AbstractTest {
 
 
     protected <T> T createThriftRPCClient(Class<T> iface, IdGenerator idGenerator, ClientEventListener eventListener, String url) {
+        return createThriftRPCClient(iface, idGenerator, eventListener, null, url);
+    }
+
+    protected <T> T createThriftRPCClient(Class<T> iface, IdGenerator idGenerator, ClientEventListener eventListener, List<MetadataExtensionKit> extensionKits, String url) {
         try {
             THClientBuilder clientBuilder = new THClientBuilder();
             clientBuilder.withAddress(new URI(url));
             clientBuilder.withHttpClient(HttpClientBuilder.create().build());
             clientBuilder.withIdGenerator(idGenerator);
             clientBuilder.withEventListener(eventListener);
+            clientBuilder.withMetaExtensions(extensionKits);
             return clientBuilder.build(iface);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
     }
-
-
 }

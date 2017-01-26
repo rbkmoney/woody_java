@@ -3,16 +3,19 @@ package com.rbkmoney.woody.thrift.impl.http;
 import com.rbkmoney.woody.api.AbstractServiceBuilder;
 import com.rbkmoney.woody.api.event.ServiceEventListener;
 import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
+import com.rbkmoney.woody.api.flow.error.WErrorMapper;
 import com.rbkmoney.woody.api.flow.error.WErrorType;
 import com.rbkmoney.woody.api.interceptor.*;
-import com.rbkmoney.woody.api.provider.ProviderEventInterceptor;
+import com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle;
 import com.rbkmoney.woody.api.trace.ContextSpan;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
+import com.rbkmoney.woody.api.trace.context.metadata.MetadataExtensionKit;
 import com.rbkmoney.woody.api.transport.TransportEventInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.error.THErrorMapProcessor;
 import com.rbkmoney.woody.thrift.impl.http.event.THServiceEvent;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THMessageInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THTransportInterceptor;
+import com.rbkmoney.woody.thrift.impl.http.interceptor.ext.MetadataExtensionBundle;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocolFactory;
@@ -21,20 +24,29 @@ import org.apache.thrift.server.TServlet;
 import javax.servlet.Servlet;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 /**
  * Created by vpankrashkin on 28.04.16.
  */
 public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
+    private List<MetadataExtensionKit> metadataExtensionKits;
+    private WErrorMapper errorMapper;
 
     @Override
     public THServiceBuilder withEventListener(ServiceEventListener listener) {
         return (THServiceBuilder) super.withEventListener(listener);
+    }
+
+    public THServiceBuilder withMetaExtensions(List<MetadataExtensionKit> extensionKits) {
+        this.metadataExtensionKits = extensionKits;
+        return this;
+    }
+
+    public THServiceBuilder withErrorMapper(WErrorMapper errorMapper) {
+        this.errorMapper = errorMapper;
+        return this;
     }
 
     protected BiConsumer<WErrorDefinition, ContextSpan> getErrorDefinitionConsumer() {
@@ -72,7 +84,7 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
     @Override
     protected <T> Servlet createProviderService(Class<T> serviceInterface, T handler) {
         try {
-            THErrorMapProcessor errorMapProcessor = THErrorMapProcessor.getInstance(false, serviceInterface);
+            THErrorMapProcessor errorMapProcessor = THErrorMapProcessor.getInstance(false, serviceInterface, errorMapper);
             TProcessor tProcessor = createThriftProcessor(serviceInterface, handler);
             return createThriftServlet(tProcessor, createInterceptor(errorMapProcessor, true), errorMapProcessor);
         } catch (Exception e) {
@@ -96,10 +108,11 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
             ));
         }
 
+        List<ExtensionBundle> extensionBundles =  Arrays.asList(new MetadataExtensionBundle(metadataExtensionKits == null ? Collections.EMPTY_LIST : metadataExtensionKits));
         interceptors.add(new ErrorMappingInterceptor(errorMapProcessor, getErrorDefinitionConsumer()));
         interceptors.add(new ContainerCommonInterceptor(
-                isTransportLevel ? new THTransportInterceptor(false, true) : null,
-                new THTransportInterceptor(false, false)
+                isTransportLevel ? new THTransportInterceptor(extensionBundles, false, true) : null,
+                new THTransportInterceptor(extensionBundles, false, false)
         ));
 
         if (isTransportLevel) {

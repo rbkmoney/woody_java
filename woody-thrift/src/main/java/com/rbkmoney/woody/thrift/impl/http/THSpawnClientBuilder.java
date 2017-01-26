@@ -6,9 +6,11 @@ import com.rbkmoney.woody.api.flow.error.WErrorMapper;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.api.proxy.InvocationTargetProvider;
 import com.rbkmoney.woody.api.proxy.SpawnTargetProvider;
+import com.rbkmoney.woody.api.trace.context.metadata.MetadataExtensionKit;
 import org.apache.http.client.HttpClient;
 
 import java.net.URI;
+import java.util.List;
 
 /**
  * Created by vpankrashkin on 09.06.16.
@@ -26,6 +28,11 @@ public class THSpawnClientBuilder extends THClientBuilder {
     @Override
     public THSpawnClientBuilder withHttpClient(HttpClient httpClient) {
         return (THSpawnClientBuilder) super.withHttpClient(httpClient);
+    }
+
+    @Override
+    public THSpawnClientBuilder withMetaExtensions(List<MetadataExtensionKit> extensionKits) {
+        return (THSpawnClientBuilder) super.withMetaExtensions(extensionKits);
     }
 
     @Override

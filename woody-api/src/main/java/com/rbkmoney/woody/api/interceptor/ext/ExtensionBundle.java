@@ -11,7 +11,7 @@ public class ExtensionBundle {
         return createExtBundle(clientBundle, ContextBundle.createCtxStub());
     }
 
-    public static ExtensionBundle createServiceExtBuldle(ContextBundle serviceBundle) {
+    public static ExtensionBundle createServiceExtBundle(ContextBundle serviceBundle) {
         return createExtBundle(ContextBundle.createCtxStub(), serviceBundle);
     }
 

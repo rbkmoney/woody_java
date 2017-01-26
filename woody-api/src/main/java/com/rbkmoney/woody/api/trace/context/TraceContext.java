@@ -15,6 +15,7 @@ public class TraceContext {
     public static final String NO_PARENT_ID = "undefined";
 
     private final static ThreadLocal<TraceData> currentTraceData = ThreadLocal.withInitial(() -> new TraceData());
+    private final static ThreadLocal<TraceData> savedTraceData = new ThreadLocal<>();
 
     public static TraceData getCurrentTraceData() {
         return currentTraceData.get();
@@ -62,6 +63,11 @@ public class TraceContext {
 
     public static TraceContext forService(Runnable postInit, Runnable preDestroy, Runnable preErrDestroy) {
         return new TraceContext(null, postInit, preDestroy, preErrDestroy);
+    }
+
+    private static TraceData createNewTraceData(TraceData oldTraceData) {
+        TraceData traceData = new TraceData(oldTraceData, true);
+        return traceData;
     }
 
     private final IdGenerator traceIdGenerator;
@@ -116,11 +122,11 @@ public class TraceContext {
     public void init() {
         TraceData traceData = getCurrentTraceData();
         if (isClientInit(traceData)) {
-            initClientContext(traceData);
+            traceData = initClientContext(traceData);
         } else {
-            initServiceContext(traceData);
+            traceData = initServiceContext(traceData);
         }
-
+        setCurrentTraceData(traceData);
         MDCUtils.putContextIds(traceData.getActiveSpan().getSpan());
 
         postInit.run();
@@ -142,10 +148,11 @@ public class TraceContext {
             }
         } finally {
             if (isClient) {
-                destroyClientContext(traceData);
+                traceData = destroyClientContext(traceData);
             } else {
-                destroyServiceContext(traceData);
+                traceData = destroyServiceContext(traceData);
             }
+            setCurrentTraceData(traceData);
 
             if (traceData.getServiceSpan().isFilled()) {
                 MDCUtils.putContextIds(traceData.getServiceSpan().getSpan());
@@ -160,8 +167,11 @@ public class TraceContext {
         setDuration(getCurrentTraceData(), isClient);
     }
 
-    private void initClientContext(TraceData traceData) {
+    private TraceData initClientContext(TraceData traceData) {
+        savedTraceData.set(traceData);
+        traceData = createNewTraceData(traceData);
         initSpan(traceIdGenerator, spanIdGenerator, traceData, true);
+        return traceData;
     }
 
     private static TraceData initSpan(IdGenerator traceIdGenerator, IdGenerator spanIdGenerator, TraceData traceData, boolean isClient) {
@@ -190,16 +200,20 @@ public class TraceContext {
         span.setTimestamp(timestamp);
     }
 
-    private void destroyClientContext(TraceData traceData) {
-        traceData.getClientSpan().reset();
+    private TraceData destroyClientContext(TraceData traceData) {
+         traceData = savedTraceData.get();
+         savedTraceData.remove();
+         return traceData;
     }
 
-    private void initServiceContext(TraceData traceData) {
+    private TraceData initServiceContext(TraceData traceData) {
         initTime(traceData.getServiceSpan().getSpan(), System.currentTimeMillis());
+        return traceData;
     }
 
-    private void destroyServiceContext(TraceData traceData) {
+    private TraceData destroyServiceContext(TraceData traceData) {
         TraceContext.reset();
+        return traceData;
     }
 
     private void setDuration(TraceData traceData, boolean isClient) {
@@ -225,9 +239,10 @@ public class TraceContext {
     }
 
     private boolean isClientDestroyAuto(TraceData traceData) {
-        assert (traceData.getClientSpan().isStarted() || traceData.getServiceSpan().isStarted());
+        //this is not valid statement: if trace_id header wasn't received -> gen interception error, both client and service spans're not started and filled
+        //assert (traceData.getClientSpan().isStarted() || traceData.getServiceSpan().isFilled());
 
-        return traceData.getServiceSpan().isStarted() ? traceData.getClientSpan().isStarted() : true;
+        return traceData.getServiceSpan().isStarted() ? traceData.getClientSpan().isStarted() : !traceData.getServiceSpan().isFilled();
     }
 
 }

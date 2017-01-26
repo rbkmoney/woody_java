@@ -6,20 +6,21 @@ import com.rbkmoney.woody.api.flow.WFlow;
 import com.rbkmoney.woody.api.flow.error.ErrorMapProcessor;
 import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
 import com.rbkmoney.woody.api.flow.error.WErrorMapper;
-import com.rbkmoney.woody.api.flow.error.WErrorType;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.api.interceptor.CommonInterceptor;
 import com.rbkmoney.woody.api.interceptor.CompositeInterceptor;
 import com.rbkmoney.woody.api.interceptor.ContainerCommonInterceptor;
+import com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle;
 import com.rbkmoney.woody.api.provider.ProviderEventInterceptor;
 import com.rbkmoney.woody.api.trace.ContextSpan;
-import com.rbkmoney.woody.api.trace.MetadataProperties;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
+import com.rbkmoney.woody.api.trace.context.metadata.MetadataExtensionKit;
 import com.rbkmoney.woody.api.transport.TransportEventInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.error.THErrorMapProcessor;
 import com.rbkmoney.woody.thrift.impl.http.event.THClientEvent;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THMessageInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THTransportInterceptor;
+import com.rbkmoney.woody.thrift.impl.http.interceptor.ext.MetadataExtensionBundle;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.thrift.TServiceClient;
@@ -33,6 +34,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
@@ -42,7 +45,8 @@ import java.util.function.BiConsumer;
 public class THClientBuilder extends AbstractClientBuilder {
 
     private HttpClient httpClient;
-    private WErrorMapper customErrMapper;
+    private WErrorMapper errorMapper;
+    private List<MetadataExtensionKit> metadataExtensionKits;
 
     public THClientBuilder() {
         this.httpClient = createHttpClient();
@@ -50,12 +54,17 @@ public class THClientBuilder extends AbstractClientBuilder {
     }
 
     public THClientBuilder withErrorMapper(WErrorMapper errorMapper) {
-        customErrMapper = errorMapper;
+        this.errorMapper = errorMapper;
         return this;
     }
 
     public THClientBuilder withHttpClient(HttpClient httpClient) {
         this.httpClient = httpClient;
+        return this;
+    }
+
+    public THClientBuilder withMetaExtensions(List<MetadataExtensionKit> extensionKits) {
+        this.metadataExtensionKits = extensionKits;
         return this;
     }
 
@@ -110,7 +119,7 @@ public class THClientBuilder extends AbstractClientBuilder {
 
     @Override
     protected ErrorMapProcessor createErrorMapProcessor(Class iface) {
-        return THErrorMapProcessor.getInstance(true, iface, customErrMapper);
+        return THErrorMapProcessor.getInstance(true, iface, errorMapper);
     }
 
     @Override
@@ -144,8 +153,9 @@ public class THClientBuilder extends AbstractClientBuilder {
     }
 
     protected CommonInterceptor createTransportInterceptor() {
+        List<ExtensionBundle> extensionBundles =  Arrays.asList(new MetadataExtensionBundle(metadataExtensionKits == null ? Collections.EMPTY_LIST : metadataExtensionKits));
         return new CompositeInterceptor(
-                new ContainerCommonInterceptor(new THTransportInterceptor(true, true), new THTransportInterceptor(true, false)),
+                new ContainerCommonInterceptor(new THTransportInterceptor(extensionBundles, true, true), new THTransportInterceptor(extensionBundles,true, false)),
                 new TransportEventInterceptor(getOnSendEventListener(), getOnReceiveEventListener(), null)
         );
     }

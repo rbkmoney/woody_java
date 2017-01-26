@@ -1,9 +1,6 @@
 package com.rbkmoney.woody.thrift.impl.http.error;
 
-import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
-import com.rbkmoney.woody.api.flow.error.WErrorMapper;
-import com.rbkmoney.woody.api.flow.error.WErrorSource;
-import com.rbkmoney.woody.api.flow.error.WErrorType;
+import com.rbkmoney.woody.api.flow.error.*;
 import com.rbkmoney.woody.api.trace.ContextSpan;
 import com.rbkmoney.woody.api.trace.ContextUtils;
 import com.rbkmoney.woody.api.trace.Metadata;
@@ -76,12 +73,14 @@ public class THProviderErrorMapper implements WErrorMapper {
             errorDefinition.setErrorSource(WErrorSource.INTERNAL);
             errorDefinition.setErrorReason(responseInfo.getErrReason());
         }
-
+        if (errorDefinition != null) {
+            errorDefinition.setErrorMessage(responseInfo.getMessage());
+        }
         return errorDefinition;
     }
 
     public static THResponseInfo getResponseInfo(ContextSpan contextSpan) {
-        WErrorDefinition errorDefinition = ContextUtils.getMetadataParameter(contextSpan, WErrorDefinition.class, MetadataProperties.ERROR_DEFINITION);
+        WErrorDefinition errorDefinition = ContextUtils.getMetadataValue(contextSpan, WErrorDefinition.class, MetadataProperties.ERROR_DEFINITION);
         int status;
         String errClass = null, errReason = null;
         if (errorDefinition == null) {
@@ -95,7 +94,7 @@ public class THProviderErrorMapper implements WErrorMapper {
                 case PROVIDER_ERROR:
                     errClass = WErrorType.UNEXPECTED_ERROR.getKey();
                     if (errorDefinition.getGenerationSource() == WErrorSource.INTERNAL) {
-                        TErrorType tErrorType = ContextUtils.getMetadataParameter(contextSpan, TErrorType.class, THMetadataProperties.TH_ERROR_TYPE);
+                        TErrorType tErrorType = ContextUtils.getMetadataValue(contextSpan, TErrorType.class, THMetadataProperties.TH_ERROR_TYPE);
                         tErrorType = tErrorType == null ? TErrorType.UNKNOWN : tErrorType;
                         boolean isRequest = !contextSpan.getMetadata().containsKey(MetadataProperties.CALL_REQUEST_PROCESSED_FLAG);
                         if (isRequest) {
@@ -104,7 +103,7 @@ public class THProviderErrorMapper implements WErrorMapper {
                                     status = 400;
                                     break;
                                 case TRANSPORT:
-                                    TTransportErrorType tTransportErrorType = ContextUtils.getMetadataParameter(contextSpan, TTransportErrorType.class, THMetadataProperties.TH_ERROR_SUBTYPE);
+                                    TTransportErrorType tTransportErrorType = ContextUtils.getMetadataValue(contextSpan, TTransportErrorType.class, THMetadataProperties.TH_ERROR_SUBTYPE);
                                     tTransportErrorType = tTransportErrorType == null ? TTransportErrorType.UNKNOWN : tTransportErrorType;
                                     switch (tTransportErrorType) {
                                         case BAD_REQUEST_TYPE:
@@ -171,6 +170,9 @@ public class THProviderErrorMapper implements WErrorMapper {
 
     @Override
     public Exception mapToError(WErrorDefinition eDefinition, ContextSpan contextSpan) {
+        if (eDefinition.getErrorType() == WErrorType.PROVIDER_ERROR) {
+            return new WRuntimeException(eDefinition);
+        }
         return null;
     }
 

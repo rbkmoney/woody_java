@@ -112,7 +112,7 @@ public class THCExtensionContext extends ExtensionContext {
             case REQ_URL_CONNECTION_TYPE:
                 return ((HttpURLConnection) providerContext).getURL();
             case REQ_HTTP_CLIENT_TYPE:
-                return  ContextUtils.getContextParameter(URL.class, getContextParameters(), 0);
+                return  ContextUtils.getContextValue(URL.class, getContextParameters(), 0);
             default:
                 throw new RuntimeException("Unknown type:" + providerContext.getClass());
         }

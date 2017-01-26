@@ -13,7 +13,6 @@ import com.rbkmoney.woody.rpc.test_error;
 import com.rbkmoney.woody.thrift.impl.http.event.*;
 import com.rbkmoney.woody.api.generator.TimestampIdGenerator;
 import org.apache.thrift.TException;
-import org.apache.thrift.transport.TTransportException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -62,7 +61,7 @@ public class TestChildRequests extends AbstractTest {
         }
     };
 
-    Servlet servlet = createThrftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener<>(
+    Servlet servlet = createThriftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener<>(
             new ServiceEventLogListener(),
             new HttpServiceEventLogListener()
     ));
@@ -99,6 +98,7 @@ public class TestChildRequests extends AbstractTest {
             errorDefinition.setErrorSource(WErrorSource.INTERNAL);
             errorDefinition.setErrorType(WErrorType.UNEXPECTED_ERROR);
             errorDefinition.setErrorReason("RuntimeException:Test");
+            errorDefinition.setErrorMessage("Server Error");
             Assert.assertEquals(errorDefinition, e.getErrorDefinition());
         }
         out.println("<");
