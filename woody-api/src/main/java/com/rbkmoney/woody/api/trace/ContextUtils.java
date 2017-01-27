@@ -1,5 +1,8 @@
 package com.rbkmoney.woody.api.trace;
 
+import com.rbkmoney.woody.api.trace.context.TraceContext;
+import com.rbkmoney.woody.api.trace.context.metadata.MetadataExtension;
+
 import java.util.function.Function;
 
 /**
@@ -15,7 +18,7 @@ public class ContextUtils {
     }
 
     public static Throwable getInterceptionError(ContextSpan span) {
-        return getMetadataParameter(span, Throwable.class, MetadataProperties.INTERCEPTION_ERROR);
+        return getMetadataValue(span, Throwable.class, MetadataProperties.INTERCEPTION_ERROR);
     }
 
     public static void setInterceptionError(ContextSpan span, Throwable t) {
@@ -27,7 +30,7 @@ public class ContextUtils {
     }
 
     public static <T> T getInterceptionErrorReason(ContextSpan span, Class<T> targetType) {
-        return getMetadataParameter(span, targetType, MetadataProperties.INTERCEPTION_ERROR_REASON);
+        return getMetadataValue(span, targetType, MetadataProperties.INTERCEPTION_ERROR_REASON);
     }
 
     public static void setCallError(ContextSpan span, Throwable t) {
@@ -35,7 +38,7 @@ public class ContextUtils {
     }
 
     public static Throwable getCallError(ContextSpan span) {
-        return getMetadataParameter(span, Throwable.class, MetadataProperties.CALL_ERROR);
+        return getMetadataValue(span, Throwable.class, MetadataProperties.CALL_ERROR);
     }
 
     public static boolean hasCallErrors(ContextSpan span) {
@@ -49,8 +52,44 @@ public class ContextUtils {
         }
     }
 
-    public static <T> T getMetadataParameter(ContextSpan span, Class<T> targetType, String key) {
-        Object obj = span.getMetadata().getValue(key);
+    public static <T> T getCustomMetadataValue(MetadataExtension<T> extension) {
+        return extension.getValue(TraceContext.getCurrentTraceData().getActiveSpan().getCustomMetadata());
+    }
+
+    public static <T> T getCustomMetadataValue(String key, MetadataExtension<T> extension) {
+        return extension.getValue(key, TraceContext.getCurrentTraceData().getActiveSpan().getCustomMetadata());
+    }
+
+    public static <T, TT extends T> void setCustomMetadataValue(TT val, MetadataExtension<T> extension) {
+        extension.setValue(val, TraceContext.getCurrentTraceData().getActiveSpan().getCustomMetadata());
+    }
+
+    public static <T, TT extends T> void setCustomMetadataValue(String key, TT val, MetadataExtension<T> extension) {
+        extension.setValue(key, val, TraceContext.getCurrentTraceData().getActiveSpan().getCustomMetadata());
+    }
+
+    public static Object  setCustomMetadataValue(String key, Object val) {
+        return TraceContext.getCurrentTraceData().getActiveSpan().getCustomMetadata().putValue(key, val);
+    }
+
+    public static <T> T getMetadataValue(Class<T> targetType, String key) {
+        return getMetadataValue(TraceContext.getCurrentTraceData().getActiveSpan(), targetType, key);
+    }
+
+    public static <T> T getCustomMetadataValue(Class<T> targetType, String key) {
+        return getCustomMetadataValue(TraceContext.getCurrentTraceData().getActiveSpan(), targetType, key);
+    }
+
+    public static <T> T getMetadataValue(ContextSpan span, Class<T> targetType, String key) {
+        return getMetadataValue(span.getMetadata(), targetType, key);
+    }
+
+    public static <T> T getCustomMetadataValue(ContextSpan span, Class<T> targetType, String key) {
+        return getMetadataValue(span.getCustomMetadata(), targetType, key);
+    }
+
+    public static <T> T getMetadataValue(Metadata metadata, Class<T> targetType, String key) {
+        Object obj = metadata.getValue(key);
         if (obj == null) {
             return null;
         } else if (targetType.isAssignableFrom(obj.getClass())) {
@@ -59,7 +98,7 @@ public class ContextUtils {
         return null;
     }
 
-    public static <T> T getContextParameter(Class<T> targetType, Object[] params, int index) {
+    public static <T> T getContextValue(Class<T> targetType, Object[] params, int index) {
         if (params == null || params.length <= index || params[index] == null) {
             return null;
         }

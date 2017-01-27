@@ -7,6 +7,11 @@ import org.apache.thrift.TException;
  */
 public class OwnerServiceImpl implements OwnerServiceSrv.Iface {
     @Override
+    public int getIntValue() throws TException {
+        return 0;
+    }
+
+    @Override
     public Owner getOwner(int id) throws TException {
         return new Owner(1, "name");
     }

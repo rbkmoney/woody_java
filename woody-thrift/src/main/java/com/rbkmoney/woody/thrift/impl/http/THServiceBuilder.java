@@ -1,50 +1,58 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.AbstractServiceBuilder;
-import com.rbkmoney.woody.api.ServiceBuilder;
 import com.rbkmoney.woody.api.event.ServiceEventListener;
-import com.rbkmoney.woody.api.interceptor.CommonInterceptor;
-import com.rbkmoney.woody.api.interceptor.CompositeInterceptor;
-import com.rbkmoney.woody.api.interceptor.ContainerCommonInterceptor;
-import com.rbkmoney.woody.api.interceptor.ContextInterceptor;
-import com.rbkmoney.woody.api.proxy.InstanceMethodCaller;
-import com.rbkmoney.woody.api.proxy.MethodCallTracer;
-import com.rbkmoney.woody.api.trace.context.EmptyTracer;
+import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
+import com.rbkmoney.woody.api.flow.error.WErrorMapper;
+import com.rbkmoney.woody.api.flow.error.WErrorType;
+import com.rbkmoney.woody.api.interceptor.*;
+import com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle;
+import com.rbkmoney.woody.api.trace.ContextSpan;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
+import com.rbkmoney.woody.api.trace.context.metadata.MetadataExtensionKit;
 import com.rbkmoney.woody.api.transport.TransportEventInterceptor;
+import com.rbkmoney.woody.thrift.impl.http.error.THErrorMapProcessor;
 import com.rbkmoney.woody.thrift.impl.http.event.THServiceEvent;
-import com.rbkmoney.woody.thrift.impl.http.interceptor.*;
+import com.rbkmoney.woody.thrift.impl.http.interceptor.THMessageInterceptor;
+import com.rbkmoney.woody.thrift.impl.http.interceptor.THTransportInterceptor;
+import com.rbkmoney.woody.thrift.impl.http.interceptor.ext.MetadataExtensionBundle;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.protocol.TProtocolFactory;
 import org.apache.thrift.server.TServlet;
 
 import javax.servlet.Servlet;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.BiConsumer;
 
 /**
  * Created by vpankrashkin on 28.04.16.
  */
 public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
+    private List<MetadataExtensionKit> metadataExtensionKits;
+    private WErrorMapper errorMapper;
 
     @Override
     public THServiceBuilder withEventListener(ServiceEventListener listener) {
         return (THServiceBuilder) super.withEventListener(listener);
     }
 
-    @Override
-    protected MethodCallTracer getOnCallMetadataExtender(Class serviceInterface) {
-        return new EmptyTracer() {
-            THErrorMetadataExtender metadataExtender = new THErrorMetadataExtender(serviceInterface);
+    public THServiceBuilder withMetaExtensions(List<MetadataExtensionKit> extensionKits) {
+        this.metadataExtensionKits = extensionKits;
+        return this;
+    }
 
-            @Override
-            public void callError(Object[] args, InstanceMethodCaller caller, Throwable error) {
-                metadataExtender.extendServiceError(TraceContext.getCurrentTraceData());
-            }
+    public THServiceBuilder withErrorMapper(WErrorMapper errorMapper) {
+        this.errorMapper = errorMapper;
+        return this;
+    }
+
+    protected BiConsumer<WErrorDefinition, ContextSpan> getErrorDefinitionConsumer() {
+        return (eDef, contextSpan) -> {
+            if (eDef.getErrorType() != WErrorType.BUSINESS_ERROR)
+                contextSpan.getMetadata().removeValue(THMetadataProperties.TH_TRANSPORT_RESPONSE_SET_FLAG);
         };
     }
 
@@ -76,66 +84,53 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
     @Override
     protected <T> Servlet createProviderService(Class<T> serviceInterface, T handler) {
         try {
-            THErrorMetadataExtender metadataExtender = new THErrorMetadataExtender(serviceInterface);
+            THErrorMapProcessor errorMapProcessor = THErrorMapProcessor.getInstance(false, serviceInterface, errorMapper);
             TProcessor tProcessor = createThriftProcessor(serviceInterface, handler);
-            return createThriftServlet(tProcessor, createTransportInterceptor(metadataExtender), metadataExtender);
+            return createThriftServlet(tProcessor, createInterceptor(errorMapProcessor, true), errorMapProcessor);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    @Override
-    protected ProxyBuilder createProxyBuilder(Class iface) {
-        ProxyBuilder proxyBuilder = super.createProxyBuilder(iface);
-        proxyBuilder.setStartEventPhases(ProxyBuilder.EVENT_BEFORE_CALL_START);
-        proxyBuilder.setEndEventPhases(ProxyBuilder.EVENT_AFTER_CALL_END);
-        proxyBuilder.setErrorEventPhases(ProxyBuilder.EVENT_AFTER_CALL_END);
-        return proxyBuilder;
-    }
-
-    protected CommonInterceptor createMessageInterceptor() {
-        return new CompositeInterceptor(
-                new ContainerCommonInterceptor(new THSMessageRequestInterceptor(), new THSMessageResponseInterceptor())
-        );
-    }
-
-    protected CommonInterceptor createTransportInterceptor(THErrorMetadataExtender metadataExtender) {
-        TraceContext traceContext = createTraceContext();
-        return new CompositeInterceptor(
-                new ContainerCommonInterceptor(null, new THSResponseMetadataInterceptor(metadataExtender)),
-                new ContainerCommonInterceptor(new THSRequestInterceptor(), new THSResponseInterceptor(true)),
-                new ContextInterceptor(
-                        traceContext,
-                        new TransportEventInterceptor(getOnReceiveEventListener(), null)
-                )
-        );
-    }
-
-    protected TraceContext createTraceContext() {
-        return TraceContext.forServer(() -> {
-        }, getOnSendEventListener(), getErrorListener());
-
-    }
-
-    protected TProtocolFactory createProtocolFactory() {
+    protected TProtocolFactory createTransferProtocolFactory() {
         return new TBinaryProtocol.Factory();
     }
 
-    protected TProtocolFactory wrapProtocolFactory(TProtocolFactory tProtocolFactory, CommonInterceptor commonInterceptor) {
-        return tTransport -> {
-            TProtocol tProtocol = tProtocolFactory.getProtocol(tTransport);
-            return new THSProtocolWrapper(tProtocol, commonInterceptor);
-        };
+    /**
+     * @param isTransportLevel true - if this interceptor must be invoked on the lowers level (transport), next is thrift protocol level wit allows message read/write detection
+     * */
+    protected CommonInterceptor createInterceptor(THErrorMapProcessor errorMapProcessor, boolean isTransportLevel) {
+        List<CommonInterceptor> interceptors = new ArrayList<>();
+
+        if (!isTransportLevel) {
+            interceptors.add(new ContainerCommonInterceptor(
+                    new THMessageInterceptor(false, true), new THMessageInterceptor(false, false)
+            ));
+        }
+
+        List<ExtensionBundle> extensionBundles =  Arrays.asList(new MetadataExtensionBundle(metadataExtensionKits == null ? Collections.EMPTY_LIST : metadataExtensionKits));
+        interceptors.add(new ErrorMappingInterceptor(errorMapProcessor, getErrorDefinitionConsumer()));
+        interceptors.add(new ContainerCommonInterceptor(
+                isTransportLevel ? new THTransportInterceptor(extensionBundles, false, true) : null,
+                new THTransportInterceptor(extensionBundles, false, false)
+        ));
+
+        if (isTransportLevel) {
+            //interceptors.add(new ProviderEventInterceptor(getOnSendEventListener(), null));
+            interceptors.add(new ContextInterceptor(
+                    TraceContext.forService(),
+                    new TransportEventInterceptor(getOnReceiveEventListener(), getOnReceiveEventListener(), getErrorListener())
+            ));
+        }
+        return new CompositeInterceptor(interceptors.toArray(new CommonInterceptor[interceptors.size()]));
+
     }
 
-    protected Servlet createThriftServlet(TProcessor tProcessor, CommonInterceptor servletInterceptor, THErrorMetadataExtender metadataExtender) {
-        CompositeInterceptor protInterceptor = new CompositeInterceptor(
-                createMessageInterceptor(),
-                new ContainerCommonInterceptor(null, new THSResponseMetadataInterceptor(metadataExtender)),
-                new ContainerCommonInterceptor(null, new THSResponseInterceptor(false))
-        );
-        TProtocolFactory tProtocolFactory = wrapProtocolFactory(createProtocolFactory(), protInterceptor);
-        return new TServlet(tProcessor, tProtocolFactory, servletInterceptor);
+    protected Servlet createThriftServlet(TProcessor tProcessor, CommonInterceptor servletInterceptor, THErrorMapProcessor errorMapProcessor) {
+        TProtocolFactory tProtocolFactory = createTransferProtocolFactory();
+        TProtocolFactory wtProtocolFactory = BuilderUtils.wrapProtocolFactory(tProtocolFactory, createInterceptor(errorMapProcessor, false), false);
+
+        return new TServlet(tProcessor, wtProtocolFactory, servletInterceptor);
     }
 
     protected <T> TProcessor createThriftProcessor(Class<T> serviceInterface, T handler) {
@@ -155,7 +150,7 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
             TProcessor tProcessor = (TProcessor) constructor.newInstance(handler);
             return tProcessor;
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalArgumentException("Failed to create provider service", e);
+            throw new IllegalArgumentException("Failed to createCtxBundle provider service", e);
         }
     }
 

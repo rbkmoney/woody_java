@@ -4,7 +4,7 @@ typedef i32 int // We can use typedef to get pretty names for the types we are u
 struct Owner {
 1:int id,
 2:string name,
-3:optional string value;
+3:optional string key;
 }
 
 exception test_error {
@@ -13,6 +13,7 @@ exception test_error {
 
 service OwnerService
 {
+        i32 getIntValue()
         Owner getOwner(1:int id),
         Owner getErrOwner(1:int id) throws (1:test_error err),
         void setOwner(1:Owner owner),

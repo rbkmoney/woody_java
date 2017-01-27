@@ -12,8 +12,12 @@ public class TraceData {
         this.serviceSpan = new ServiceSpan();
     }
 
-    protected TraceData(TraceData oldTraceData) {
-        this.clientSpan = oldTraceData.clientSpan.cloneObject();
+    public TraceData(TraceData oldTraceData) {
+        this(oldTraceData, false);
+    }
+
+    public TraceData(TraceData oldTraceData, boolean copyCustomServiceMetadata) {
+        this.clientSpan = copyCustomServiceMetadata ? new ClientSpan(oldTraceData.clientSpan, oldTraceData.serviceSpan.customMetadata) : oldTraceData.clientSpan.cloneObject();
         this.serviceSpan = oldTraceData.serviceSpan.cloneObject();
     }
 

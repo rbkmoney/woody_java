@@ -2,15 +2,19 @@ package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.event.CallType;
 import com.rbkmoney.woody.api.event.ClientEventListener;
-import com.rbkmoney.woody.api.event.ErrorType;
-import com.rbkmoney.woody.api.generator.IdGenerator;
+import com.rbkmoney.woody.api.flow.error.WErrorSource;
+import com.rbkmoney.woody.api.flow.error.WErrorType;
+import com.rbkmoney.woody.api.flow.error.WRuntimeException;
+import com.rbkmoney.woody.api.trace.context.TraceContext;
 import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerServiceSrv;
 import com.rbkmoney.woody.rpc.test_error;
 import com.rbkmoney.woody.thrift.impl.http.event.THClientEvent;
-import com.rbkmoney.woody.thrift.impl.http.generator.TimestampIdGenerator;
+import com.rbkmoney.woody.api.generator.TimestampIdGenerator;
 import org.apache.thrift.TException;
 import org.junit.Test;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 
@@ -18,9 +22,8 @@ import static org.junit.Assert.*;
  * Created by vpankrashkin on 06.05.16.
  */
 public class TestClientEventHandling extends AbstractTest {
-    {
 
-        tProcessor = new OwnerServiceSrv.Processor<>(new OwnerServiceStub() {
+        OwnerServiceSrv.Iface handler = new OwnerServiceStub() {
             @Override
             public Owner getOwner(int id) throws TException {
                 switch (id) {
@@ -37,31 +40,34 @@ public class TestClientEventHandling extends AbstractTest {
             public Owner getErrOwner(int id) throws test_error {
                 throw new test_error(id);
             }
-        }
+        };
 
-        );
-    }
+
 
     @Test
     public void testExpectedError() {
-        addServlet(createMutableTervlet(), "/");
+        addServlet(createMutableTServlet(OwnerServiceSrv.Iface.class, handler), "/");
+        AtomicInteger order = new AtomicInteger();
 
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
             switch (thClientEvent.getEventType()) {
                 case CALL_SERVICE:
+                    assertEquals(0, order.getAndIncrement());
                     assertArrayEquals(new Object[]{0}, thClientEvent.getCallArguments());
                     assertEquals("getErrOwner", thClientEvent.getCallName());
                     assertEquals(CallType.CALL, thClientEvent.getCallType());
-                    assertEquals(IdGenerator.NO_PARENT_ID, thClientEvent.getParentId());
+                    assertEquals(TraceContext.NO_PARENT_ID, thClientEvent.getParentId());
                     assertNotNull(thClientEvent.getTraceId());
                     assertEquals(thClientEvent.getTraceId(), thClientEvent.getSpanId());
                     assertNull(thClientEvent.getEndpoint());
                     assertNotEquals(thClientEvent.getTimeStamp(), 0);
                     break;
                 case CLIENT_SEND:
+                    assertEquals(1, order.getAndIncrement());
                     assertEquals(getUrlString(), thClientEvent.getEndpoint().getStringValue());
                     break;
                 case CLIENT_RECEIVE:
+                    assertEquals(2, order.getAndIncrement());
                     assertEquals(new Integer(200), thClientEvent.getThriftResponseStatus());
                     assertEquals("OK", thClientEvent.getThriftResponseMessage());
                     break;
@@ -69,9 +75,10 @@ public class TestClientEventHandling extends AbstractTest {
                     fail("Should not be invoked on error");
                     break;
                 case ERROR:
+                    assertEquals(3, order.getAndIncrement());
                     assertFalse(thClientEvent.isSuccessfullCall());
-                    assertEquals(ErrorType.APPLICATION_KNOWN_ERROR, thClientEvent.getErrorType());
-                    assertEquals("test_error", thClientEvent.getErrorName());
+                    assertEquals(WErrorType.BUSINESS_ERROR, thClientEvent.getErrorDefinition().getErrorType());
+                    assertEquals("test_error", thClientEvent.getErrorDefinition().getErrorName());
                     assertNull(thClientEvent.getThriftErrorType());
                     break;
                 default:
@@ -90,7 +97,7 @@ public class TestClientEventHandling extends AbstractTest {
 
     @Test
     public void testGetOwnerOK() {
-        addServlet(createMutableTervlet(), "/");
+        addServlet(createMutableTServlet(OwnerServiceSrv.Iface.class, handler), "/");
 
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
             switch (thClientEvent.getEventType()) {
@@ -98,7 +105,7 @@ public class TestClientEventHandling extends AbstractTest {
                     assertArrayEquals(new Object[]{1}, thClientEvent.getCallArguments());
                     assertEquals("getOwner", thClientEvent.getCallName());
                     assertEquals(CallType.CALL, thClientEvent.getCallType());
-                    assertEquals(IdGenerator.NO_PARENT_ID, thClientEvent.getParentId());
+                    assertEquals(TraceContext.NO_PARENT_ID, thClientEvent.getParentId());
                     assertNotNull(thClientEvent.getTraceId());
                     assertEquals(thClientEvent.getTraceId(), thClientEvent.getSpanId());
                     assertNull(thClientEvent.getEndpoint());
@@ -131,7 +138,7 @@ public class TestClientEventHandling extends AbstractTest {
 
     @Test
     public void testUnexpectedError() {
-        addServlet(createMutableTervlet(), "/");
+        addServlet(createMutableTServlet(OwnerServiceSrv.Iface.class, handler), "/");
 
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
             switch (thClientEvent.getEventType()) {
@@ -139,7 +146,7 @@ public class TestClientEventHandling extends AbstractTest {
                     assertArrayEquals(new Object[]{0}, thClientEvent.getCallArguments());
                     assertEquals("getOwner", thClientEvent.getCallName());
                     assertEquals(CallType.CALL, thClientEvent.getCallType());
-                    assertEquals(IdGenerator.NO_PARENT_ID, thClientEvent.getParentId());
+                    assertEquals(TraceContext.NO_PARENT_ID, thClientEvent.getParentId());
                     assertNotNull(thClientEvent.getTraceId());
                     assertEquals(thClientEvent.getTraceId(), thClientEvent.getSpanId());
                     assertNull(thClientEvent.getEndpoint());
@@ -157,8 +164,10 @@ public class TestClientEventHandling extends AbstractTest {
                     break;
                 case ERROR:
                     assertFalse(thClientEvent.isSuccessfullCall());
-                    assertEquals(ErrorType.PROVIDER_ERROR, thClientEvent.getErrorType());
-                    assertEquals(TErrorType.TRANSPORT, thClientEvent.getThriftErrorType());
+                    assertEquals(WErrorType.UNEXPECTED_ERROR, thClientEvent.getErrorDefinition().getErrorType());
+                    assertEquals("Error was generated outside of the client", WErrorSource.EXTERNAL, thClientEvent.getErrorDefinition().getGenerationSource());
+                    assertEquals("This is internal service error", WErrorSource.INTERNAL, thClientEvent.getErrorDefinition().getErrorSource());
+                    assertEquals("RuntimeException:err", thClientEvent.getErrorDefinition().getErrorReason());
                     break;
                 default:
                     fail();
@@ -168,7 +177,7 @@ public class TestClientEventHandling extends AbstractTest {
         });
         try {
             client.getOwner(0);
-        } catch (TException e) {
+        } catch (TException | WRuntimeException e) {
             e.printStackTrace();
         }
     }

@@ -2,14 +2,12 @@ package com.rbkmoney.woody.api;
 
 import com.rbkmoney.woody.api.event.ServiceEvent;
 import com.rbkmoney.woody.api.event.ServiceEventListener;
-import com.rbkmoney.woody.api.proxy.InvocationTargetProvider;
-import com.rbkmoney.woody.api.proxy.MethodCallTracer;
 import com.rbkmoney.woody.api.proxy.ProxyFactory;
 import com.rbkmoney.woody.api.proxy.SingleTargetProvider;
-import com.rbkmoney.woody.api.trace.context.CompositeTracer;
-import com.rbkmoney.woody.api.trace.context.EmptyTracer;
-import com.rbkmoney.woody.api.trace.context.EventTracer;
-import com.rbkmoney.woody.api.trace.context.MetadataTracer;
+import com.rbkmoney.woody.api.proxy.tracer.CompositeTracer;
+import com.rbkmoney.woody.api.proxy.tracer.EventTracer;
+import com.rbkmoney.woody.api.proxy.tracer.MethodCallTracer;
+import com.rbkmoney.woody.api.proxy.tracer.TargetCallTracer;
 
 /**
  * Created by vpankrashkin on 10.05.16.
@@ -17,6 +15,7 @@ import com.rbkmoney.woody.api.trace.context.MetadataTracer;
 public abstract class AbstractServiceBuilder<Srv> implements ServiceBuilder<Srv> {
     private static final ServiceEventListener DEFAULT_EVENT_LISTENER = (ServiceEventListener<ServiceEvent>) event -> {
     };
+    private boolean allowObjectProxyOverriding = false;
 
     private ServiceEventListener eventListener = DEFAULT_EVENT_LISTENER;
 
@@ -41,6 +40,25 @@ public abstract class AbstractServiceBuilder<Srv> implements ServiceBuilder<Srv>
         return eventListener;
     }
 
+    protected <T> T createProxyService(Class<T> iface, T handler) {
+
+        ProxyFactory proxyFactory = new ProxyFactory(createEventTracer(), allowObjectProxyOverriding);
+        return proxyFactory.getInstance(iface, new SingleTargetProvider<T>(iface, handler));
+    }
+
+    protected MethodCallTracer createEventTracer() {
+        return new CompositeTracer(
+                TargetCallTracer.forServer(),
+                new EventTracer(getOnCallStartEventListener(),
+                        getOnCallEndEventListener(),
+                        getErrorListener()
+                ));
+    }
+
+    public void setAllowObjectProxyOverriding(boolean allowObjectProxyOverriding) {
+        this.allowObjectProxyOverriding = allowObjectProxyOverriding;
+    }
+
     abstract protected Runnable getErrorListener();
 
     abstract protected Runnable getOnCallStartEventListener();
@@ -51,106 +69,6 @@ public abstract class AbstractServiceBuilder<Srv> implements ServiceBuilder<Srv>
 
     abstract protected Runnable getOnCallEndEventListener();
 
-    abstract protected MethodCallTracer getOnCallMetadataExtender(Class serviceInterface);
-
     abstract protected <T> Srv createProviderService(Class<T> serviceInterface, T handler);
-
-
-    protected <T> T createProxyService(Class<T> iface, T handler) {
-        return createProxyBuilder(iface).build(iface, handler);
-    }
-
-    protected ProxyBuilder createProxyBuilder(Class iface) {
-        ProxyBuilder proxyBuilder = new ProxyBuilder();
-        proxyBuilder.setStartEventListener(getOnCallStartEventListener());
-        proxyBuilder.setEndEventListener(getOnCallEndEventListener());
-        proxyBuilder.setErrEventListener(getErrorListener());
-        proxyBuilder.setMetadataExtender(getOnCallMetadataExtender(iface));
-        return proxyBuilder;
-    }
-
-    protected static class ProxyBuilder {
-        public static final int EVENT_DISABLE = 0b0;
-        public static final int EVENT_BEFORE_CALL_START = 0b100;
-        public static final int EVENT_AFTER_CALL_END = 0b1000;
-
-        private int startEventPhases;
-        private int endEventPhases;
-        private int errorEventPhases;
-        private boolean allowObjectOverriding = false;
-
-        private final Runnable listenerStub = () -> {
-        };
-
-        private final MethodCallTracer extenderStub = new EmptyTracer();
-
-        private Runnable startEventListener;
-        private Runnable endEventListener;
-        private Runnable errEventListener;
-        private MethodCallTracer metadataExtender;
-
-        public void setStartEventListener(Runnable startEventListener) {
-            this.startEventListener = startEventListener;
-        }
-
-        public void setEndEventListener(Runnable endEventListener) {
-            this.endEventListener = endEventListener;
-        }
-
-        public void setErrEventListener(Runnable errEventListener) {
-            this.errEventListener = errEventListener;
-        }
-
-        public void setMetadataExtender(MethodCallTracer metadataExtender) {
-            this.metadataExtender = metadataExtender;
-        }
-
-        public void setAllowObjectOverriding(boolean allowObjectOverriding) {
-            this.allowObjectOverriding = allowObjectOverriding;
-        }
-
-        public void setStartEventPhases(int phases) {
-            startEventPhases = phases;
-        }
-
-        public void setEndEventPhases(int phases) {
-            endEventPhases = phases;
-        }
-
-        public void setErrorEventPhases(int phases) {
-            this.errorEventPhases = phases;
-        }
-
-        public <T> T build(Class<T> iface, T target) {
-            return build(iface, new SingleTargetProvider<>(iface, target));
-        }
-
-        public <T> T build(Class<T> iface, InvocationTargetProvider<T> targetProvider) {
-            ProxyFactory proxyFactory = createProxyFactory();
-            return proxyFactory.getInstance(iface, targetProvider);
-        }
-
-        protected ProxyFactory createProxyFactory() {
-            return new ProxyFactory(createMethodCallTracer(), allowObjectOverriding);
-        }
-
-        protected MethodCallTracer createMethodCallTracer() {
-            return createEventTracer();
-        }
-
-        protected MethodCallTracer createEventTracer() {
-            return new CompositeTracer(MetadataTracer.forServer(),
-                    metadataExtender == null ? extenderStub : metadataExtender,
-                    new EventTracer(
-                            hasFlag(EVENT_BEFORE_CALL_START, startEventPhases) ? startEventListener : listenerStub,
-                            hasFlag(EVENT_AFTER_CALL_END, endEventPhases) ? endEventListener : listenerStub,
-                            hasFlag(EVENT_AFTER_CALL_END, errorEventPhases) ? errEventListener : listenerStub)
-            );
-        }
-
-        private boolean hasFlag(int test, int flags) {
-            return (test & flags) != 0;
-        }
-    }
 
 }

@@ -7,7 +7,7 @@ import com.rbkmoney.woody.api.trace.context.TraceContext;
 /**
  * Created by vpankrashkin on 10.05.16.
  */
-public class ContextInterceptor<ReqProvider, RespProvider> implements CommonInterceptor<ReqProvider, RespProvider> {
+public class ContextInterceptor implements CommonInterceptor {
     private final TraceContext traceContext;
     private final CommonInterceptor interceptor;
 
@@ -17,18 +17,17 @@ public class ContextInterceptor<ReqProvider, RespProvider> implements CommonInte
     }
 
     @Override
-    public boolean interceptRequest(TraceData traceData, ReqProvider providerContext, Object... contextParams) {
+    public boolean interceptRequest(TraceData traceData, Object providerContext, Object... contextParams) {
         traceContext.init();
         return interceptor.interceptRequest(traceData, providerContext, contextParams);
     }
 
     @Override
-    public boolean interceptResponse(TraceData traceData, RespProvider providerContext, Object... contextParams) {
+    public boolean interceptResponse(TraceData traceData, Object providerContext, Object... contextParams) {
         try {
-            interceptor.interceptResponse(traceData, providerContext, contextParams);
+            return interceptor.interceptResponse(traceData, providerContext, contextParams);
         } finally {
             traceContext.destroy(ContextUtils.hasCallErrors(traceData.getActiveSpan()));
         }
-        return false;
     }
 }

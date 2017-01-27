@@ -3,14 +3,16 @@ package com.rbkmoney.woody.thrift.impl.http;
 import com.rbkmoney.woody.api.event.ClientEventListener;
 import com.rbkmoney.woody.api.event.CompositeClientEventListener;
 import com.rbkmoney.woody.api.event.CompositeServiceEventListener;
+import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
+import com.rbkmoney.woody.api.flow.error.WErrorSource;
+import com.rbkmoney.woody.api.flow.error.WErrorType;
+import com.rbkmoney.woody.api.flow.error.WRuntimeException;
 import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerServiceSrv;
 import com.rbkmoney.woody.rpc.test_error;
 import com.rbkmoney.woody.thrift.impl.http.event.*;
-import com.rbkmoney.woody.thrift.impl.http.generator.SnowflakeIdGenerator;
-import com.rbkmoney.woody.thrift.impl.http.generator.TimestampIdGenerator;
+import com.rbkmoney.woody.api.generator.TimestampIdGenerator;
 import org.apache.thrift.TException;
-import org.apache.thrift.transport.TTransportException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,7 +61,7 @@ public class TestChildRequests extends AbstractTest {
         }
     };
 
-    Servlet servlet = createThrftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener<>(
+    Servlet servlet = createThriftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener<>(
             new ServiceEventLogListener(),
             new HttpServiceEventLogListener()
     ));
@@ -91,7 +93,13 @@ public class TestChildRequests extends AbstractTest {
         out.println("Root call>");
         try {
             client1.getErrOwner(500);
-        } catch (TTransportException e) {
+        } catch (WRuntimeException e) {
+            WErrorDefinition errorDefinition = new WErrorDefinition(WErrorSource.EXTERNAL);
+            errorDefinition.setErrorSource(WErrorSource.INTERNAL);
+            errorDefinition.setErrorType(WErrorType.UNEXPECTED_ERROR);
+            errorDefinition.setErrorReason("RuntimeException:Test");
+            errorDefinition.setErrorMessage("Server Error");
+            Assert.assertEquals(errorDefinition, e.getErrorDefinition());
         }
         out.println("<");
 

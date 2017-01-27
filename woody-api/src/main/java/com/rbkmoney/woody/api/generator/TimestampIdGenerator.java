@@ -1,0 +1,22 @@
+package com.rbkmoney.woody.api.generator;
+
+/**
+ * Created by vpankrashkin on 06.05.16.
+ */
+public class TimestampIdGenerator implements IdGenerator {
+
+    @Override
+    public String generateId() {
+        return Long.toString(System.currentTimeMillis());
+    }
+
+    @Override
+    public String generateId(String prefix) {
+        return new StringBuilder().append(prefix).append(System.currentTimeMillis()).toString();
+    }
+
+    @Override
+    public String generateId(String prefix, int counter) {
+        return new StringBuilder().append(prefix).append(System.currentTimeMillis()).append(':').append(counter).toString();
+    }
+}

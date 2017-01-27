@@ -1,6 +1,9 @@
 package com.rbkmoney.woody.api.event;
 
+import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
 import com.rbkmoney.woody.api.trace.*;
+
+import static com.rbkmoney.woody.api.trace.MetadataProperties.*;
 
 /**
  * Created by vpankrashkin on 06.05.16.
@@ -17,35 +20,27 @@ public abstract class Event {
     }
 
     public Object getEventType() {
-        return getActiveSpan().getMetadata().getValue(MetadataProperties.EVENT_TYPE);
+        return getActiveSpan().getMetadata().getValue(EVENT_TYPE);
     }
 
     public CallType getCallType() {
-        return getActiveSpan().getMetadata().getValue(MetadataProperties.CALL_TYPE);
+        return getActiveSpan().getMetadata().getValue(CALL_TYPE);
     }
 
     public String getCallName() {
-        return getActiveSpan().getMetadata().getValue(MetadataProperties.CALL_NAME);
+        return getActiveSpan().getMetadata().getValue(CALL_NAME);
     }
 
     public Object[] getCallArguments() {
-        return getActiveSpan().getMetadata().getValue(MetadataProperties.CALL_ARGUMENTS);
+        return getActiveSpan().getMetadata().getValue(CALL_ARGUMENTS);
     }
 
     public Object getCallResult() {
-        return getActiveSpan().getMetadata().getValue(MetadataProperties.CALL_RESULT);
+        return getActiveSpan().getMetadata().getValue(CALL_RESULT);
     }
 
-    public ErrorType getErrorType() {
-        return getActiveSpan().getMetadata().getValue(MetadataProperties.ERROR_TYPE);
-    }
-
-    public String getErrorName() {
-        return getActiveSpan().getMetadata().getValue(MetadataProperties.ERROR_NAME);
-    }
-
-    public String getErrorMessage() {
-        return getActiveSpan().getMetadata().getValue(MetadataProperties.ERROR_MESSAGE);
+    public WErrorDefinition getErrorDefinition() {
+        return getActiveSpan().getMetadata().getValue(ERROR_DEFINITION);
     }
 
     public String getSpanId() {
@@ -69,7 +64,7 @@ public abstract class Event {
     }
 
     public Endpoint getEndpoint() {
-        return getActiveSpan().getMetadata().getValue(MetadataProperties.CALL_ENDPOINT);
+        return getActiveSpan().getMetadata().getValue(CALL_ENDPOINT);
     }
 
     public boolean isSuccessfullCall() {

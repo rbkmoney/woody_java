@@ -72,7 +72,7 @@ public class Span {
     }
 
     public boolean isFilled() {
-        return traceId != null;
+        return traceId != null && parentId != null && id != null;
     }
 
     public boolean isStarted() {

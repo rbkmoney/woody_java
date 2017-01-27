@@ -12,6 +12,10 @@ public class ClientSpan extends ContextSpan {
         super(clientSpan);
     }
 
+    protected ClientSpan(ContextSpan oldSpan, Metadata customMetadata) {
+        super(oldSpan, customMetadata);
+    }
+
     public ClientSpan cloneObject() {
         return new ClientSpan(this);
     }

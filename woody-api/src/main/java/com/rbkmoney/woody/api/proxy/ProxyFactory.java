@@ -1,5 +1,7 @@
 package com.rbkmoney.woody.api.proxy;
 
+import com.rbkmoney.woody.api.proxy.tracer.MethodCallTracer;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;

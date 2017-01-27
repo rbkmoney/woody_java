@@ -5,7 +5,7 @@ import com.rbkmoney.woody.api.trace.TraceData;
 /**
  * Created by vpankrashkin on 28.04.16.
  */
-public class CompositeInterceptor<ReqProvider, RespProvider> implements CommonInterceptor<ReqProvider, RespProvider> {
+public class CompositeInterceptor implements CommonInterceptor {
     private final CommonInterceptor[] interceptors;
     private final boolean breakOnError;
 
@@ -19,7 +19,7 @@ public class CompositeInterceptor<ReqProvider, RespProvider> implements CommonIn
     }
 
     @Override
-    public boolean interceptRequest(TraceData traceData, ReqProvider providerContext, Object... contextParams) {
+    public boolean interceptRequest(TraceData traceData, Object providerContext, Object... contextParams) {
         boolean successful = true;
         for (int i = 0; i < interceptors.length; ++i) {
             successful &= interceptors[i].interceptRequest(traceData, providerContext, contextParams);
@@ -31,7 +31,7 @@ public class CompositeInterceptor<ReqProvider, RespProvider> implements CommonIn
     }
 
     @Override
-    public boolean interceptResponse(TraceData traceData, RespProvider providerContext, Object... contextParams) {
+    public boolean interceptResponse(TraceData traceData, Object providerContext, Object... contextParams) {
         boolean successful = true;
         for (int i = 0; i < interceptors.length; ++i) {
             successful &= interceptors[i].interceptResponse(traceData, providerContext, contextParams);

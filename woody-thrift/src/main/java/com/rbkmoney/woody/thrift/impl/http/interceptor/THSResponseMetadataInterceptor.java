@@ -2,21 +2,21 @@ package com.rbkmoney.woody.thrift.impl.http.interceptor;
 
 import com.rbkmoney.woody.api.interceptor.ResponseInterceptor;
 import com.rbkmoney.woody.api.trace.TraceData;
-import com.rbkmoney.woody.thrift.impl.http.THErrorMetadataExtender;
+import com.rbkmoney.woody.thrift.impl.http.error.THErrorMapProcessor;
 
 /**
  * Created by vpankrashkin on 11.05.16.
  */
 public class THSResponseMetadataInterceptor implements ResponseInterceptor {
-    private final THErrorMetadataExtender metadataExtender;
+    private final THErrorMapProcessor errorMapProcessor;
 
-    public THSResponseMetadataInterceptor(THErrorMetadataExtender metadataExtender) {
-        this.metadataExtender = metadataExtender;
+    public THSResponseMetadataInterceptor(THErrorMapProcessor errorMapProcessor) {
+        this.errorMapProcessor = errorMapProcessor;
     }
 
     @Override
     public boolean interceptResponse(TraceData traceData, Object providerContext, Object... contextParams) {
-        metadataExtender.extendServiceError(traceData);
+        errorMapProcessor.processMapToDef(traceData);
         return true;
     }
 }

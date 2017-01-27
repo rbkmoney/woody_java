@@ -2,19 +2,34 @@ package com.rbkmoney.woody.api.trace.context;
 
 import com.rbkmoney.woody.api.MDCUtils;
 import com.rbkmoney.woody.api.generator.IdGenerator;
+import com.rbkmoney.woody.api.trace.ContextSpan;
 import com.rbkmoney.woody.api.trace.Span;
 import com.rbkmoney.woody.api.trace.TraceData;
 
-import static com.rbkmoney.woody.api.generator.IdGenerator.NO_PARENT_ID;
+import java.util.Optional;
 
 /**
  * Created by vpankrashkin on 25.04.16.
  */
 public class TraceContext {
+    public static final String NO_PARENT_ID = "undefined";
+
     private final static ThreadLocal<TraceData> currentTraceData = ThreadLocal.withInitial(() -> new TraceData());
+    private final static ThreadLocal<TraceData> savedTraceData = new ThreadLocal<>();
 
     public static TraceData getCurrentTraceData() {
         return currentTraceData.get();
+    }
+
+    public static TraceData initNewServiceTrace(TraceData traceData, IdGenerator traceIdGenerator, IdGenerator spanIdGenerator) {
+        return initServiceTraceData(traceData, traceIdGenerator, spanIdGenerator);
+    }
+
+    public static TraceData initServiceTraceData(TraceData traceData, IdGenerator traceIdGenerator, IdGenerator spanIdGenerator) {
+        if ((traceData.isRoot())) {
+            initSpan(traceIdGenerator, spanIdGenerator, traceData, false);
+        }
+        return traceData;
     }
 
     public static void setCurrentTraceData(TraceData traceData) {
@@ -32,18 +47,31 @@ public class TraceContext {
         if (traceData != null) {
             traceData.reset();
         }
+    }
 
+    public static TraceContext forClient(IdGenerator idGenerator) {
+        return new TraceContext(idGenerator);
+    }
+
+    public static TraceContext forService() {
+        return new TraceContext(null);
     }
 
     public static TraceContext forClient(IdGenerator idGenerator, Runnable postInit, Runnable preDestroy, Runnable preErrDestroy) {
         return new TraceContext(idGenerator, postInit, preDestroy, preErrDestroy);
     }
 
-    public static TraceContext forServer(Runnable postInit, Runnable preDestroy, Runnable preErrDestroy) {
+    public static TraceContext forService(Runnable postInit, Runnable preDestroy, Runnable preErrDestroy) {
         return new TraceContext(null, postInit, preDestroy, preErrDestroy);
     }
 
-    private final IdGenerator idGenerator;
+    private static TraceData createNewTraceData(TraceData oldTraceData) {
+        TraceData traceData = new TraceData(oldTraceData, true);
+        return traceData;
+    }
+
+    private final IdGenerator traceIdGenerator;
+    private final IdGenerator spanIdGenerator;
     private final Runnable postInit;
     private final Runnable preDestroy;
     private final Runnable preErrDestroy;
@@ -51,28 +79,41 @@ public class TraceContext {
     private final boolean isClient;
 
     public TraceContext(IdGenerator idGenerator) {
-        this(idGenerator, () -> {
+        this(idGenerator, idGenerator);
+    }
+
+    public TraceContext(IdGenerator traceIdGenerator, IdGenerator spanIdGenerator) {
+        this(traceIdGenerator, spanIdGenerator, () -> {
         }, () -> {
         }, () -> {
         });
     }
 
     public TraceContext(IdGenerator idGenerator, Runnable postInit, Runnable preDestroy, Runnable preErrDestroy) {
-        this.idGenerator = idGenerator;
-        this.postInit = postInit;
-        this.preDestroy = preDestroy;
-        this.preErrDestroy = preErrDestroy;
-        this.isAuto = true;
-        this.isClient = false;
+        this(idGenerator, idGenerator, postInit, preDestroy, preErrDestroy);
+    }
+
+    public TraceContext(IdGenerator traceIdGenerator, IdGenerator spanIdGenerator, Runnable postInit, Runnable preDestroy, Runnable preErrDestroy) {
+        this(traceIdGenerator, spanIdGenerator, postInit, preDestroy, preErrDestroy, Optional.empty());
     }
 
     public TraceContext(IdGenerator idGenerator, Runnable postInit, Runnable preDestroy, Runnable preErrDestroy, boolean isClient) {
-        this.idGenerator = idGenerator;
+        this(idGenerator, idGenerator, postInit, preDestroy, preErrDestroy, Optional.of(isClient));
+    }
+
+    private TraceContext(IdGenerator traceIdGenerator, IdGenerator spanIdGenerator, Runnable postInit, Runnable preDestroy, Runnable preErrDestroy, Optional<Boolean> isClient) {
+        this.traceIdGenerator = traceIdGenerator;
+        this.spanIdGenerator = spanIdGenerator;
         this.postInit = postInit;
         this.preDestroy = preDestroy;
         this.preErrDestroy = preErrDestroy;
-        this.isAuto = false;
-        this.isClient = isClient;
+        if (isClient.isPresent()) {
+            this.isAuto = false;
+            this.isClient = isClient.get();
+        } else {
+            this.isAuto = true;
+            this.isClient = false;
+        }
     }
 
     /**
@@ -81,11 +122,11 @@ public class TraceContext {
     public void init() {
         TraceData traceData = getCurrentTraceData();
         if (isClientInit(traceData)) {
-            initClientContext(traceData);
+            traceData = initClientContext(traceData);
         } else {
-            initServerContext(traceData);
+            traceData = initServiceContext(traceData);
         }
-
+        setCurrentTraceData(traceData);
         MDCUtils.putContextIds(traceData.getActiveSpan().getSpan());
 
         postInit.run();
@@ -98,7 +139,7 @@ public class TraceContext {
     public void destroy(boolean onError) {
         TraceData traceData = getCurrentTraceData();
         boolean isClient = isClientDestroy(traceData);
-        setDuration(isClient ? traceData.getClientSpan().getSpan() : traceData.getServiceSpan().getSpan());
+        setDuration(traceData, isClient);
         try {
             if (onError) {
                 preErrDestroy.run();
@@ -107,10 +148,11 @@ public class TraceContext {
             }
         } finally {
             if (isClient) {
-                destroyClientContext(traceData);
+                traceData = destroyClientContext(traceData);
             } else {
-                destroyServerContext(traceData);
+                traceData = destroyServiceContext(traceData);
             }
+            setCurrentTraceData(traceData);
 
             if (traceData.getServiceSpan().isFilled()) {
                 MDCUtils.putContextIds(traceData.getServiceSpan().getSpan());
@@ -122,44 +164,60 @@ public class TraceContext {
     }
 
     public void setDuration() {
-        TraceData traceData = getCurrentTraceData();
-        setDuration(isClient ? traceData.getClientSpan().getSpan() : traceData.getServiceSpan().getSpan());
+        setDuration(getCurrentTraceData(), isClient);
     }
 
-    private void initClientContext(TraceData traceData) {
-        assert idGenerator != null;
+    private TraceData initClientContext(TraceData traceData) {
+        savedTraceData.set(traceData);
+        traceData = createNewTraceData(traceData);
+        initSpan(traceIdGenerator, spanIdGenerator, traceData, true);
+        return traceData;
+    }
+
+    private static TraceData initSpan(IdGenerator traceIdGenerator, IdGenerator spanIdGenerator, TraceData traceData, boolean isClient) {
 
         long timestamp = System.currentTimeMillis();
         Span clientSpan = traceData.getClientSpan().getSpan();
-        Span serverSpan = traceData.getServiceSpan().getSpan();
+        Span serviceSpan = traceData.getServiceSpan().getSpan();
+
+        Span initSpan = isClient ? clientSpan : serviceSpan;
 
         boolean root = traceData.isRoot();
-        String traceId = root ? idGenerator.generateId(timestamp) : serverSpan.getTraceId();
+        String traceId = root ? traceIdGenerator.generateId() : serviceSpan.getTraceId();
         if (root) {
-            clientSpan.setId(traceId);
-            clientSpan.setParentId(NO_PARENT_ID);
+            initSpan.setId(spanIdGenerator.generateId());
+            initSpan.setParentId(NO_PARENT_ID);
         } else {
-            clientSpan.setId(idGenerator.generateId(timestamp, traceData.getServiceSpan().getCounter().incrementAndGet()));
-            clientSpan.setParentId(serverSpan.getId());
+            initSpan.setId(spanIdGenerator.generateId("", traceData.getServiceSpan().getCounter().incrementAndGet()));
+            initSpan.setParentId(serviceSpan.getId());
         }
-        clientSpan.setTraceId(traceId);
-        clientSpan.setTimestamp(timestamp);
+        initSpan.setTraceId(traceId);
+        initTime(initSpan, timestamp);
+        return traceData;
     }
 
-    private void destroyClientContext(TraceData traceData) {
-        traceData.getClientSpan().reset();
+    private static void initTime(Span span, long timestamp) {
+        span.setTimestamp(timestamp);
     }
 
-    private void initServerContext(TraceData traceData) {
-        long timestamp = System.currentTimeMillis();
-        traceData.getServiceSpan().getSpan().setTimestamp(timestamp);
+    private TraceData destroyClientContext(TraceData traceData) {
+         traceData = savedTraceData.get();
+         savedTraceData.remove();
+         return traceData;
     }
 
-    private void destroyServerContext(TraceData traceData) {
+    private TraceData initServiceContext(TraceData traceData) {
+        initTime(traceData.getServiceSpan().getSpan(), System.currentTimeMillis());
+        return traceData;
+    }
+
+    private TraceData destroyServiceContext(TraceData traceData) {
         TraceContext.reset();
+        return traceData;
     }
 
-    private void setDuration(Span span) {
+    private void setDuration(TraceData traceData, boolean isClient) {
+        Span span = (isClient ? traceData.getClientSpan().getSpan() : traceData.getServiceSpan().getSpan());
         span.setDuration(System.currentTimeMillis() - span.getTimestamp());
     }
 
@@ -178,14 +236,13 @@ public class TraceContext {
         assert !(traceData.getClientSpan().isFilled() & traceData.getServiceSpan().isFilled());
 
         return serverSpan.isFilled() ? serverSpan.isStarted() : true;
-
     }
 
     private boolean isClientDestroyAuto(TraceData traceData) {
-        assert (traceData.getClientSpan().isStarted() || traceData.getServiceSpan().isStarted());
+        //this is not valid statement: if trace_id header wasn't received -> gen interception error, both client and service spans're not started and filled
+        //assert (traceData.getClientSpan().isStarted() || traceData.getServiceSpan().isFilled());
 
-        return traceData.getServiceSpan().isStarted() ? traceData.getClientSpan().isStarted() : true;
-
+        return traceData.getServiceSpan().isStarted() ? traceData.getClientSpan().isStarted() : !traceData.getServiceSpan().isFilled();
     }
 
 }

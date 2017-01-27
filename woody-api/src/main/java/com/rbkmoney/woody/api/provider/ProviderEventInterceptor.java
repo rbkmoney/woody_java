@@ -9,7 +9,7 @@ import com.rbkmoney.woody.api.trace.TraceData;
 /**
  * Created by vpankrashkin on 27.04.16.
  */
-public class ProviderEventInterceptor<ReqProvider, RespProvider> implements CommonInterceptor<ReqProvider, RespProvider> {
+public class ProviderEventInterceptor implements CommonInterceptor {
     private final Runnable reqListener;
     private final Runnable respListener;
 
@@ -21,14 +21,14 @@ public class ProviderEventInterceptor<ReqProvider, RespProvider> implements Comm
     }
 
     @Override
-    public boolean interceptRequest(TraceData traceData, ReqProvider providerContext, Object... contextParams) {
+    public boolean interceptRequest(TraceData traceData, Object providerContext, Object... contextParams) {
         traceData.getActiveSpan().getMetadata().putValue(MetadataProperties.EVENT_TYPE, traceData.isClient() ? ClientEventType.CALL_SERVICE : ServiceEventType.SERVICE_RECEIVE);
         reqListener.run();
         return true;
     }
 
     @Override
-    public boolean interceptResponse(TraceData traceData, RespProvider providerContext, Object... contextParams) {
+    public boolean interceptResponse(TraceData traceData, Object providerContext, Object... contextParams) {
         traceData.getActiveSpan().getMetadata().putValue(MetadataProperties.EVENT_TYPE, traceData.isClient() ? ClientEventType.SERVICE_RESULT : ServiceEventType.HANDLER_RESULT);
         respListener.run();
         return true;

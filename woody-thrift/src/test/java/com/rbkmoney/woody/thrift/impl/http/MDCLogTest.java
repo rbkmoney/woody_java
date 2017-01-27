@@ -2,13 +2,13 @@ package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.MDCUtils;
 import com.rbkmoney.woody.api.event.*;
+import com.rbkmoney.woody.api.flow.error.WRuntimeException;
 import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerServiceSrv;
 import com.rbkmoney.woody.rpc.test_error;
 import com.rbkmoney.woody.thrift.impl.http.event.*;
-import com.rbkmoney.woody.thrift.impl.http.generator.TimestampIdGenerator;
+import com.rbkmoney.woody.api.generator.TimestampIdGenerator;
 import org.apache.thrift.TException;
-import org.apache.thrift.transport.TTransportException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,37 +29,28 @@ public class MDCLogTest extends AbstractTest {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    ClientEventListener clientEventListener = new ClientEventListener<THClientEvent>(){
+    ClientEventListener clientEventListener = (ClientEventListener<THClientEvent>) event -> {
+        assertNotNull(MDC.get(MDCUtils.SPAN_ID));
+        assertNotNull(MDC.get(MDCUtils.TRACE_ID));
+        assertNotNull(MDC.get(MDCUtils.PARENT_ID));
 
-        @Override
-        public void notifyEvent(THClientEvent event) {
-            assertNotNull(MDC.get(MDCUtils.SPAN_ID));
-            assertNotNull(MDC.get(MDCUtils.TRACE_ID));
-            assertNotNull(MDC.get(MDCUtils.PARENT_ID));
-
-            log.info("{} {} {}", event.getTraceId(), event.getSpanId(), event.getParentId());
-            assertEquals(MDC.get(MDCUtils.SPAN_ID), event.getSpanId());
-            assertEquals(MDC.get(MDCUtils.TRACE_ID), event.getTraceId());
-            assertEquals(MDC.get(MDCUtils.PARENT_ID), event.getParentId());
-        }
+        assertEquals(MDC.get(MDCUtils.SPAN_ID), event.getSpanId());
+        assertEquals(MDC.get(MDCUtils.TRACE_ID), event.getTraceId());
+        assertEquals(MDC.get(MDCUtils.PARENT_ID), event.getParentId());
     };
 
-    ServiceEventListener serviceEventListener = new ServiceEventListener<THServiceEvent>(){
+    ServiceEventListener serviceEventListener = (ServiceEventListener<THServiceEvent>) event -> {
+        assertNotNull(MDC.get(MDCUtils.SPAN_ID));
+        assertNotNull(MDC.get(MDCUtils.TRACE_ID));
+        assertNotNull(MDC.get(MDCUtils.PARENT_ID));
 
-        @Override
-        public void notifyEvent(THServiceEvent event) {
-            assertNotNull(MDC.get(MDCUtils.SPAN_ID));
-            assertNotNull(MDC.get(MDCUtils.TRACE_ID));
-            assertNotNull(MDC.get(MDCUtils.PARENT_ID));
-
-            assertEquals(MDC.get(MDCUtils.SPAN_ID), event.getSpanId());
-            assertEquals(MDC.get(MDCUtils.TRACE_ID), event.getTraceId());
-            assertEquals(MDC.get(MDCUtils.PARENT_ID), event.getParentId());
-        }
+        assertEquals(MDC.get(MDCUtils.SPAN_ID), event.getSpanId());
+        assertEquals(MDC.get(MDCUtils.TRACE_ID), event.getTraceId());
+        assertEquals(MDC.get(MDCUtils.PARENT_ID), event.getParentId());
     };
 
-    OwnerServiceSrv.Iface client1 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), clientEventListener, getUrlString("/rpc"));
-    OwnerServiceSrv.Iface client2 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), clientEventListener, getUrlString("/rpc"));
+    OwnerServiceSrv.Iface client1 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(new HttpClientEventLogListener(), new ClientEventLogListener(), clientEventListener), getUrlString("/rpc"));
+    OwnerServiceSrv.Iface client2 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(new HttpClientEventLogListener(), new ClientEventLogListener(), clientEventListener), getUrlString("/rpc"));
     OwnerServiceSrv.Iface handler = new OwnerServiceStub() {
         @Override
         public Owner getErrOwner(int id) throws TException, test_error {
@@ -78,7 +69,7 @@ public class MDCLogTest extends AbstractTest {
         }
     };
 
-    Servlet servlet = createThrftRPCService(OwnerServiceSrv.Iface.class, handler, serviceEventListener);
+    Servlet servlet = createThriftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener(new HttpServiceEventLogListener(), new ServiceEventLogListener(), serviceEventListener));
 
     @Before
     public void before() {
@@ -101,7 +92,7 @@ public class MDCLogTest extends AbstractTest {
         out.println("Root call>");
         try {
             client1.getErrOwner(500);
-        } catch (TTransportException e) {
+        } catch (WRuntimeException e) {
         }
         out.println("<");
 

@@ -4,6 +4,8 @@ import com.rbkmoney.woody.api.event.ClientEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 /**
  * Created by vpankrashkin on 12.05.16.
  */
@@ -27,7 +29,7 @@ public class ClientEventLogListener implements ClientEventListener<THClientEvent
                     log.info("CLIENT Event: {}, Status: {}, Time: {}, Duration: {}", event.getEventType(), event.isSuccessfullCall() ? "ok" : "error", event.getTimeStamp(), event.getDuration());
                     break;
                 case ERROR:
-                    log.info("CLIENT Event: {}, ErrType: {}, TErrType: {}, ErrName: {},  Time: {}, Duration: {}", event.getEventType(), event.getErrorType(), event.getThriftErrorType(), event.getErrorName(), event.getTimeStamp(), event.getDuration());
+                    log.info("CLIENT Event: {}, ErrType: {}, TErrType: {}, ErrName: {},  Time: {}, Duration: {}", event.getEventType(), event.getErrorDefinition(), event.getThriftErrorType(), Optional.ofNullable(event.getErrorDefinition()).map(ed -> ed.getErrorName()).orElse(""), event.getTimeStamp(), event.getDuration());
                     break;
                 default:
                     log.info("CLIENT Unknown error: {}", event);

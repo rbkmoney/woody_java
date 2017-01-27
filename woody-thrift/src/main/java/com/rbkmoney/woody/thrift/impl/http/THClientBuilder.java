@@ -2,28 +2,31 @@ package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.AbstractClientBuilder;
 import com.rbkmoney.woody.api.event.ClientEventListener;
+import com.rbkmoney.woody.api.flow.WFlow;
+import com.rbkmoney.woody.api.flow.error.ErrorMapProcessor;
+import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
+import com.rbkmoney.woody.api.flow.error.WErrorMapper;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.api.interceptor.CommonInterceptor;
 import com.rbkmoney.woody.api.interceptor.CompositeInterceptor;
 import com.rbkmoney.woody.api.interceptor.ContainerCommonInterceptor;
+import com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle;
 import com.rbkmoney.woody.api.provider.ProviderEventInterceptor;
-import com.rbkmoney.woody.api.proxy.InstanceMethodCaller;
-import com.rbkmoney.woody.api.proxy.MethodCallTracer;
-import com.rbkmoney.woody.api.trace.context.EmptyTracer;
+import com.rbkmoney.woody.api.trace.ContextSpan;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
+import com.rbkmoney.woody.api.trace.context.metadata.MetadataExtensionKit;
 import com.rbkmoney.woody.api.transport.TransportEventInterceptor;
+import com.rbkmoney.woody.thrift.impl.http.error.THErrorMapProcessor;
 import com.rbkmoney.woody.thrift.impl.http.event.THClientEvent;
-import com.rbkmoney.woody.thrift.impl.http.generator.SnowflakeIdGenerator;
-import com.rbkmoney.woody.thrift.impl.http.generator.TimestampIdGenerator;
-import com.rbkmoney.woody.thrift.impl.http.interceptor.THCMessageRequestInterceptor;
-import com.rbkmoney.woody.thrift.impl.http.interceptor.THCMessageResponseInterceptor;
-import com.rbkmoney.woody.thrift.impl.http.interceptor.THCRequestInterceptor;
-import com.rbkmoney.woody.thrift.impl.http.interceptor.THCResponseInterceptor;
+import com.rbkmoney.woody.thrift.impl.http.interceptor.THMessageInterceptor;
+import com.rbkmoney.woody.thrift.impl.http.interceptor.THTransportInterceptor;
+import com.rbkmoney.woody.thrift.impl.http.interceptor.ext.MetadataExtensionBundle;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.thrift.TServiceClient;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.protocol.TProtocolFactory;
 import org.apache.thrift.transport.THttpClient;
 import org.apache.thrift.transport.TTransport;
 
@@ -31,23 +34,37 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 /**
  * Created by vpankrashkin on 28.04.16.
  */
 public class THClientBuilder extends AbstractClientBuilder {
-    private static final IdGenerator DEFAULT_ID_GENERATOR = new SnowflakeIdGenerator();
 
     private HttpClient httpClient;
+    private WErrorMapper errorMapper;
+    private List<MetadataExtensionKit> metadataExtensionKits;
 
     public THClientBuilder() {
         this.httpClient = createHttpClient();
-        super.withIdGenerator(DEFAULT_ID_GENERATOR);
+        super.withIdGenerator(WFlow.createDefaultIdGenerator());
+    }
+
+    public THClientBuilder withErrorMapper(WErrorMapper errorMapper) {
+        this.errorMapper = errorMapper;
+        return this;
     }
 
     public THClientBuilder withHttpClient(HttpClient httpClient) {
         this.httpClient = httpClient;
+        return this;
+    }
+
+    public THClientBuilder withMetaExtensions(List<MetadataExtensionKit> extensionKits) {
+        this.metadataExtensionKits = extensionKits;
         return this;
     }
 
@@ -71,15 +88,8 @@ public class THClientBuilder extends AbstractClientBuilder {
     }
 
     @Override
-    protected MethodCallTracer getOnCallMetadataExtender(Class iface) {
-        return new EmptyTracer() {
-            THErrorMetadataExtender metadataExtender = new THErrorMetadataExtender(iface);
-
-            @Override
-            public void callError(Object[] args, InstanceMethodCaller caller, Throwable error) {
-                metadataExtender.extendClientError(TraceContext.getCurrentTraceData());
-            }
-        };
+    protected BiConsumer<WErrorDefinition, ContextSpan> getErrorDefinitionConsumer() {
+        return (eDef, contextSpan) -> {};
     }
 
     @Override
@@ -108,27 +118,27 @@ public class THClientBuilder extends AbstractClientBuilder {
     }
 
     @Override
+    protected ErrorMapProcessor createErrorMapProcessor(Class iface) {
+        return THErrorMapProcessor.getInstance(true, iface, errorMapper);
+    }
+
+    @Override
     protected <T> T createProviderClient(Class<T> iface) {
         try {
             THttpClient tHttpClient = new THttpClient(getAddress().toString(), getHttpClient(), createTransportInterceptor());
             TProtocol tProtocol = createProtocol(tHttpClient);
-            return createThriftClient(iface, tProtocol, createMessageInterceptor());
+            return createThriftClient(iface, tProtocol);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    @Override
-    protected ProxyBuilder createProxyBuilder(Class iface) {
-        ProxyBuilder proxyBuilder = super.createProxyBuilder(iface);
-        proxyBuilder.setStartEventPhases(ProxyBuilder.EVENT_DISABLE);
-        proxyBuilder.setEndEventPhases(ProxyBuilder.EVENT_BEFORE_CONTEXT_DESTROY);
-        proxyBuilder.setErrorEventPhases(ProxyBuilder.EVENT_AFTER_CALL_END);
-        return proxyBuilder;
+    protected TProtocolFactory createTransferProtocolFactory() {
+        return new TBinaryProtocol.Factory();
     }
 
     protected TProtocol createProtocol(TTransport tTransport) {
-        return new TBinaryProtocol(tTransport);
+        return BuilderUtils.wrapProtocolFactory(createTransferProtocolFactory(), createMessageInterceptor(), true).getProtocol(tTransport);
     }
 
     protected HttpClient createHttpClient() {
@@ -137,19 +147,20 @@ public class THClientBuilder extends AbstractClientBuilder {
 
     protected CommonInterceptor createMessageInterceptor() {
         return new CompositeInterceptor(
-                new ContainerCommonInterceptor(new THCMessageRequestInterceptor(), new THCMessageResponseInterceptor()),
+                new ContainerCommonInterceptor(new THMessageInterceptor(true, true), new THMessageInterceptor(true, false)),
                 new ProviderEventInterceptor(getOnCallStartEventListener(), null)
         );
     }
 
     protected CommonInterceptor createTransportInterceptor() {
+        List<ExtensionBundle> extensionBundles =  Arrays.asList(new MetadataExtensionBundle(metadataExtensionKits == null ? Collections.EMPTY_LIST : metadataExtensionKits));
         return new CompositeInterceptor(
-                new ContainerCommonInterceptor(new THCRequestInterceptor(), new THCResponseInterceptor()),
-                new TransportEventInterceptor(getOnSendEventListener(), getOnReceiveEventListener())
+                new ContainerCommonInterceptor(new THTransportInterceptor(extensionBundles, true, true), new THTransportInterceptor(extensionBundles,true, false)),
+                new TransportEventInterceptor(getOnSendEventListener(), getOnReceiveEventListener(), null)
         );
     }
 
-    protected static <T> T createThriftClient(Class<T> clientIface, TProtocol tProtocol, CommonInterceptor interceptor) {
+    protected static <T> T createThriftClient(Class<T> clientIface, TProtocol tProtocol) {
         try {
             Optional<? extends Class> clientClass = Arrays.stream(clientIface.getDeclaringClass().getClasses())
                     .filter(cl -> cl.getSimpleName().equals("Client")).findFirst();
@@ -167,10 +178,9 @@ public class THClientBuilder extends AbstractClientBuilder {
                 throw new IllegalArgumentException("Client class doesn't have required constructor to be created");
             }
             TServiceClient tClient = (TServiceClient) constructor.newInstance(tProtocol);
-            tClient.setInterceptor(interceptor);
             return (T) tClient;
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalArgumentException("Failed to create provider client", e);
+            throw new IllegalArgumentException("Failed to createCtxBundle provider client", e);
         }
     }
 

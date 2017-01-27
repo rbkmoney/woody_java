@@ -4,9 +4,10 @@ package com.rbkmoney.woody.api.generator;
  * Created by vpankrashkin on 22.04.16.
  */
 public interface IdGenerator {
-    String NO_PARENT_ID = "undefined";
 
-    String generateId(long timestamp);
+    String generateId();
 
-    String generateId(long timestamp, int counter);
+    String generateId(String prefix);
+
+    String generateId(String prefix, int counter);
 }

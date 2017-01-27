@@ -10,6 +10,11 @@ public class THRequestInterceptionException extends RuntimeException {
     private final Object reason;
 
     public THRequestInterceptionException(TTransportErrorType transportErrorType, Object reason) {
+        this(transportErrorType, reason, null);
+    }
+
+    public THRequestInterceptionException(TTransportErrorType transportErrorType, Object reason, Throwable cause) {
+        super(cause);
         errorType = transportErrorType;
         this.reason = reason;
     }
