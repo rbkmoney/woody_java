@@ -2,6 +2,7 @@ package com.rbkmoney.woody.thrift.impl.http.error;
 
 import com.rbkmoney.woody.api.flow.error.*;
 import com.rbkmoney.woody.api.trace.ContextSpan;
+import com.rbkmoney.woody.api.trace.ContextUtils;
 import com.rbkmoney.woody.api.trace.MetadataProperties;
 
 /**
@@ -14,7 +15,7 @@ public class THSystemErrorMapper implements WErrorMapper {
         if (t instanceof WRuntimeException) {
             return ((WRuntimeException) t).getErrorDefinition();
         } else {
-            WErrorDefinition errorDefinition = contextSpan.getMetadata().getValue(MetadataProperties.ERROR_DEFINITION);
+            WErrorDefinition errorDefinition = ContextUtils.getErrorDefinition(contextSpan);
             if (errorDefinition != null) {
                 WErrorType errorType = errorDefinition.getErrorType();
                 if (errorType == WErrorType.UNEXPECTED_ERROR ||

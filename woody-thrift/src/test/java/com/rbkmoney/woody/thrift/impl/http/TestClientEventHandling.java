@@ -2,9 +2,7 @@ package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.event.CallType;
 import com.rbkmoney.woody.api.event.ClientEventListener;
-import com.rbkmoney.woody.api.flow.error.WErrorSource;
-import com.rbkmoney.woody.api.flow.error.WErrorType;
-import com.rbkmoney.woody.api.flow.error.WRuntimeException;
+import com.rbkmoney.woody.api.flow.error.*;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
 import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerServiceSrv;
@@ -14,6 +12,7 @@ import com.rbkmoney.woody.api.generator.TimestampIdGenerator;
 import org.apache.thrift.TException;
 import org.junit.Test;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
@@ -29,6 +28,10 @@ public class TestClientEventHandling extends AbstractTest {
                 switch (id) {
                     case 0:
                         throw new RuntimeException("err");
+                    case 10:
+                        throw new WUnavailableResultException("err");
+                    case 20:
+                        throw new WUndefinedResultException("err");
                     case 1:
                         return new Owner(1, "name1");
                     default:
@@ -79,6 +82,8 @@ public class TestClientEventHandling extends AbstractTest {
                     assertFalse(thClientEvent.isSuccessfullCall());
                     assertEquals(WErrorType.BUSINESS_ERROR, thClientEvent.getErrorDefinition().getErrorType());
                     assertEquals("test_error", thClientEvent.getErrorDefinition().getErrorName());
+                    assertEquals("Error was generated outside of the client", WErrorSource.EXTERNAL, thClientEvent.getErrorDefinition().getGenerationSource());
+                    assertEquals("This is internal service error", WErrorSource.INTERNAL, thClientEvent.getErrorDefinition().getErrorSource());
                     assertNull(thClientEvent.getThriftErrorType());
                     break;
                 default:
@@ -178,6 +183,50 @@ public class TestClientEventHandling extends AbstractTest {
         try {
             client.getOwner(0);
         } catch (TException | WRuntimeException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testUnavailableResultError() {
+        addServlet(createMutableTServlet(OwnerServiceSrv.Iface.class, handler), "/");
+        AtomicBoolean hasErr = new AtomicBoolean();
+        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
+            switch (thClientEvent.getEventType()) {
+                case ERROR:
+                    assertFalse(thClientEvent.isSuccessfullCall());
+                    assertEquals(new Integer(503), thClientEvent.getThriftResponseStatus());
+                    hasErr.set(true);
+                    break;
+            }
+        });
+        try {
+            client.getOwner(10);
+            fail();
+        } catch (TException| WUnavailableResultException e) {
+            assertTrue(hasErr.get());
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testUndefinedResultError() {
+        addServlet(createMutableTServlet(OwnerServiceSrv.Iface.class, handler), "/");
+        AtomicBoolean hasErr = new AtomicBoolean();
+        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
+            switch (thClientEvent.getEventType()) {
+                case ERROR:
+                    assertFalse(thClientEvent.isSuccessfullCall());
+                    assertEquals(new Integer(504), thClientEvent.getThriftResponseStatus());
+                    hasErr.set(true);
+                    break;
+            }
+        });
+        try {
+            client.getOwner(20);
+            fail();
+        } catch (TException| WUndefinedResultException e) {
+            assertTrue(hasErr.get());
             e.printStackTrace();
         }
     }

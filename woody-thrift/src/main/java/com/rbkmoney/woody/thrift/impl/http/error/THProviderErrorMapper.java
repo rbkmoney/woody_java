@@ -43,6 +43,7 @@ public class THProviderErrorMapper implements WErrorMapper {
                 errorDefinition.setErrorType(WErrorType.BUSINESS_ERROR);
                 errorDefinition.setErrorSource(WErrorSource.INTERNAL);
                 errorDefinition.setErrorReason(responseInfo.getErrReason());
+                errorDefinition.setErrorName(responseInfo.getErrReason());
             }
         } else if (status == 503) {
             errorDefinition = new WErrorDefinition(WErrorSource.EXTERNAL);
@@ -157,7 +158,7 @@ public class THProviderErrorMapper implements WErrorMapper {
     @Override
     public WErrorDefinition mapToDef(Throwable t, ContextSpan contextSpan) {
         if (isThriftError(t) || isInternalTransportErr(t)) {
-            WErrorDefinition errorDefinition = contextSpan.getMetadata().getValue(MetadataProperties.ERROR_DEFINITION);
+            WErrorDefinition errorDefinition = ContextUtils.getErrorDefinition(contextSpan);
             //If transport interceptor has already read error def data, this data has more priority than thrift error
             //Woody error def always overrides other errors on provider level (except woody transport error)
             if (errorDefinition != null && !isInternalTransportErr(t)) {
