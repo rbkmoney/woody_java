@@ -136,16 +136,16 @@ public class THProviderErrorMapper implements WErrorMapper {
                     }
                     break;
                 case UNAVAILABLE_RESULT:
-                    status = errorDefinition.getErrorSource() == WErrorSource.INTERNAL ? 503 : 502;
+                    status = errorDefinition.getGenerationSource() == WErrorSource.INTERNAL ? 503 : 502;
                     errClass = WErrorType.UNAVAILABLE_RESULT.getKey();
                     break;
                 case UNDEFINED_RESULT:
-                    status = errorDefinition.getErrorSource() == WErrorSource.INTERNAL ? 504 : 502;
+                    status = errorDefinition.getGenerationSource() == WErrorSource.INTERNAL ? 504 : 502;
                     errClass = WErrorType.UNDEFINED_RESULT.getKey();
                     break;
                 case UNEXPECTED_ERROR:
                 default:
-                    status = errorDefinition.getErrorSource() == WErrorSource.INTERNAL ? 500 : 502;
+                    status = errorDefinition.getGenerationSource() == WErrorSource.INTERNAL ? 500 : 502;
                     errClass = WErrorType.UNEXPECTED_ERROR.getKey();
                     break;
             }

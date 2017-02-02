@@ -106,7 +106,7 @@ public class MDCLogTest extends AbstractTest {
             Assert.fail();
         } catch (WUnavailableResultException e) {
             assertEquals(e.getErrorDefinition().getGenerationSource(), WErrorSource.EXTERNAL);
-            assertEquals(e.getErrorDefinition().getErrorSource(), WErrorSource.INTERNAL);
+            assertEquals(e.getErrorDefinition().getErrorSource(), WErrorSource.EXTERNAL);
             assertEquals(e.getErrorDefinition().getErrorType(), WErrorType.UNAVAILABLE_RESULT);
         }
 
@@ -116,7 +116,7 @@ public class MDCLogTest extends AbstractTest {
             Assert.fail();
         } catch (WUndefinedResultException e) {
             assertEquals(e.getErrorDefinition().getGenerationSource(), WErrorSource.EXTERNAL);
-            assertEquals(e.getErrorDefinition().getErrorSource(), WErrorSource.INTERNAL);
+            assertEquals(e.getErrorDefinition().getErrorSource(), WErrorSource.EXTERNAL);
             assertEquals(e.getErrorDefinition().getErrorType(), WErrorType.UNDEFINED_RESULT);
         }
 

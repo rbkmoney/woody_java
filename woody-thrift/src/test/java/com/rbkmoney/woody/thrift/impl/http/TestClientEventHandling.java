@@ -142,7 +142,7 @@ public class TestClientEventHandling extends AbstractTest {
     }
 
     @Test
-    public void testUnexpectedError() {
+    public void testUnexpectedError() throws TException {
         addServlet(createMutableTServlet(OwnerServiceSrv.Iface.class, handler), "/");
 
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
@@ -182,13 +182,13 @@ public class TestClientEventHandling extends AbstractTest {
         });
         try {
             client.getOwner(0);
-        } catch (TException | WRuntimeException e) {
+        } catch (WRuntimeException e) {
             e.printStackTrace();
         }
     }
 
     @Test
-    public void testUnavailableResultError() {
+    public void testUnavailableResultError() throws TException {
         addServlet(createMutableTServlet(OwnerServiceSrv.Iface.class, handler), "/");
         AtomicBoolean hasErr = new AtomicBoolean();
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
@@ -203,14 +203,14 @@ public class TestClientEventHandling extends AbstractTest {
         try {
             client.getOwner(10);
             fail();
-        } catch (TException| WUnavailableResultException e) {
+        } catch (WUnavailableResultException e) {
             assertTrue(hasErr.get());
             e.printStackTrace();
         }
     }
 
     @Test
-    public void testUndefinedResultError() {
+    public void testUndefinedResultError() throws TException {
         addServlet(createMutableTServlet(OwnerServiceSrv.Iface.class, handler), "/");
         AtomicBoolean hasErr = new AtomicBoolean();
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
@@ -225,7 +225,7 @@ public class TestClientEventHandling extends AbstractTest {
         try {
             client.getOwner(20);
             fail();
-        } catch (TException| WUndefinedResultException e) {
+        } catch (WUndefinedResultException e) {
             assertTrue(hasErr.get());
             e.printStackTrace();
         }
