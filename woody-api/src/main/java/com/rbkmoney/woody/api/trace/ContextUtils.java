@@ -1,5 +1,6 @@
 package com.rbkmoney.woody.api.trace;
 
+import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
 import com.rbkmoney.woody.api.trace.context.metadata.MetadataExtension;
 
@@ -43,6 +44,10 @@ public class ContextUtils {
 
     public static boolean hasCallErrors(ContextSpan span) {
         return span.getMetadata().containsKey(MetadataProperties.CALL_ERROR);
+    }
+
+    public static WErrorDefinition getErrorDefinition(ContextSpan span) {
+        return span.getMetadata().getValue(MetadataProperties.ERROR_DEFINITION);
     }
 
     public static void tryThrowInterceptionError(ContextSpan span) throws Throwable {
