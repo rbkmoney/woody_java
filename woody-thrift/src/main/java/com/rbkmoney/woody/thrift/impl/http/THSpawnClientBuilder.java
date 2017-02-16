@@ -8,17 +8,24 @@ import com.rbkmoney.woody.api.proxy.InvocationTargetProvider;
 import com.rbkmoney.woody.api.proxy.SpawnTargetProvider;
 import com.rbkmoney.woody.api.trace.context.metadata.MetadataExtensionKit;
 import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.HttpClients;
 
 import java.net.URI;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 /**
  * Created by vpankrashkin on 09.06.16.
- *
+ * <p>
  * This builder provides the ability to build thread-safe clients around not thread-safe Thrift clients.
  * It creates new Thrift client instance for every call which is dropped after call finishes.
  */
 public class THSpawnClientBuilder extends THClientBuilder {
+
+    public THSpawnClientBuilder() {
+        withHttpClient(createHttpClient());
+    }
 
     @Override
     public THSpawnClientBuilder withErrorMapper(WErrorMapper errorMapper) {
@@ -61,9 +68,36 @@ public class THSpawnClientBuilder extends THClientBuilder {
         }
     }
 
+    @Override
+    protected HttpClient createHttpClient() {
+        return HttpClients.createMinimal();
+    }
+
     private <T> InvocationTargetProvider<T> createTargetProvider(Class<T> iface) {
-            SpawnTargetProvider<T> targetProvider = new SpawnTargetProvider<>(iface, () -> createProviderClient(iface));
-            return targetProvider;
+        SpawnTargetProvider<T> targetProvider = new THSpawnTargetProvider<>(
+                iface,
+                () -> createProviderClient(iface),
+                this::destroyProviderClient,
+                isCustomHttpClient());
+        return targetProvider;
+    }
+
+    private static class THSpawnTargetProvider<T> extends SpawnTargetProvider<T> {
+        private final boolean customClient;
+        private final BiConsumer<Object, Boolean> releaseConsumer;
+
+
+        public THSpawnTargetProvider(Class<T> targetType, Supplier<T> supplier, BiConsumer<Object, Boolean> releaseConsumer, boolean customClient) {
+            super(targetType, supplier);
+            this.customClient = customClient;
+            this.releaseConsumer = releaseConsumer;
+        }
+
+        @Override
+        public void releaseTarget(T target) {
+            releaseConsumer.accept(target, customClient);
+            super.releaseTarget(target);
+        }
     }
 
 }

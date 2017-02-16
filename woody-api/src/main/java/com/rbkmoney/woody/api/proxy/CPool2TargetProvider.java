@@ -16,34 +16,30 @@ import java.util.function.Supplier;
 public class CPool2TargetProvider<T> implements InvocationTargetProvider<T> {
     private final ObjectPool<T> pool;
     private final Class<T> targetType;
-    private final Supplier<T> supplier;
 
-    public static <T> CPool2TargetProvider<T> newInstance(Class<T> targetType, Supplier<T> supplier, GenericObjectPoolConfig config, AbandonedConfig abandonedConfig) {
+    public static <T> CPool2TargetProvider<T> newInstance(Class<T> targetType, Supplier<TargetObjectFactory<T>> objFactoryFunc, GenericObjectPoolConfig config, AbandonedConfig abandonedConfig) {
         if (config == null) {
-            return new CPool2TargetProvider<>(targetType, supplier);
+            return new CPool2TargetProvider<>(targetType, objFactoryFunc);
         } else if (abandonedConfig == null) {
-            return new CPool2TargetProvider<>(targetType, supplier, config);
+            return new CPool2TargetProvider<>(targetType, objFactoryFunc, config);
         } else {
-            return new CPool2TargetProvider<>(targetType, supplier, config, abandonedConfig);
+            return new CPool2TargetProvider<>(targetType, objFactoryFunc, config, abandonedConfig);
         }
     }
 
-    public CPool2TargetProvider(Class<T> targetType, Supplier<T> supplier) {
-        this.supplier = supplier;
+    public CPool2TargetProvider(Class<T> targetType, Supplier<TargetObjectFactory<T>> objFactoryFunc) {
         this.targetType = targetType;
-        this.pool = new GenericObjectPool<>(new TargetObjectFactory<>(this::createTarget));
+        this.pool = new GenericObjectPool<>(objFactoryFunc.get());
     }
 
-    public CPool2TargetProvider(Class<T> targetType, Supplier<T> supplier, GenericObjectPoolConfig config) {
-        this.supplier = supplier;
+    public CPool2TargetProvider(Class<T> targetType, Supplier<TargetObjectFactory<T>> objFactoryFunc, GenericObjectPoolConfig config) {
         this.targetType = targetType;
-        this.pool = new GenericObjectPool<>(new TargetObjectFactory<>(this::createTarget), config);
+        this.pool = new GenericObjectPool<>(objFactoryFunc.get(), config);
     }
 
-    public CPool2TargetProvider(Class<T> targetType, Supplier<T> supplier, GenericObjectPoolConfig config, AbandonedConfig abandonedConfig) {
-        this.supplier = supplier;
+    public CPool2TargetProvider(Class<T> targetType, Supplier<TargetObjectFactory<T>> objFactoryFunc, GenericObjectPoolConfig config, AbandonedConfig abandonedConfig) {
         this.targetType = targetType;
-        this.pool = new GenericObjectPool<>(new TargetObjectFactory<>(this::createTarget), config, abandonedConfig);
+        this.pool = new GenericObjectPool<>(objFactoryFunc.get(), config, abandonedConfig);
     }
 
     @Override
@@ -84,11 +80,7 @@ public class CPool2TargetProvider<T> implements InvocationTargetProvider<T> {
         return false;
     }
 
-    protected T createTarget() {
-        return supplier.get();
-    }
-
-    private static class TargetObjectFactory<T> extends BasePooledObjectFactory<T> {
+    public static class TargetObjectFactory<T> extends BasePooledObjectFactory<T> {
         private final Supplier<T> targetSupplier;
 
         public TargetObjectFactory(Supplier<T> targetSupplier) {

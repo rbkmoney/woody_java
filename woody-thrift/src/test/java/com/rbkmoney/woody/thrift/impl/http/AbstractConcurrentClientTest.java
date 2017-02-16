@@ -57,25 +57,24 @@ public abstract class AbstractConcurrentClientTest extends AbstractTest {
 
         ExecutorService executor = Executors.newFixedThreadPool(nThreads);
 
-        Collection<Callable> callableCollection = Collections.nCopies(nThreads, new Callable<Object>() {
-            @Override
-            public Object call() {
-                while (!Thread.currentThread().isInterrupted()) {
-                    try {
-                        client.getOwner(0);
-                        clientCalls.incrementAndGet();
-                        client.setOwner(new Owner(0, ""));
-                        clientCalls.incrementAndGet();
-                        //Thread.sleep(100);
+        Collection<Callable> callableCollection = Collections.nCopies(nThreads, () -> {
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    client.getOwner(0);
+                    clientCalls.incrementAndGet();
+                    client.setOwner(new Owner(0, ""));
+                    clientCalls.incrementAndGet();
+                    //Thread.sleep(100);
 
-                    } catch (Exception e) {
-                        if (!(e instanceof InterruptedException))
-                            e.printStackTrace();
-                    }
+                } catch (Exception e) {
+                    if (!(e instanceof InterruptedException))
+                        e.printStackTrace();
+                } finally {
+
                 }
-                return null;
-
             }
+            return null;
+
         });
 
         callableCollection.stream().forEach((callable -> executor.submit(callable)));
