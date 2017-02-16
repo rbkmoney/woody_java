@@ -22,7 +22,10 @@ import com.rbkmoney.woody.thrift.impl.http.interceptor.THMessageInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THTransportInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.ext.MetadataExtensionBundle;
 import org.apache.http.client.HttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.thrift.TServiceClient;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
@@ -30,6 +33,7 @@ import org.apache.thrift.protocol.TProtocolFactory;
 import org.apache.thrift.transport.THttpClient;
 import org.apache.thrift.transport.TTransport;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
@@ -49,7 +53,6 @@ public class THClientBuilder extends AbstractClientBuilder {
     private List<MetadataExtensionKit> metadataExtensionKits;
 
     public THClientBuilder() {
-        this.httpClient = createHttpClient();
         super.withIdGenerator(WFlow.createDefaultIdGenerator());
     }
 
@@ -83,8 +86,17 @@ public class THClientBuilder extends AbstractClientBuilder {
         return (THClientBuilder) super.withIdGenerator(generator);
     }
 
+    public boolean isCustomHttpClient() {
+        return httpClient != null;
+    }
+
     public HttpClient getHttpClient() {
-        return httpClient;
+        if (isCustomHttpClient()) {
+            return httpClient;
+        } else {
+            return createHttpClient();
+        }
+
     }
 
     @Override
@@ -133,6 +145,23 @@ public class THClientBuilder extends AbstractClientBuilder {
         }
     }
 
+    protected void destroyProviderClient(Object client, boolean customClient) {
+        if (!customClient && client instanceof TServiceClient) {
+            TTransport tTransport = ((TServiceClient) client).getInputProtocol().getTransport();
+            if (tTransport instanceof THttpClient) {
+                HttpClient httpClient = ((THttpClient)tTransport).getHttpClient();
+                if (httpClient instanceof CloseableHttpClient) {
+                    try {
+                        ((CloseableHttpClient) httpClient).close();
+                    } catch (IOException e) {
+                        throw new RuntimeException("Failed to release HttpClient", e);
+                    }
+                }
+            }
+
+        }
+    }
+
     protected TProtocolFactory createTransferProtocolFactory() {
         return new TBinaryProtocol.Factory();
     }
@@ -142,7 +171,7 @@ public class THClientBuilder extends AbstractClientBuilder {
     }
 
     protected HttpClient createHttpClient() {
-        return HttpClientBuilder.create().build();
+        return HttpClients.createMinimal(new BasicHttpClientConnectionManager());
     }
 
     protected CommonInterceptor createMessageInterceptor() {
@@ -186,5 +215,8 @@ public class THClientBuilder extends AbstractClientBuilder {
 
     private Runnable createEventRunnable(ClientEventListener eventListener) {
         return () -> eventListener.notifyEvent(new THClientEvent(TraceContext.getCurrentTraceData()));
+    }
+
+    public void destroy() {
     }
 }

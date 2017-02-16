@@ -13,6 +13,7 @@ import org.apache.thrift.protocol.TProtocolDecorator;
 public class THSProtocolWrapper extends TProtocolDecorator {
     private final boolean isCLient;
     private final CommonInterceptor interceptor;
+    private final TProtocol protocol;
 
     /**
      * Encloses the specified protocol.
@@ -21,8 +22,13 @@ public class THSProtocolWrapper extends TProtocolDecorator {
      */
     public THSProtocolWrapper(TProtocol protocol, CommonInterceptor interceptor, boolean isCLient) {
         super(protocol);
+        this.protocol = protocol;
         this.interceptor = interceptor;
         this.isCLient = isCLient;
+    }
+
+    public TProtocol getProtocol() {
+        return protocol;
     }
 
     @Override

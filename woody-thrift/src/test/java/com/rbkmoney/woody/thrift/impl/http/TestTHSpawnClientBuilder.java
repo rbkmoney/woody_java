@@ -16,7 +16,6 @@ public class TestTHSpawnClientBuilder extends AbstractConcurrentClientTest {
         try {
             THSpawnClientBuilder clientBuilder = new THSpawnClientBuilder();
             clientBuilder.withAddress(new URI(url));
-            clientBuilder.withHttpClient(HttpClientBuilder.create().build());
             clientBuilder.withIdGenerator(idGenerator);
             clientBuilder.withEventListener(clientEventStub);
             return clientBuilder.build(iface);
