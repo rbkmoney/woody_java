@@ -7,6 +7,7 @@ import com.rbkmoney.woody.api.flow.error.WErrorType;
 import com.rbkmoney.woody.api.proxy.InstanceMethodCaller;
 import com.rbkmoney.woody.api.proxy.MethodShadow;
 import com.rbkmoney.woody.api.trace.ContextSpan;
+import com.rbkmoney.woody.api.trace.ContextUtils;
 import com.rbkmoney.woody.api.trace.Metadata;
 import com.rbkmoney.woody.api.trace.MetadataProperties;
 import com.rbkmoney.woody.thrift.impl.http.THMetadataProperties;
@@ -17,6 +18,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.function.Function;
 
@@ -49,18 +51,22 @@ public class THBusinessErrorMapper implements WErrorMapper {
             return null;
         }
 
-        WErrorDefinition errorDefinition = null;
         if (isDeclaredError(t.getClass(), caller.getTargetMethod())) {
+            WErrorDefinition errorDefinition = ContextUtils.getErrorDefinition(contextSpan);
             String errName = getDeclaredErrName(t);
-            errorDefinition = new WErrorDefinition(WErrorSource.INTERNAL);
-            errorDefinition.setErrorType(WErrorType.BUSINESS_ERROR);
-            errorDefinition.setErrorSource(WErrorSource.INTERNAL);
-            errorDefinition.setErrorReason(BUSINESS_ERROR_REASON_FUNC.apply(errName));
-            errorDefinition.setErrorName(errName);
-            errorDefinition.setErrorMessage(t.getMessage());
+            if (!(errorDefinition != null &&
+                    errorDefinition.getErrorType() == WErrorType.BUSINESS_ERROR && Objects.equals(
+                    errorDefinition.getErrorName(),errName))) {
+                errorDefinition = new WErrorDefinition(WErrorSource.INTERNAL);
+                errorDefinition.setErrorType(WErrorType.BUSINESS_ERROR);
+                errorDefinition.setErrorSource(WErrorSource.INTERNAL);
+                errorDefinition.setErrorReason(BUSINESS_ERROR_REASON_FUNC.apply(errName));
+                errorDefinition.setErrorName(errName);
+                errorDefinition.setErrorMessage(t.getMessage());
+            }
+            return errorDefinition;
         }
-
-        return errorDefinition;
+        return null;
     }
 
     @Override

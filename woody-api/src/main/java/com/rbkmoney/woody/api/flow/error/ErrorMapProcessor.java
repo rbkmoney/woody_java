@@ -37,7 +37,7 @@ public class ErrorMapProcessor {
      * */
     public Exception processMapToError(TraceData traceData) {
         ContextSpan contextSpan = isClient ? traceData.getClientSpan() : traceData.getServiceSpan();
-        WErrorDefinition errorDefinition = contextSpan.getMetadata().getValue(MetadataProperties.ERROR_DEFINITION);
+        WErrorDefinition errorDefinition = ContextUtils.getErrorDefinition(contextSpan);
         Exception ex = null;
 
         if (errorDefinition != null) {
