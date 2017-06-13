@@ -43,6 +43,11 @@ public class THSpawnClientBuilder extends THClientBuilder {
     }
 
     @Override
+    public THSpawnClientBuilder withNetworkTimeout(int timeout) {
+        return (THSpawnClientBuilder) super.withNetworkTimeout(timeout);
+    }
+
+    @Override
     public THSpawnClientBuilder withAddress(URI address) {
         return (THSpawnClientBuilder) super.withAddress(address);
     }

@@ -26,6 +26,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
+import org.apache.http.params.HttpParams;
 import org.apache.thrift.TServiceClient;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
@@ -48,6 +49,7 @@ import java.util.function.BiConsumer;
  */
 public class THClientBuilder extends AbstractClientBuilder {
 
+    private int networkTimeout = 5000;
     private HttpClient httpClient;
     private WErrorMapper errorMapper;
     private List<MetadataExtensionKit> metadataExtensionKits;
@@ -69,6 +71,15 @@ public class THClientBuilder extends AbstractClientBuilder {
     public THClientBuilder withMetaExtensions(List<MetadataExtensionKit> extensionKits) {
         this.metadataExtensionKits = extensionKits;
         return this;
+    }
+
+    public THClientBuilder withNetworkTimeout(int timeout) {
+        this.networkTimeout = timeout >= 0 ? timeout : 0;
+        return this;
+    }
+
+    public int getNetworkTimeout() {
+        return networkTimeout;
     }
 
     @Override
@@ -138,6 +149,8 @@ public class THClientBuilder extends AbstractClientBuilder {
     protected <T> T createProviderClient(Class<T> iface) {
         try {
             THttpClient tHttpClient = new THttpClient(getAddress().toString(), getHttpClient(), createTransportInterceptor());
+            tHttpClient.setConnectTimeout(networkTimeout);
+            tHttpClient.setReadTimeout(networkTimeout);
             TProtocol tProtocol = createProtocol(tHttpClient);
             return createThriftClient(iface, tProtocol);
         } catch (Exception e) {
