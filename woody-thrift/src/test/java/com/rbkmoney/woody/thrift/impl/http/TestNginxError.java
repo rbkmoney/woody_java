@@ -35,7 +35,7 @@ public class TestNginxError extends AbstractTest {
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
             switch (thClientEvent.getEventType()) {
                 case ERROR:
-                    assertFalse(thClientEvent.isSuccessfullCall());
+                    assertFalse(thClientEvent.isSuccessfulCall());
                     assertEquals(new Integer(500), thClientEvent.getThriftResponseStatus());
                     WErrorDefinition errorDefinition = thClientEvent.getErrorDefinition();
                     assertEquals(errorDefinition.getErrorSource(), WErrorSource.INTERNAL);
@@ -67,7 +67,7 @@ public class TestNginxError extends AbstractTest {
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
             switch (thClientEvent.getEventType()) {
                 case ERROR:
-                    assertFalse(thClientEvent.isSuccessfullCall());
+                    assertFalse(thClientEvent.isSuccessfulCall());
                     assertEquals(new Integer(HttpServletResponse.SC_OK), thClientEvent.getThriftResponseStatus());
                     WErrorDefinition errorDefinition = thClientEvent.getErrorDefinition();
                     assertEquals(errorDefinition.getErrorSource(), WErrorSource.INTERNAL);
@@ -97,7 +97,7 @@ public class TestNginxError extends AbstractTest {
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
             switch (thClientEvent.getEventType()) {
                 case ERROR:
-                    assertFalse(thClientEvent.isSuccessfullCall());
+                    assertFalse(thClientEvent.isSuccessfulCall());
                     assertEquals(new Integer(HttpServletResponse.SC_BAD_GATEWAY), thClientEvent.getThriftResponseStatus());
                     WErrorDefinition errorDefinition = thClientEvent.getErrorDefinition();
                     assertEquals(errorDefinition.getErrorSource(), WErrorSource.EXTERNAL);
@@ -129,7 +129,7 @@ public class TestNginxError extends AbstractTest {
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
             switch (thClientEvent.getEventType()) {
                 case ERROR:
-                    assertFalse(thClientEvent.isSuccessfullCall());
+                    assertFalse(thClientEvent.isSuccessfulCall());
                     assertEquals(new Integer(HttpServletResponse.SC_CONFLICT), thClientEvent.getThriftResponseStatus());
                     WErrorDefinition errorDefinition = thClientEvent.getErrorDefinition();
                     assertEquals(errorDefinition.getErrorSource(), WErrorSource.INTERNAL);

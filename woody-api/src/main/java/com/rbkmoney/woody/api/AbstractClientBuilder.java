@@ -73,7 +73,7 @@ public abstract class AbstractClientBuilder implements ClientBuilder {
         }
     }
 
-    public <T> T build(Class<T> iface, InvocationTargetProvider<T> targetProvider) {
+    protected  <T> T build(Class<T> iface, InvocationTargetProvider<T> targetProvider) {
         try {
             return createProxyClient(iface, targetProvider);
         } catch (Exception e) {

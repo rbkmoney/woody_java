@@ -52,8 +52,8 @@ public class MDCLogTest extends AbstractTest {
         assertEquals(MDC.get(MDCUtils.PARENT_ID), event.getParentId());
     };
 
-    OwnerServiceSrv.Iface client1 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(new HttpClientEventLogListener(), new ClientEventLogListener(), clientEventListener), getUrlString("/rpc"));
-    OwnerServiceSrv.Iface client2 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(new HttpClientEventLogListener(), new ClientEventLogListener(), clientEventListener), getUrlString("/rpc"));
+    OwnerServiceSrv.Iface client1 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener( clientEventListener), getUrlString("/rpc"));
+    OwnerServiceSrv.Iface client2 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener( clientEventListener), getUrlString("/rpc"));
     OwnerServiceSrv.Iface handler = new OwnerServiceStub() {
         @Override
         public Owner getErrOwner(int id) throws TException, test_error {
@@ -80,7 +80,7 @@ public class MDCLogTest extends AbstractTest {
         }
     };
 
-    Servlet servlet = createThriftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener(new HttpServiceEventLogListener(), new ServiceEventLogListener(), serviceEventListener));
+    Servlet servlet = createThriftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener( serviceEventListener));
 
     @Before
     public void before() {

@@ -2,6 +2,7 @@ package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.AbstractClientBuilder;
 import com.rbkmoney.woody.api.event.ClientEventListener;
+import com.rbkmoney.woody.api.event.CompositeClientEventListener;
 import com.rbkmoney.woody.api.flow.WFlow;
 import com.rbkmoney.woody.api.flow.error.ErrorMapProcessor;
 import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
@@ -17,13 +18,13 @@ import com.rbkmoney.woody.api.trace.context.TraceContext;
 import com.rbkmoney.woody.api.trace.context.metadata.MetadataExtensionKit;
 import com.rbkmoney.woody.api.transport.TransportEventInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.error.THErrorMapProcessor;
+import com.rbkmoney.woody.thrift.impl.http.event.THCEventLogListener;
 import com.rbkmoney.woody.thrift.impl.http.event.THClientEvent;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THMessageInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THTransportInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.ext.MetadataExtensionBundle;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.thrift.TServiceClient;
@@ -48,9 +49,12 @@ import java.util.function.BiConsumer;
  */
 public class THClientBuilder extends AbstractClientBuilder {
 
+    private int networkTimeout = 5000;
     private HttpClient httpClient;
     private WErrorMapper errorMapper;
     private List<MetadataExtensionKit> metadataExtensionKits;
+    private boolean logEnabled = true;
+    private THCEventLogListener logListener = new THCEventLogListener();
 
     public THClientBuilder() {
         super.withIdGenerator(WFlow.createDefaultIdGenerator());
@@ -71,6 +75,20 @@ public class THClientBuilder extends AbstractClientBuilder {
         return this;
     }
 
+    public THClientBuilder withNetworkTimeout(int timeout) {
+        this.networkTimeout = timeout >= 0 ? timeout : 0;
+        return this;
+    }
+
+    public THClientBuilder withLogEnabled(boolean enabled) {
+        this.logEnabled = enabled;
+        return this;
+    }
+
+    public int getNetworkTimeout() {
+        return networkTimeout;
+    }
+
     @Override
     public THClientBuilder withAddress(URI address) {
         return (THClientBuilder) super.withAddress(address);
@@ -78,6 +96,9 @@ public class THClientBuilder extends AbstractClientBuilder {
 
     @Override
     public THClientBuilder withEventListener(ClientEventListener listener) {
+        if (logEnabled) {
+            listener = new CompositeClientEventListener(logListener, listener);
+        }
         return (THClientBuilder) super.withEventListener(listener);
     }
 
@@ -97,6 +118,9 @@ public class THClientBuilder extends AbstractClientBuilder {
             return createHttpClient();
         }
 
+    }
+
+    public void destroy() {
     }
 
     @Override
@@ -138,6 +162,8 @@ public class THClientBuilder extends AbstractClientBuilder {
     protected <T> T createProviderClient(Class<T> iface) {
         try {
             THttpClient tHttpClient = new THttpClient(getAddress().toString(), getHttpClient(), createTransportInterceptor());
+            tHttpClient.setConnectTimeout(networkTimeout);
+            tHttpClient.setReadTimeout(networkTimeout);
             TProtocol tProtocol = createProtocol(tHttpClient);
             return createThriftClient(iface, tProtocol);
         } catch (Exception e) {
@@ -215,8 +241,5 @@ public class THClientBuilder extends AbstractClientBuilder {
 
     private Runnable createEventRunnable(ClientEventListener eventListener) {
         return () -> eventListener.notifyEvent(new THClientEvent(TraceContext.getCurrentTraceData()));
-    }
-
-    public void destroy() {
     }
 }

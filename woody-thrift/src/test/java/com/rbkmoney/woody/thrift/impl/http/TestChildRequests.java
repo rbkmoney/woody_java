@@ -29,8 +29,6 @@ public class TestChildRequests extends AbstractTest {
 
     ServiceEventListenerImpl serviceEventListener = new ServiceEventListenerImpl();
     ClientEventListener clientEventLogListener = new CompositeClientEventListener(
-            new ClientEventLogListener(),
-            new HttpClientEventLogListener()
     );
 
     OwnerServiceSrv.Iface client1 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), clientEventLogListener, getUrlString("/rpc"));
@@ -62,8 +60,6 @@ public class TestChildRequests extends AbstractTest {
     };
 
     Servlet servlet = createThriftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener<>(
-            new ServiceEventLogListener(),
-            new HttpServiceEventLogListener()
     ));
 
     @Before

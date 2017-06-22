@@ -3,6 +3,7 @@ package com.rbkmoney.woody.thrift.impl.http;
 import com.rbkmoney.woody.api.event.ClientEventListener;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.junit.Ignore;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -10,6 +11,7 @@ import java.net.URISyntaxException;
 /**
  * Created by vpankrashkin on 10.06.16.
  */
+@Ignore
 public class TestTHSpawnClientBuilder extends AbstractConcurrentClientTest {
 
     protected <T> T createThriftRPCClient(Class<T> iface, IdGenerator idGenerator, ClientEventListener eventListener, String url) {

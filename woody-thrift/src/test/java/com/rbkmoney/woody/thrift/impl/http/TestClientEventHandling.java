@@ -79,7 +79,7 @@ public class TestClientEventHandling extends AbstractTest {
                     break;
                 case ERROR:
                     assertEquals(3, order.getAndIncrement());
-                    assertFalse(thClientEvent.isSuccessfullCall());
+                    assertFalse(thClientEvent.isSuccessfulCall());
                     assertEquals(WErrorType.BUSINESS_ERROR, thClientEvent.getErrorDefinition().getErrorType());
                     assertEquals("test_error", thClientEvent.getErrorDefinition().getErrorName());
                     assertEquals("Error was generated outside of the client", WErrorSource.EXTERNAL, thClientEvent.getErrorDefinition().getGenerationSource());
@@ -168,7 +168,7 @@ public class TestClientEventHandling extends AbstractTest {
                     fail("Should not be invoked on error");
                     break;
                 case ERROR:
-                    assertFalse(thClientEvent.isSuccessfullCall());
+                    assertFalse(thClientEvent.isSuccessfulCall());
                     assertEquals(WErrorType.UNEXPECTED_ERROR, thClientEvent.getErrorDefinition().getErrorType());
                     assertEquals("Error was generated outside of the client", WErrorSource.EXTERNAL, thClientEvent.getErrorDefinition().getGenerationSource());
                     assertEquals("This is internal service error", WErrorSource.INTERNAL, thClientEvent.getErrorDefinition().getErrorSource());
@@ -194,7 +194,7 @@ public class TestClientEventHandling extends AbstractTest {
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
             switch (thClientEvent.getEventType()) {
                 case ERROR:
-                    assertFalse(thClientEvent.isSuccessfullCall());
+                    assertFalse(thClientEvent.isSuccessfulCall());
                     assertEquals(new Integer(503), thClientEvent.getThriftResponseStatus());
                     hasErr.set(true);
                     break;
@@ -216,7 +216,7 @@ public class TestClientEventHandling extends AbstractTest {
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
             switch (thClientEvent.getEventType()) {
                 case ERROR:
-                    assertFalse(thClientEvent.isSuccessfullCall());
+                    assertFalse(thClientEvent.isSuccessfulCall());
                     assertEquals(new Integer(504), thClientEvent.getThriftResponseStatus());
                     hasErr.set(true);
                     break;

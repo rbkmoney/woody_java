@@ -18,10 +18,6 @@ import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerServiceSrv;
 import com.rbkmoney.woody.thrift.impl.http.AbstractTest;
 import com.rbkmoney.woody.thrift.impl.http.OwnerServiceStub;
-import com.rbkmoney.woody.thrift.impl.http.event.ClientEventLogListener;
-import com.rbkmoney.woody.thrift.impl.http.event.HttpClientEventLogListener;
-import com.rbkmoney.woody.thrift.impl.http.event.HttpServiceEventLogListener;
-import com.rbkmoney.woody.thrift.impl.http.event.ServiceEventLogListener;
 import org.apache.thrift.TException;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,15 +65,15 @@ public class TestCustomMetadataExtension extends AbstractTest {
         }
     };
 
-    OwnerServiceSrv.Iface rpcMetaClientToMetaSrv =   createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(new HttpClientEventLogListener(), new ClientEventLogListener()), Arrays.asList(IntExtension.instance), getUrlString("/rpc_cmeta"));
-    OwnerServiceSrv.Iface rpcMetaClientToNoMetaSrv = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(new HttpClientEventLogListener(), new ClientEventLogListener()), Arrays.asList(IntExtension.instance), getUrlString("/rpc_no_cmeta"));
-    OwnerServiceSrv.Iface rpcNoMetaClientToMetaSrv = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(new HttpClientEventLogListener(), new ClientEventLogListener()), getUrlString("/rpc_cmeta"));
-    OwnerServiceSrv.Iface client1 =                  createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(new HttpClientEventLogListener(), new ClientEventLogListener()), getUrlString("/rpc_no_cmeta"));
-    OwnerServiceSrv.Iface client2 =                  createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(new HttpClientEventLogListener(), new ClientEventLogListener()), getUrlString("/rpc_no_cmeta"));
-    OwnerServiceSrv.Iface client3 =                  createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(new HttpClientEventLogListener(), new ClientEventLogListener()), getUrlString("/rpc_no_cmeta"));
+    OwnerServiceSrv.Iface rpcMetaClientToMetaSrv =   createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), Arrays.asList(IntExtension.instance), getUrlString("/rpc_cmeta"));
+    OwnerServiceSrv.Iface rpcMetaClientToNoMetaSrv = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), Arrays.asList(IntExtension.instance), getUrlString("/rpc_no_cmeta"));
+    OwnerServiceSrv.Iface rpcNoMetaClientToMetaSrv = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), getUrlString("/rpc_cmeta"));
+    OwnerServiceSrv.Iface client1 =                  createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), getUrlString("/rpc_no_cmeta"));
+    OwnerServiceSrv.Iface client2 =                  createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), getUrlString("/rpc_no_cmeta"));
+    OwnerServiceSrv.Iface client3 =                  createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), getUrlString("/rpc_no_cmeta"));
 
-    Servlet cMetaServlet =   createThriftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener(new HttpServiceEventLogListener(), new ServiceEventLogListener()), Arrays.asList(IntExtension.instance));
-    Servlet ncMetaServlet =  createThriftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener(new HttpServiceEventLogListener(), new ServiceEventLogListener()));
+    Servlet cMetaServlet =   createThriftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener(), Arrays.asList(IntExtension.instance));
+    Servlet ncMetaServlet =  createThriftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener());
 
 
     @Before

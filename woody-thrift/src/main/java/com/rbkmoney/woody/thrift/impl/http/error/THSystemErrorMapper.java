@@ -3,7 +3,6 @@ package com.rbkmoney.woody.thrift.impl.http.error;
 import com.rbkmoney.woody.api.flow.error.*;
 import com.rbkmoney.woody.api.trace.ContextSpan;
 import com.rbkmoney.woody.api.trace.ContextUtils;
-import com.rbkmoney.woody.api.trace.MetadataProperties;
 
 /**
  * Created by vpankrashkin on 26.12.16.

@@ -50,6 +50,16 @@ public class THPooledClientBuilder extends THClientBuilder {
         return (THPooledClientBuilder) super.withMetaExtensions(extensionKits);
     }
 
+    @Override
+    public THPooledClientBuilder withNetworkTimeout(int timeout) {
+        return (THPooledClientBuilder) super.withNetworkTimeout(timeout);
+    }
+
+    @Override
+    public THPooledClientBuilder withLogEnabled(boolean enabled) {
+        return (THPooledClientBuilder) super.withLogEnabled(enabled);
+    }
+
     /**
      * If you're using pooling config which spawns any threads, you need to set {@link THPooledClientBuilder#collectInstance} field to collect all built instances and shutdown them later with {@link THPooledClientBuilder#destroy()} method.
      *

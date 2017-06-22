@@ -4,6 +4,8 @@ import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerServiceSrv;
 import com.rbkmoney.woody.rpc.test_error;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TCompactProtocol;
 import org.apache.thrift.protocol.TProtocol;
@@ -124,7 +126,7 @@ public class TestLoadErrThriftRPCClient {
     }
 
     private OwnerServiceSrv.Iface createThriftClient(String url) throws TTransportException {
-        THttpClient thc = new THttpClient(url, HttpClientBuilder.create().build());
+        THttpClient thc = new THttpClient(url, HttpClients.createMinimal());
         TProtocol loPFactory = new TCompactProtocol(thc);
         return new OwnerServiceSrv.Client(loPFactory);
     }
@@ -132,7 +134,7 @@ public class TestLoadErrThriftRPCClient {
     private OwnerServiceSrv.Iface createThriftRPCClient(String url) throws URISyntaxException {
         THClientBuilder clientBuilder = new THClientBuilder();
         clientBuilder.withAddress(new URI(url));
-        clientBuilder.withHttpClient(HttpClientBuilder.create().build());
+        clientBuilder.withHttpClient(HttpClients.createMinimal());
 
         return clientBuilder.build(OwnerServiceSrv.Iface.class);
     }

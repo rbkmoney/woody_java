@@ -1,19 +1,14 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
-import com.rbkmoney.woody.api.event.CallType;
 import com.rbkmoney.woody.api.event.ClientEventListener;
 import com.rbkmoney.woody.api.flow.error.*;
 import com.rbkmoney.woody.api.generator.TimestampIdGenerator;
-import com.rbkmoney.woody.api.trace.context.TraceContext;
 import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerServiceSrv;
 import com.rbkmoney.woody.rpc.test_error;
 import com.rbkmoney.woody.thrift.impl.http.event.THClientEvent;
 import org.apache.thrift.TException;
 import org.junit.Test;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 
@@ -48,7 +43,7 @@ public class TestClientChainEventHandling extends AbstractTest {
     OwnerServiceSrv.Iface client1 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
         switch (thClientEvent.getEventType()) {
             case ERROR:
-                assertFalse(thClientEvent.isSuccessfullCall());
+                assertFalse(thClientEvent.isSuccessfulCall());
                 assertEquals(new Integer(502), thClientEvent.getThriftResponseStatus());
                 break;
         }
@@ -57,7 +52,7 @@ public class TestClientChainEventHandling extends AbstractTest {
     OwnerServiceSrv.Iface client2 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
         switch (thClientEvent.getEventType()) {
             case ERROR:
-                assertFalse(thClientEvent.isSuccessfullCall());
+                assertFalse(thClientEvent.isSuccessfulCall());
                 assertEquals(new Integer(504), thClientEvent.getThriftResponseStatus());
                 break;
         }
