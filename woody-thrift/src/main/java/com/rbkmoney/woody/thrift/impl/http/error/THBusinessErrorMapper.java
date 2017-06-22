@@ -10,7 +10,6 @@ import com.rbkmoney.woody.api.trace.ContextSpan;
 import com.rbkmoney.woody.api.trace.ContextUtils;
 import com.rbkmoney.woody.api.trace.Metadata;
 import com.rbkmoney.woody.api.trace.MetadataProperties;
-import com.rbkmoney.woody.thrift.impl.http.THMetadataProperties;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TStruct;
 

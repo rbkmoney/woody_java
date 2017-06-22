@@ -1,6 +1,7 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
 import com.rbkmoney.woody.api.AbstractServiceBuilder;
+import com.rbkmoney.woody.api.event.CompositeServiceEventListener;
 import com.rbkmoney.woody.api.event.ServiceEventListener;
 import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
 import com.rbkmoney.woody.api.flow.error.WErrorMapper;
@@ -12,6 +13,7 @@ import com.rbkmoney.woody.api.trace.context.TraceContext;
 import com.rbkmoney.woody.api.trace.context.metadata.MetadataExtensionKit;
 import com.rbkmoney.woody.api.transport.TransportEventInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.error.THErrorMapProcessor;
+import com.rbkmoney.woody.thrift.impl.http.event.THSEventLogListener;
 import com.rbkmoney.woody.thrift.impl.http.event.THServiceEvent;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THMessageInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THTransportInterceptor;
@@ -32,15 +34,25 @@ import java.util.function.BiConsumer;
  */
 public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
     private List<MetadataExtensionKit> metadataExtensionKits;
+    private boolean logEnabled = true;
+    private THSEventLogListener logListener = new THSEventLogListener();
     private WErrorMapper errorMapper;
 
     @Override
     public THServiceBuilder withEventListener(ServiceEventListener listener) {
+        if (logEnabled) {
+            listener = new CompositeServiceEventListener(logListener, listener);
+        }
         return (THServiceBuilder) super.withEventListener(listener);
     }
 
     public THServiceBuilder withMetaExtensions(List<MetadataExtensionKit> extensionKits) {
         this.metadataExtensionKits = extensionKits;
+        return this;
+    }
+
+    public THServiceBuilder withLogEnabled(boolean enabled) {
+        this.logEnabled = enabled;
         return this;
     }
 

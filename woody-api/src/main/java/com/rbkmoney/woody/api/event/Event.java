@@ -67,7 +67,7 @@ public abstract class Event {
         return getActiveSpan().getMetadata().getValue(CALL_ENDPOINT);
     }
 
-    public boolean isSuccessfullCall() {
+    public boolean isSuccessfulCall() {
         return !ContextUtils.hasCallErrors(getActiveSpan());
 
     }

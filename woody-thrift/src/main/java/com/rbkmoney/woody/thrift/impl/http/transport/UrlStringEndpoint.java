@@ -21,4 +21,11 @@ public class UrlStringEndpoint implements Endpoint<String> {
     public String getValue() {
         return url;
     }
+
+    @Override
+    public String toString() {
+        return "UrlStringEndpoint{" +
+                "url='" + url + '\'' +
+                '}';
+    }
 }

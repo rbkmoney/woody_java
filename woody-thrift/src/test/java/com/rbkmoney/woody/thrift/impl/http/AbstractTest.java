@@ -5,6 +5,8 @@ import com.rbkmoney.woody.api.event.ServiceEventListener;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.api.trace.context.metadata.MetadataExtensionKit;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
@@ -119,7 +121,7 @@ public class AbstractTest {
 
     protected <T> T createThriftClient(Class<T> iface) throws TTransportException {
         try {
-            THttpClient thc = new THttpClient(getUrlString(), HttpClientBuilder.create().build());
+            THttpClient thc = new THttpClient(getUrlString(), HttpClients.createMinimal());
             TProtocol tProtocol = new TBinaryProtocol(thc);
             return THClientBuilder.createThriftClient(iface, tProtocol);
         } catch (TTransportException e) {
@@ -140,7 +142,7 @@ public class AbstractTest {
         try {
             THClientBuilder clientBuilder = new THClientBuilder();
             clientBuilder.withAddress(new URI(url));
-            clientBuilder.withHttpClient(HttpClientBuilder.create().build());
+            clientBuilder.withHttpClient(HttpClients.createMinimal());
             clientBuilder.withIdGenerator(idGenerator);
             clientBuilder.withEventListener(eventListener);
             clientBuilder.withMetaExtensions(extensionKits);

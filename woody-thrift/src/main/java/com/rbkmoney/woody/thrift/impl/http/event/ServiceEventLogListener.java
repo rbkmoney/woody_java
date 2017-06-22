@@ -20,13 +20,13 @@ public class ServiceEventLogListener implements ServiceEventListener<THServiceEv
                     log.info("SERVER Event: {}, [{}, Type: {}], Time: {}", event.getEventType(), event.getCallName(), event.getCallType(), event.getTimeStamp());
                     break;
                 case HANDLER_RESULT:
-                    log.info("SERVER Event: {}, Status: {}, Time: {}", event.getEventType(), event.isSuccessfullCall() ? "ok" : "error", event.getTimeStamp());
+                    log.info("SERVER Event: {}, Status: {}, Time: {}", event.getEventType(), event.isSuccessfulCall() ? "ok" : "error", event.getTimeStamp());
                     break;
                 case SERVICE_RECEIVE:
-                    log.info("SERVER Event: {}, Status: {}, Url: {}, Time: {}", event.getEventType(), event.isSuccessfullCall() ? "ok" : "error", event.getEndpoint().getStringValue(), event.getTimeStamp());
+                    log.info("SERVER Event: {}, Status: {}, Url: {}, Time: {}", event.getEventType(), event.isSuccessfulCall() ? "ok" : "error", event.getEndpoint().getStringValue(), event.getTimeStamp());
                     break;
                 case SERVICE_RESULT:
-                    log.info("SERVER Event: {}, Status: {}, Time: {}, Duration: {}", event.getEventType(), event.isSuccessfullCall() ? "ok" : "error", event.getTimeStamp(), event.getDuration());
+                    log.info("SERVER Event: {}, Status: {}, Time: {}, Duration: {}", event.getEventType(), event.isSuccessfulCall() ? "ok" : "error", event.getTimeStamp(), event.getDuration());
                     break;
                 case ERROR:
                     log.info("SERVER Event: {}, ErrType: {}, TErrType: {}, ErrName: {},  Time: {}", event.getEventType(), event.getErrorDefinition(), event.getThriftErrorType(), Optional.ofNullable(event.getErrorDefinition()).map(ed -> ed.getErrorName()).orElse(""), event.getTimeStamp());
