@@ -22,7 +22,7 @@ public class THSEventLogListener implements ServiceEventListener<THServiceEvent>
         try {
             switch (event.getEventType()) {
                 case CALL_HANDLER:
-                    log.info("SRV: {}, [{}, Type: {}]", event.getEventType(), event.getCallName(), event.getCallType());
+                    log.info("SRV: {}, [{}, {}]", event.getEventType(), event.getCallName(), event.getCallType());
                     break;
                 case HANDLER_RESULT:
                     log.info("SRV: {}, CStatus: {}, HTime: {}ms", event.getEventType(), event.isSuccessfulCall() ? "ok" : "error", (System.currentTimeMillis() - event.getTimeStamp()));

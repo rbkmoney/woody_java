@@ -20,7 +20,7 @@ public class THCEventLogListener implements ClientEventListener<THClientEvent> {
         try {
             switch (event.getEventType()) {
                 case CALL_SERVICE:
-                    log.info("CLN: {}, [{}, Type: {}]", event.getEventType(), event.getCallName(), event.getCallType());
+                    log.info("CLN: {}, [{}, {}]", event.getEventType(), event.getCallName(), event.getCallType());
                     break;
                 case CLIENT_SEND:
                     HttpRequestBase request = event.getTransportRequest();

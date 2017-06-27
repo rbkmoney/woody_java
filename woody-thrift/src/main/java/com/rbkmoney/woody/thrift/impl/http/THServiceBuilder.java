@@ -61,6 +61,16 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
         return this;
     }
 
+    @Override
+    public <T> Servlet build(Class<T> iface, T serviceHandler) {
+        if (logEnabled) {
+            ServiceEventListener listener = getEventListener();
+            listener = listener == null ? logListener : new CompositeServiceEventListener(logListener, listener);
+            withEventListener(listener);
+        }
+        return super.build(iface, serviceHandler);
+    }
+
     protected BiConsumer<WErrorDefinition, ContextSpan> getErrorDefinitionConsumer() {
         return (eDef, contextSpan) -> {
             if (eDef.getErrorType() != WErrorType.BUSINESS_ERROR)
