@@ -3,6 +3,7 @@ package com.rbkmoney.woody.thrift.impl.http;
 import com.rbkmoney.woody.api.AbstractClientBuilder;
 import com.rbkmoney.woody.api.event.ClientEventListener;
 import com.rbkmoney.woody.api.event.CompositeClientEventListener;
+import com.rbkmoney.woody.api.event.EventListener;
 import com.rbkmoney.woody.api.flow.WFlow;
 import com.rbkmoney.woody.api.flow.error.ErrorMapProcessor;
 import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
@@ -96,9 +97,6 @@ public class THClientBuilder extends AbstractClientBuilder {
 
     @Override
     public THClientBuilder withEventListener(ClientEventListener listener) {
-        if (logEnabled) {
-            listener = new CompositeClientEventListener(logListener, listener);
-        }
         return (THClientBuilder) super.withEventListener(listener);
     }
 
@@ -118,6 +116,17 @@ public class THClientBuilder extends AbstractClientBuilder {
             return createHttpClient();
         }
 
+    }
+
+
+    @Override
+    public <T> T build(Class<T> iface) {
+        if (logEnabled) {
+            ClientEventListener listener = getEventListener();
+            listener = listener == null ? logListener : new CompositeClientEventListener(logListener, listener);
+            withEventListener(listener);
+        }
+        return super.build(iface);
     }
 
     public void destroy() {

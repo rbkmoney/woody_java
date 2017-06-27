@@ -14,6 +14,7 @@ import com.rbkmoney.woody.api.trace.ContextSpan;
 import com.rbkmoney.woody.api.trace.context.*;
 
 import java.net.URI;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
 /**
@@ -27,6 +28,7 @@ public abstract class AbstractClientBuilder implements ClientBuilder {
     private IdGenerator idGenerator;
     private ClientEventListener eventListener = DEFAULT_EVENT_LISTENER;
     private boolean allowObjectProxyOverriding = false;
+    private final AtomicBoolean used = new AtomicBoolean(false);
 
     @Override
     public ClientBuilder withAddress(URI address) {
@@ -63,6 +65,9 @@ public abstract class AbstractClientBuilder implements ClientBuilder {
 
     @Override
     public <T> T build(Class<T> iface) {
+        if (!used.compareAndSet(false, true)) {
+            throw new IllegalStateException("Builder already used");
+        }
         try {
             T target = createProviderClient(iface);
             return build(iface, new SingleTargetProvider<>(iface, target));

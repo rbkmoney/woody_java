@@ -9,6 +9,8 @@ import com.rbkmoney.woody.api.proxy.tracer.EventTracer;
 import com.rbkmoney.woody.api.proxy.tracer.MethodCallTracer;
 import com.rbkmoney.woody.api.proxy.tracer.TargetCallTracer;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Created by vpankrashkin on 10.05.16.
  */
@@ -18,6 +20,7 @@ public abstract class AbstractServiceBuilder<Srv> implements ServiceBuilder<Srv>
     private boolean allowObjectProxyOverriding = false;
 
     private ServiceEventListener eventListener = DEFAULT_EVENT_LISTENER;
+    private final AtomicBoolean used = new AtomicBoolean(false);
 
     @Override
     public ServiceBuilder withEventListener(ServiceEventListener listener) {
@@ -27,6 +30,9 @@ public abstract class AbstractServiceBuilder<Srv> implements ServiceBuilder<Srv>
 
     @Override
     public <T> Srv build(Class<T> iface, T serviceHandler) {
+        if (!used.compareAndSet(false, true)) {
+            throw new IllegalStateException("Builder already used");
+        }
         try {
             T target = createProxyService(iface, serviceHandler);
             return createProviderService(iface, target);
