@@ -40,6 +40,9 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
 
     @Override
     public THServiceBuilder withEventListener(ServiceEventListener listener) {
+        if (logEnabled) {
+            listener = new CompositeServiceEventListener(logListener, listener);
+        }
         return (THServiceBuilder) super.withEventListener(listener);
     }
 
