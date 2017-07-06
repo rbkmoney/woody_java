@@ -1,17 +1,13 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
-import com.rbkmoney.woody.api.event.ClientEventListener;
-import com.rbkmoney.woody.api.event.CompositeClientEventListener;
-import com.rbkmoney.woody.api.event.CompositeServiceEventListener;
 import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
 import com.rbkmoney.woody.api.flow.error.WErrorSource;
 import com.rbkmoney.woody.api.flow.error.WErrorType;
 import com.rbkmoney.woody.api.flow.error.WRuntimeException;
+import com.rbkmoney.woody.api.generator.TimestampIdGenerator;
 import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerServiceSrv;
 import com.rbkmoney.woody.rpc.test_error;
-import com.rbkmoney.woody.thrift.impl.http.event.*;
-import com.rbkmoney.woody.api.generator.TimestampIdGenerator;
 import org.apache.thrift.TException;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,12 +23,9 @@ import static java.lang.System.out;
 
 public class TestChildRequests extends AbstractTest {
 
-    ServiceEventListenerImpl serviceEventListener = new ServiceEventListenerImpl();
-    ClientEventListener clientEventLogListener = new CompositeClientEventListener(
-    );
 
-    OwnerServiceSrv.Iface client1 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), clientEventLogListener, getUrlString("/rpc"));
-    OwnerServiceSrv.Iface client2 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), clientEventLogListener, getUrlString("/rpc"));
+    OwnerServiceSrv.Iface client1 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), null, getUrlString("/rpc"));
+    OwnerServiceSrv.Iface client2 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), null, getUrlString("/rpc"));
     OwnerServiceSrv.Iface handler = new OwnerServiceStub() {
 
         @Override
@@ -59,8 +52,7 @@ public class TestChildRequests extends AbstractTest {
         }
     };
 
-    Servlet servlet = createThriftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener<>(
-    ));
+    Servlet servlet = createThriftRPCService(OwnerServiceSrv.Iface.class, handler, null);
 
     @Before
     public void before() {

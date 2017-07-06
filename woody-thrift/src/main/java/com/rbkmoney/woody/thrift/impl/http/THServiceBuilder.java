@@ -40,9 +40,6 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
 
     @Override
     public THServiceBuilder withEventListener(ServiceEventListener listener) {
-        if (logEnabled) {
-            listener = new CompositeServiceEventListener(logListener, listener);
-        }
         return (THServiceBuilder) super.withEventListener(listener);
     }
 
@@ -65,7 +62,7 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
     public <T> Servlet build(Class<T> iface, T serviceHandler) {
         if (logEnabled) {
             ServiceEventListener listener = getEventListener();
-            listener = listener == null ? logListener : new CompositeServiceEventListener(logListener, listener);
+            listener = (listener == null || listener == DEFAULT_EVENT_LISTENER) ? logListener : new CompositeServiceEventListener(logListener, listener);
             withEventListener(listener);
         }
         return super.build(iface, serviceHandler);

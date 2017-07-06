@@ -3,7 +3,6 @@ package com.rbkmoney.woody.thrift.impl.http;
 import com.rbkmoney.woody.api.AbstractClientBuilder;
 import com.rbkmoney.woody.api.event.ClientEventListener;
 import com.rbkmoney.woody.api.event.CompositeClientEventListener;
-import com.rbkmoney.woody.api.event.EventListener;
 import com.rbkmoney.woody.api.flow.WFlow;
 import com.rbkmoney.woody.api.flow.error.ErrorMapProcessor;
 import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
@@ -14,6 +13,7 @@ import com.rbkmoney.woody.api.interceptor.CompositeInterceptor;
 import com.rbkmoney.woody.api.interceptor.ContainerCommonInterceptor;
 import com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle;
 import com.rbkmoney.woody.api.provider.ProviderEventInterceptor;
+import com.rbkmoney.woody.api.proxy.InvocationTargetProvider;
 import com.rbkmoney.woody.api.trace.ContextSpan;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
 import com.rbkmoney.woody.api.trace.context.metadata.MetadataExtensionKit;
@@ -118,15 +118,14 @@ public class THClientBuilder extends AbstractClientBuilder {
 
     }
 
-
     @Override
-    public <T> T build(Class<T> iface) {
+    protected <T> T build(Class<T> iface, InvocationTargetProvider<T> targetProvider) {
         if (logEnabled) {
             ClientEventListener listener = getEventListener();
-            listener = listener == null ? logListener : new CompositeClientEventListener(logListener, listener);
+            listener = (listener == null || listener == DEFAULT_EVENT_LISTENER) ? logListener : new CompositeClientEventListener(logListener, listener);
             withEventListener(listener);
         }
-        return super.build(iface);
+        return super.build(iface, targetProvider);
     }
 
     public void destroy() {

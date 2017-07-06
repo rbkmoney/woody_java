@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Created by vpankrashkin on 10.05.16.
  */
 public abstract class AbstractServiceBuilder<Srv> implements ServiceBuilder<Srv> {
-    private static final ServiceEventListener DEFAULT_EVENT_LISTENER = (ServiceEventListener<ServiceEvent>) event -> {
+    protected static final ServiceEventListener DEFAULT_EVENT_LISTENER = (ServiceEventListener<ServiceEvent>) event -> {
     };
     private boolean allowObjectProxyOverriding = false;
 
