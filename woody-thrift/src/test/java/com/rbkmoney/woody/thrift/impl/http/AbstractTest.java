@@ -110,7 +110,9 @@ public class AbstractTest {
 
     protected <T> Servlet createThriftRPCService(Class<T> iface, T handler, ServiceEventListener eventListener, List<MetadataExtensionKit> extensionKits) {
         THServiceBuilder serviceBuilder = new THServiceBuilder();
-        serviceBuilder.withEventListener(eventListener);
+        if (eventListener != null) {
+            serviceBuilder.withEventListener(eventListener);
+        }
         serviceBuilder.withMetaExtensions(extensionKits);
         return serviceBuilder.build(iface, handler);
     }
@@ -144,7 +146,9 @@ public class AbstractTest {
             clientBuilder.withAddress(new URI(url));
             clientBuilder.withHttpClient(HttpClients.createMinimal());
             clientBuilder.withIdGenerator(idGenerator);
-            clientBuilder.withEventListener(eventListener);
+            if (eventListener != null) {
+                clientBuilder.withEventListener(eventListener);
+            }
             clientBuilder.withMetaExtensions(extensionKits);
             return clientBuilder.build(iface);
         } catch (URISyntaxException e) {

@@ -21,7 +21,7 @@ import java.util.function.BiConsumer;
  * Created by vpankrashkin on 25.04.16.
  */
 public abstract class AbstractClientBuilder implements ClientBuilder {
-    private static final ClientEventListener DEFAULT_EVENT_LISTENER = (ClientEventListener<ClientEvent>) event -> {
+    protected static final ClientEventListener DEFAULT_EVENT_LISTENER = (ClientEventListener<ClientEvent>) event -> {
     };
 
     private URI address;
