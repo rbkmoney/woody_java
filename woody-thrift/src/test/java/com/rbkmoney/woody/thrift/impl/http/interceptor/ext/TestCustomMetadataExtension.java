@@ -58,6 +58,9 @@ public class TestCustomMetadataExtension extends AbstractTest {
                 case 10:
                     assertEquals((Object) 1, ContextUtils.getCustomMetadataValue(IntExtension.instance.getExtension()));
                     break;
+                case 11:
+                    assertEquals("test", ContextUtils.getCustomMetadataValue(String.class, "test.test.test"));
+                    break;
                 default:
                     super.getOwner(id);
             }
@@ -65,12 +68,13 @@ public class TestCustomMetadataExtension extends AbstractTest {
         }
     };
 
-    OwnerServiceSrv.Iface rpcMetaClientToMetaSrv =   createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), Arrays.asList(IntExtension.instance), getUrlString("/rpc_cmeta"));
-    OwnerServiceSrv.Iface rpcMetaClientToNoMetaSrv = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), Arrays.asList(IntExtension.instance), getUrlString("/rpc_no_cmeta"));
-    OwnerServiceSrv.Iface rpcNoMetaClientToMetaSrv = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), getUrlString("/rpc_cmeta"));
-    OwnerServiceSrv.Iface client1 =                  createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), getUrlString("/rpc_no_cmeta"));
-    OwnerServiceSrv.Iface client2 =                  createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), getUrlString("/rpc_no_cmeta"));
-    OwnerServiceSrv.Iface client3 =                  createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), getUrlString("/rpc_no_cmeta"));
+    OwnerServiceSrv.Iface rpcMetaClientToMetaSrv =     createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), Arrays.asList(IntExtension.instance), getUrlString("/rpc_cmeta"));
+    OwnerServiceSrv.Iface rpcMetaClientToNoMetaSrv =   createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), Arrays.asList(IntExtension.instance), getUrlString("/rpc_no_cmeta"));
+    OwnerServiceSrv.Iface rpcNoMetaClientToMetaSrv =   createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), getUrlString("/rpc_cmeta"));
+    OwnerServiceSrv.Iface rpcNoMetaClientToNoMetaSrv = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), getUrlString("/rpc_no_cmeta"));
+    OwnerServiceSrv.Iface client1 =                    createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), getUrlString("/rpc_no_cmeta"));
+    OwnerServiceSrv.Iface client2 =                    createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), getUrlString("/rpc_no_cmeta"));
+    OwnerServiceSrv.Iface client3 =                    createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), getUrlString("/rpc_no_cmeta"));
 
     Servlet cMetaServlet =   createThriftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener(), Arrays.asList(IntExtension.instance));
     Servlet ncMetaServlet =  createThriftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener());
@@ -130,6 +134,21 @@ public class TestCustomMetadataExtension extends AbstractTest {
                 assertTrue(e.getErrorDefinition().getGenerationSource() == WErrorSource.INTERNAL);
                 assertTrue(e.getErrorDefinition().getErrorSource() == WErrorSource.INTERNAL);
                 assertTrue(e.getErrorDefinition().getErrorType() == WErrorType.UNEXPECTED_ERROR);
+            }
+        }).run();
+    }
+
+    @Test
+    public void testCustomExtensionWithDotSymbol() {
+        addServlet(ncMetaServlet, "/rpc_no_cmeta");
+
+        new WFlow().createServiceFork(() -> {
+            ContextUtils.setCustomMetadataValue("test.test.test", "test");
+            try {
+                rpcNoMetaClientToNoMetaSrv.getOwner(11);
+            } catch (TException e) {
+                e.printStackTrace();
+                fail();
             }
         }).run();
     }
