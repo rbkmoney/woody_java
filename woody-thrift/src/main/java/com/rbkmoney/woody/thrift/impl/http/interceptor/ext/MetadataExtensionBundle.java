@@ -22,7 +22,7 @@ import static com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle.ContextBund
  * Created by vpankrashkin on 23.01.17.
  */
 public class MetadataExtensionBundle extends ExtensionBundle {
-    private static final Pattern KEY_PATTERN = Pattern.compile("[\\w-]{1,53}");
+    private static final Pattern KEY_PATTERN = Pattern.compile("[\\w-.]{1,53}");
 
     public MetadataExtensionBundle(List<MetadataExtensionKit> extensionList) {
         super(createClientBundle(extensionList), createServiceBundle(extensionList));
