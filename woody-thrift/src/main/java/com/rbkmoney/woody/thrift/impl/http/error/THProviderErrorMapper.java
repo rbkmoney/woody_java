@@ -63,11 +63,6 @@ public class THProviderErrorMapper implements WErrorMapper {
             if (errorDefinition.getErrorType() == WErrorType.BUSINESS_ERROR) {
                 invalidErrClass.get();
             }
-        } else if (status >= 400 && status < 500) {
-            errorDefinition = new WErrorDefinition(WErrorSource.EXTERNAL);
-            errorDefinition.setErrorType(WErrorType.PROVIDER_ERROR);
-            errorDefinition.setErrorSource(WErrorSource.INTERNAL);
-            errorDefinition.setErrorReason(responseInfo.getErrReason());
         } else {
             errorDefinition = new WErrorDefinition(WErrorSource.EXTERNAL);
             errorDefinition.setErrorType(WErrorType.UNEXPECTED_ERROR);

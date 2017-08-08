@@ -16,6 +16,7 @@ public class THErrorMapProcessor extends ErrorMapProcessor {
         return Arrays.asList(
                 new THBusinessErrorMapper(ifaceClass),
                 new THSystemErrorMapper(),
+                new THTransportErrorMapper(),
                 new THProviderErrorMapper(),
                 new THDefaultErrorMapper()
         );

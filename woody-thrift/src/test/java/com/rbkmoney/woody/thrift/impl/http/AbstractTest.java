@@ -32,6 +32,7 @@ import java.util.Map;
  * Created by vpankrashkin on 06.05.16.
  */
 public class AbstractTest {
+    public static final int networkTimeout = 200;
     private HandlerCollection handlerCollection;
     protected Server server;
     protected int serverPort = 8080;
@@ -135,16 +136,29 @@ public class AbstractTest {
         return createThriftRPCClient(iface, idGenerator, eventListener, getUrlString());
     }
 
+    protected <T> T createThriftRPCClient(Class<T> iface, IdGenerator idGenerator, ClientEventListener eventListener, int timeout) {
+        return createThriftRPCClient(iface, idGenerator, eventListener, getUrlString(), timeout);
+    }
+
 
     protected <T> T createThriftRPCClient(Class<T> iface, IdGenerator idGenerator, ClientEventListener eventListener, String url) {
-        return createThriftRPCClient(iface, idGenerator, eventListener, null, url);
+        return createThriftRPCClient(iface, idGenerator, eventListener, null, url, networkTimeout);
+    }
+
+    protected <T> T createThriftRPCClient(Class<T> iface, IdGenerator idGenerator, ClientEventListener eventListener, String url, int timeout) {
+        return createThriftRPCClient(iface, idGenerator, eventListener, null, url, timeout);
     }
 
     protected <T> T createThriftRPCClient(Class<T> iface, IdGenerator idGenerator, ClientEventListener eventListener, List<MetadataExtensionKit> extensionKits, String url) {
+        return createThriftRPCClient(iface, idGenerator, eventListener, extensionKits, url, networkTimeout);
+    }
+        protected <T> T createThriftRPCClient(Class<T> iface, IdGenerator idGenerator, ClientEventListener eventListener, List<MetadataExtensionKit> extensionKits, String url, int timeout) {
         try {
-            THClientBuilder clientBuilder = new THClientBuilder();
+            //todo fix loosing log events for THClientBuilder
+            THSpawnClientBuilder clientBuilder = new THSpawnClientBuilder();
+            clientBuilder.withNetworkTimeout(timeout);
             clientBuilder.withAddress(new URI(url));
-            clientBuilder.withHttpClient(HttpClients.createMinimal());
+            //clientBuilder.withHttpClient(HttpClients.createMinimal());
             clientBuilder.withIdGenerator(idGenerator);
             if (eventListener != null) {
                 clientBuilder.withEventListener(eventListener);

@@ -27,7 +27,7 @@ public class THCEventLogListener implements ClientEventListener<THClientEvent> {
                     if (request == null) {
                         log.info("CLN: {} [no transport request]", event.getEventType());
                     } else if (log.isInfoEnabled()) {
-                        log.info("CLN: {}, [Url: {}, Headers: {}]", event.getEventType(), request.toString(), Arrays.toString(request.getAllHeaders()));
+                        log.info("CLN: {}, [EP: {}, Headers: {}]", event.getEventType(), event.getEndpoint().getStringValue(), Arrays.toString(request.getAllHeaders()));
                     }
                     break;
                 case CLIENT_RECEIVE:
@@ -35,11 +35,11 @@ public class THCEventLogListener implements ClientEventListener<THClientEvent> {
                     if (response == null) {
                         log.info("CLN: {} [no transport response]", event.getEventType());
                     } else if (log.isInfoEnabled()) {
-                        log.info("CLN: {}, CStatus: {}, [StLine: {}, Headers: {}]", event.getEventType(), event.isSuccessfulCall() ? "ok" : "error", response.getStatusLine().toString(), Arrays.toString(response.getAllHeaders()));
+                        log.info("CLN: {}, CRes: {}, [StLine: {}, Headers: {}]", event.getEventType(), event.isSuccessfulCall() ? "ok" : "error", response.getStatusLine().toString(), Arrays.toString(response.getAllHeaders()));
                     }
                     break;
                 case SERVICE_RESULT:
-                    log.info("CLN: {}, CStatus: {}, Time: {}ms", event.getEventType(), event.isSuccessfulCall() ? "ok" : "error", (System.currentTimeMillis() - event.getTimeStamp()));
+                    log.info("CLN: {}, CRes: {}, Time: {}ms", event.getEventType(), event.isSuccessfulCall() ? "ok" : "error", (System.currentTimeMillis() - event.getTimeStamp()));
                     break;
                 case ERROR:
                     Throwable error = ContextUtils.getCallError(event.getActiveSpan());
