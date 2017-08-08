@@ -201,7 +201,7 @@ public class TestCustomMetadataExtension extends AbstractTest {
             } catch (WRuntimeException e) {
                 assertEquals(WErrorSource.INTERNAL, e.getErrorDefinition().getErrorSource());
                 assertEquals(WErrorSource.EXTERNAL, e.getErrorDefinition().getGenerationSource());
-                assertEquals(WErrorType.PROVIDER_ERROR, e.getErrorDefinition().getErrorType());
+                assertEquals(WErrorType.UNEXPECTED_ERROR, e.getErrorDefinition().getErrorType());
             }
         }).run();
     }
