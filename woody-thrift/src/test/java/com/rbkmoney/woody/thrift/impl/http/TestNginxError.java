@@ -70,9 +70,9 @@ public class TestNginxError extends AbstractTest {
                     assertFalse(thClientEvent.isSuccessfulCall());
                     assertEquals(new Integer(HttpServletResponse.SC_OK), thClientEvent.getThriftResponseStatus());
                     WErrorDefinition errorDefinition = thClientEvent.getErrorDefinition();
-                    assertEquals(errorDefinition.getErrorSource(), WErrorSource.INTERNAL);
-                    assertEquals(errorDefinition.getGenerationSource(), WErrorSource.INTERNAL);
-                    assertEquals(errorDefinition.getErrorType(), WErrorType.PROVIDER_ERROR);
+                    assertEquals(WErrorSource.INTERNAL, errorDefinition.getErrorSource());
+                    assertEquals(WErrorSource.INTERNAL, errorDefinition.getGenerationSource());
+                    assertEquals(WErrorType.PROVIDER_ERROR, errorDefinition.getErrorType());
                     hasErr.set(true);
                     break;
             }
@@ -100,9 +100,9 @@ public class TestNginxError extends AbstractTest {
                     assertFalse(thClientEvent.isSuccessfulCall());
                     assertEquals(new Integer(HttpServletResponse.SC_BAD_GATEWAY), thClientEvent.getThriftResponseStatus());
                     WErrorDefinition errorDefinition = thClientEvent.getErrorDefinition();
-                    assertEquals(errorDefinition.getErrorSource(), WErrorSource.EXTERNAL);
-                    assertEquals(errorDefinition.getGenerationSource(), WErrorSource.EXTERNAL);
-                    assertEquals(errorDefinition.getErrorType(), WErrorType.UNEXPECTED_ERROR);
+                    assertEquals(WErrorSource.EXTERNAL, errorDefinition.getErrorSource());
+                    assertEquals(WErrorSource.EXTERNAL, errorDefinition.getGenerationSource());
+                    assertEquals(WErrorType.UNEXPECTED_ERROR, errorDefinition.getErrorType());
                     assertNull(errorDefinition.getErrorReason());
                     assertNull(errorDefinition.getErrorName());
                     hasErr.set(true);
@@ -132,9 +132,9 @@ public class TestNginxError extends AbstractTest {
                     assertFalse(thClientEvent.isSuccessfulCall());
                     assertEquals(new Integer(HttpServletResponse.SC_CONFLICT), thClientEvent.getThriftResponseStatus());
                     WErrorDefinition errorDefinition = thClientEvent.getErrorDefinition();
-                    assertEquals(errorDefinition.getErrorSource(), WErrorSource.INTERNAL);
-                    assertEquals(errorDefinition.getGenerationSource(), WErrorSource.EXTERNAL);
-                    assertEquals(errorDefinition.getErrorType(), WErrorType.PROVIDER_ERROR);
+                    assertEquals(WErrorSource.INTERNAL, errorDefinition.getErrorSource());
+                    assertEquals(WErrorSource.EXTERNAL, errorDefinition.getGenerationSource());
+                    assertEquals(WErrorType.UNEXPECTED_ERROR, errorDefinition.getErrorType());
                     assertNull(errorDefinition.getErrorReason());
                     assertNull(errorDefinition.getErrorName());
                     hasErr.set(true);

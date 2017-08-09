@@ -1,5 +1,7 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
+import com.rbkmoney.woody.api.event.ClientEventListener;
+import com.rbkmoney.woody.api.event.CompositeClientEventListener;
 import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
 import com.rbkmoney.woody.api.flow.error.WErrorSource;
 import com.rbkmoney.woody.api.flow.error.WErrorType;
@@ -8,6 +10,10 @@ import com.rbkmoney.woody.api.generator.TimestampIdGenerator;
 import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerServiceSrv;
 import com.rbkmoney.woody.rpc.test_error;
+import com.rbkmoney.woody.thrift.impl.http.event.ClientEventListenerImpl;
+import com.rbkmoney.woody.thrift.impl.http.event.ClientEventLogListener;
+import com.rbkmoney.woody.thrift.impl.http.event.HttpClientEventLogListener;
+import com.rbkmoney.woody.thrift.impl.http.event.THCEventLogListener;
 import org.apache.thrift.TException;
 import org.junit.Assert;
 import org.junit.Before;
@@ -24,8 +30,9 @@ import static java.lang.System.out;
 public class TestChildRequests extends AbstractTest {
 
 
-    OwnerServiceSrv.Iface client1 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), null, getUrlString("/rpc"));
-    OwnerServiceSrv.Iface client2 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), null, getUrlString("/rpc"));
+    ClientEventListener clientListener = null;
+    OwnerServiceSrv.Iface client1 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), clientListener, getUrlString("/rpc"));
+    OwnerServiceSrv.Iface client2 = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), clientListener, getUrlString("/rpc"));
     OwnerServiceSrv.Iface handler = new OwnerServiceStub() {
 
         @Override

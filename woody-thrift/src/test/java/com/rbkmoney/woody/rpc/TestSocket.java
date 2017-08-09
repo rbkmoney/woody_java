@@ -11,6 +11,7 @@ import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -19,7 +20,7 @@ import java.net.URISyntaxException;
 /**
  * Created by vpankrashkin on 19.04.16.
  */
-
+@Ignore
 public class TestSocket {
 
     private static final int PORT = 7911;

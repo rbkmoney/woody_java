@@ -25,14 +25,14 @@ public class THSEventLogListener implements ServiceEventListener<THServiceEvent>
                     log.info("SRV: {}, [{}, {}]", event.getEventType(), event.getCallName(), event.getCallType());
                     break;
                 case HANDLER_RESULT:
-                    log.info("SRV: {}, CStatus: {}, HTime: {}ms", event.getEventType(), event.isSuccessfulCall() ? "ok" : "error", (System.currentTimeMillis() - event.getTimeStamp()));
+                    log.info("SRV: {}, CRes: {}, HTime: {}ms", event.getEventType(), event.isSuccessfulCall() ? "ok" : "error", (System.currentTimeMillis() - event.getTimeStamp()));
                     break;
                 case SERVICE_RECEIVE:
                     HttpServletRequest request = event.getTransportRequest();
                     if (request == null) {
                         log.info("SRV: {} [no transport request]", event.getEventType());
                     } else if (log.isInfoEnabled()) {
-                        log.info("SRV: {}, [EP: {}, M:{} Url: {}, Src: {} {}, Headers: {}]", event.getEventType(), event.getEndpoint().getStringValue(), request.getMethod(), buildUrl(request), request.getRemoteAddr(), request.getRemotePort(), buildHeaders(request));
+                        log.info("SRV: {}, [EP: {}, Url: {}, Src: [{}]:{}, Headers: {}]", event.getEventType(), event.getEndpoint().getStringValue(), buildUrl(request), request.getRemoteAddr(), request.getRemotePort(), buildHeaders(request));
                     }
                     break;
                 case SERVICE_RESULT:
@@ -40,7 +40,7 @@ public class THSEventLogListener implements ServiceEventListener<THServiceEvent>
                     if (response == null) {
                         log.info("SRV: {} [no transport response]", event.getEventType());
                     } else if (log.isInfoEnabled()) {
-                        log.info("SRV: {}, CStatus: {}, [Status: {}, Headers: {}]", event.getEventType(), event.isSuccessfulCall() ? "ok" : "error", response.getStatus(), buildHeaders(response));
+                        log.info("SRV: {}, CRes: {}, [Status: {}, Headers: {}]", event.getEventType(), event.isSuccessfulCall() ? "ok" : "error", response.getStatus(), buildHeaders(response));
                     }
                     break;
                 case ERROR:
