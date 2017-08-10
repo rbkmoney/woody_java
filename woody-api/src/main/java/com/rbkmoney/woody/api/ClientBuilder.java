@@ -15,11 +15,15 @@ public interface ClientBuilder {
 
     ClientBuilder withIdGenerator(IdGenerator generator);
 
+    ClientBuilder withNetworkTimeout(int timeout);
+
     URI getAddress();
 
     ClientEventListener getEventListener();
 
     IdGenerator getIdGenerator();
+
+    int getNetworkTimeout();
 
     <T> T build(Class<T> iface);
 }
