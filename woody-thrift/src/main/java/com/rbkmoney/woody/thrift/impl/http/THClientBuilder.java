@@ -50,7 +50,7 @@ import java.util.function.BiConsumer;
  */
 public class THClientBuilder extends AbstractClientBuilder {
 
-    private int networkTimeout = 5000;
+
     private HttpClient httpClient;
     private WErrorMapper errorMapper;
     private List<MetadataExtensionKit> metadataExtensionKits;
@@ -77,17 +77,13 @@ public class THClientBuilder extends AbstractClientBuilder {
     }
 
     public THClientBuilder withNetworkTimeout(int timeout) {
-        this.networkTimeout = timeout >= 0 ? timeout : 0;
+        super.withNetworkTimeout(timeout);
         return this;
     }
 
     public THClientBuilder withLogEnabled(boolean enabled) {
         this.logEnabled = enabled;
         return this;
-    }
-
-    public int getNetworkTimeout() {
-        return networkTimeout;
     }
 
     @Override
@@ -170,8 +166,8 @@ public class THClientBuilder extends AbstractClientBuilder {
     protected <T> T createProviderClient(Class<T> iface) {
         try {
             THttpClient tHttpClient = new THttpClient(getAddress().toString(), getHttpClient(), createTransportInterceptor());
-            tHttpClient.setConnectTimeout(networkTimeout);
-            tHttpClient.setReadTimeout(networkTimeout);
+            tHttpClient.setConnectTimeout(getNetworkTimeout());
+            tHttpClient.setReadTimeout(getNetworkTimeout());
             TProtocol tProtocol = createProtocol(tHttpClient);
             return createThriftClient(iface, tProtocol);
         } catch (Exception e) {

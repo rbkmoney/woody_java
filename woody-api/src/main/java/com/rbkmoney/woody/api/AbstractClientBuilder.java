@@ -23,12 +23,18 @@ import java.util.function.BiConsumer;
 public abstract class AbstractClientBuilder implements ClientBuilder {
     protected static final ClientEventListener DEFAULT_EVENT_LISTENER = (ClientEventListener<ClientEvent>) event -> {
     };
-
+    private int networkTimeout = 5000;
     private URI address;
     private IdGenerator idGenerator;
     private ClientEventListener eventListener = DEFAULT_EVENT_LISTENER;
     private boolean allowObjectProxyOverriding = false;
     private final AtomicBoolean used = new AtomicBoolean(false);
+
+
+    public ClientBuilder withNetworkTimeout(int timeout) {
+        this.networkTimeout = timeout;
+        return this;
+    }
 
     @Override
     public ClientBuilder withAddress(URI address) {
@@ -46,6 +52,10 @@ public abstract class AbstractClientBuilder implements ClientBuilder {
     public ClientBuilder withIdGenerator(IdGenerator generator) {
         this.idGenerator = generator;
         return this;
+    }
+
+    public int getNetworkTimeout() {
+        return networkTimeout;
     }
 
     @Override
