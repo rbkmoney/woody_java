@@ -9,6 +9,7 @@ import com.rbkmoney.woody.api.proxy.SpawnTargetProvider;
 import com.rbkmoney.woody.api.trace.context.metadata.MetadataExtensionKit;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 
 import java.net.URI;
 import java.util.List;
@@ -24,7 +25,6 @@ import java.util.function.Supplier;
 public class THSpawnClientBuilder extends THClientBuilder {
 
     public THSpawnClientBuilder() {
-        withHttpClient(createHttpClient());
     }
 
     @Override
@@ -80,7 +80,7 @@ public class THSpawnClientBuilder extends THClientBuilder {
 
     @Override
     protected HttpClient createHttpClient() {
-        return HttpClients.createMinimal();
+        return HttpClients.createMinimal(new BasicHttpClientConnectionManager());
     }
 
     private <T> InvocationTargetProvider<T> createTargetProvider(Class<T> iface) {
