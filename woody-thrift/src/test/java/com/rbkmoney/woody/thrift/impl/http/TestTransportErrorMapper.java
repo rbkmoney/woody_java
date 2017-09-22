@@ -5,6 +5,7 @@ import com.rbkmoney.woody.api.flow.error.WErrorSource;
 import com.rbkmoney.woody.api.flow.error.WErrorType;
 import com.rbkmoney.woody.api.flow.error.WRuntimeException;
 import com.rbkmoney.woody.api.generator.TimestampIdGenerator;
+import com.rbkmoney.woody.api.trace.ContextUtils;
 import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerServiceSrv;
 import com.rbkmoney.woody.rpc.test_error;
@@ -12,6 +13,7 @@ import com.rbkmoney.woody.thrift.impl.http.event.THClientEvent;
 import org.apache.thrift.TException;
 import org.junit.Test;
 
+import java.net.UnknownHostException;
 import java.util.concurrent.Semaphore;
 
 import static org.junit.Assert.*;
@@ -76,6 +78,15 @@ public class TestTransportErrorMapper extends AbstractTest {
         }
     });
 
+    OwnerServiceSrv.Iface unknownHostClient = createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), (ClientEventListener<THClientEvent>) (THClientEvent thClientEvent) -> {
+        switch (thClientEvent.getEventType()) {
+            case ERROR:
+                assertFalse(thClientEvent.isSuccessfulCall());
+                assertEquals(WErrorType.UNAVAILABLE_RESULT, thClientEvent.getErrorDefinition().getErrorType());
+                break;
+        }
+    }, "http://wronghost:" + serverPort);
+
     @Test
     public void testSocketTimeoutError() throws TException {
         //Socket timeout expected
@@ -113,6 +124,18 @@ public class TestTransportErrorMapper extends AbstractTest {
             assertEquals("Generation source is external for all network errors", WErrorSource.EXTERNAL, e.getErrorDefinition().getGenerationSource());
         }
         t.join();
+    }
+
+    @Test
+    public void testUnknownHostError() throws TException {
+        try {
+            unknownHostClient.getOwner(0);
+            fail();
+        } catch (WRuntimeException e) {
+            assertEquals("Network timeout expected", WErrorType.UNAVAILABLE_RESULT, e.getErrorDefinition().getErrorType());
+            assertEquals("Error returned for root client request", WErrorSource.INTERNAL, e.getErrorDefinition().getErrorSource());
+            assertEquals("Generation source is external for all network errors", WErrorSource.EXTERNAL, e.getErrorDefinition().getGenerationSource());
+        }
     }
 
 }
