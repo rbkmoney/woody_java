@@ -5,7 +5,6 @@ import com.rbkmoney.woody.api.flow.error.WErrorMapper;
 import com.rbkmoney.woody.api.flow.error.WErrorSource;
 import com.rbkmoney.woody.api.flow.error.WErrorType;
 import com.rbkmoney.woody.api.trace.ContextSpan;
-import org.apache.http.NoHttpResponseException;
 
 import java.net.SocketTimeoutException;
 import java.util.regex.Pattern;
@@ -21,7 +20,8 @@ public class THTransportErrorMapper implements WErrorMapper {
                 return def;
             }),
             new ErrorAnalyzer(Pattern.compile("java.net.Socket.*"), THTransportErrorMapper::genUnavailableResult),
-            new ErrorAnalyzer(Pattern.compile(NoHttpResponseException.class.getName()), THTransportErrorMapper::genUnavailableResult),
+            new ErrorAnalyzer(Pattern.compile(org.apache.http.NoHttpResponseException.class.getName()), THTransportErrorMapper::genUnavailableResult),
+            new ErrorAnalyzer(Pattern.compile(java.net.UnknownHostException.class.getName()), THTransportErrorMapper::genUnavailableResult),
     };
 
     private static WErrorDefinition genUnavailableResult(Throwable t, ContextSpan c) {
