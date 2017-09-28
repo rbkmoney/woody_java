@@ -42,6 +42,7 @@ public class MetadataExtensionBundle extends ExtensionBundle {
                                                 unusedKits.remove(extKit);
                                                 Object metaVal = extKit.getExtension().getValue(key, customMetadata);
                                                 reqCCtx.setRequestHeader(formatHeaderKey(key), extKit.getConverter().convertToString(key, metaVal));
+                                                break;
                                             }
                                         }
                                     } catch (MetadataConversionException e) {
@@ -83,6 +84,7 @@ public class MetadataExtensionBundle extends ExtensionBundle {
                                                 unusedKits.remove(extKit);
                                                 Object metaVal = extKit.getConverter().convertToObject(metaKey, metaStrVal);
                                                 extKit.getExtension().setValue(metaKey, metaVal, reqSCtx.getTraceData().getActiveSpan().getCustomMetadata());
+                                                break;
                                             }
                                         }
                                     } catch (MetadataConversionException e) {
