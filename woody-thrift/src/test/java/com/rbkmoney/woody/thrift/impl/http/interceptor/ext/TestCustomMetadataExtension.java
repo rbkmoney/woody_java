@@ -75,9 +75,11 @@ public class TestCustomMetadataExtension extends AbstractTest {
     OwnerServiceSrv.Iface client1 =                    createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), getUrlString("/rpc_no_cmeta"));
     OwnerServiceSrv.Iface client2 =                    createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), getUrlString("/rpc_no_cmeta"));
     OwnerServiceSrv.Iface client3 =                    createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), getUrlString("/rpc_no_cmeta"));
+    OwnerServiceSrv.Iface rpcMetaMultiExtClientToMultiExtMetaSrv =     createThriftRPCClient(OwnerServiceSrv.Iface.class, new TimestampIdGenerator(), new CompositeClientEventListener(), Arrays.asList(IntExtension.instance, StringExtension.instance), getUrlString("/rpc_cmeta"));
 
     Servlet cMetaServlet =   createThriftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener(), Arrays.asList(IntExtension.instance));
     Servlet ncMetaServlet =  createThriftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener());
+    Servlet cMetaMultipleExtKitServlet =  createThriftRPCService(OwnerServiceSrv.Iface.class, handler, new CompositeServiceEventListener(), Arrays.asList(IntExtension.instance, StringExtension.instance));
 
 
     @Before
@@ -151,6 +153,16 @@ public class TestCustomMetadataExtension extends AbstractTest {
                 fail();
             }
         }).run();
+    }
+
+    @Test
+    public void testMultipleExtKit() throws Exception {
+        addServlet(cMetaMultipleExtKitServlet, "/rpc_cmeta");
+        new WFlow().createServiceFork(() -> {
+            ContextUtils.setCustomMetadataValue(1, IntExtension.instance.getExtension());
+            ContextUtils.setCustomMetadataValue(StringExtension.KEY,"test");
+            return rpcMetaMultiExtClientToMultiExtMetaSrv.getIntValue();
+        }).call();
     }
 
     @Test
@@ -263,6 +275,68 @@ public class TestCustomMetadataExtension extends AbstractTest {
                 @Override
                 public boolean applyToString() {
                     return IntExtension.this.applyToString;
+                }
+            };
+        }
+    }
+
+    static class StringExtension implements MetadataExtensionKit<String> {
+        private static final String KEY = "string-val";
+        static final StringExtension instance = new StringExtension();
+
+        private final boolean applyToObject;
+        private final boolean applyToString;
+
+        public StringExtension(boolean applyToObject, boolean applyToString) {
+            this.applyToObject = applyToObject;
+            this.applyToString = applyToString;
+        }
+
+        public StringExtension() {
+            this(false, false);
+        }
+
+        @Override
+        public MetadataExtension<String> getExtension() {
+            return new MetadataExtension<String>() {
+                @Override
+                public String getValue(Metadata metadata) {
+                    return metadata.getValue(KEY);
+                }
+
+                @Override
+                public void setValue(String val, Metadata metadata) {
+                    metadata.putValue(KEY, val);
+                }
+            };
+        }
+
+        @Override
+        public MetadataConverter<String> getConverter() {
+            return new MetadataConverter<String>() {
+                @Override
+                public String convertToObject(String key, String value) throws MetadataConversionException {
+                    return value;
+                }
+
+                @Override
+                public String convertToString(String key, String value) throws MetadataConversionException {
+                    return value;
+                }
+
+                @Override
+                public boolean apply(String key) {
+                    return KEY.equalsIgnoreCase(key);
+                }
+
+                @Override
+                public boolean applyToObject() {
+                    return StringExtension.this.applyToObject;
+                }
+
+                @Override
+                public boolean applyToString() {
+                    return StringExtension.this.applyToString;
                 }
             };
         }
