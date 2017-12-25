@@ -44,6 +44,8 @@ public class THSExtensionContext extends ExtensionContext {
     }
 
     public void setResponseHeader(String key, String value) {
-        getProviderResponse().setHeader(key, value);
+        if (key != null && value != null) {
+            getProviderResponse().setHeader(key, value);
+        }
     }
 }
