@@ -247,7 +247,7 @@ public final class TBaseHelper {
     int arrayOffset = bb.arrayOffset();
     int offset = arrayOffset + bb.position();
     int origLimit = arrayOffset + bb.limit();
-    int limit = (origLimit - offset > 128) ? offset + 128 : origLimit;
+    int limit = (origLimit - offset > 4096) ? offset + 4096 : origLimit;
 
     for (int i = offset; i < limit; i++) {
       if (i > offset) {
