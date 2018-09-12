@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle.ContextBundle.createCtxBundle;
 import static com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle.createExtBundle;
@@ -76,11 +77,11 @@ public class TransportExtensionBundles {
                                 new SimpleEntry<>(THttpHeader.SPAN_ID, (id) -> span.setId(id))
                         );
 
-                        //old headers
-                        validateAndProcessTraceHeaders(request, (tHttpHeader) -> tHttpHeader.getOldKey(), headerConsumers);
-                        validateAndProcessTraceHeaders(request, (tHttpHeader) -> tHttpHeader.getKey(), headerConsumers);
-                        if (!span.isFilled()) {
-                            throw new THRequestInterceptionException(TTransportErrorType.BAD_TRACE_HEADER, "No trace headers found");
+                        if (headerConsumers.stream().anyMatch(entry -> request.getHeader(entry.getKey().getKey()) != null)) {
+                            validateAndProcessTraceHeaders(request, (tHttpHeader) -> tHttpHeader.getKey(), headerConsumers);
+                        } else {
+                            //old headers
+                            validateAndProcessTraceHeaders(request, (tHttpHeader) -> tHttpHeader.getOldKey(), headerConsumers);
                         }
                     },
                     (InterceptorExtension<THSExtensionContext>) respSCtx -> {
@@ -230,21 +231,16 @@ public class TransportExtensionBundles {
     }
 
     private static void validateAndProcessTraceHeaders(HttpServletRequest request, Function<THttpHeader, String> getHeaderKeyFunction, List<Map.Entry<THttpHeader, Consumer<String>>> headerConsumers) {
-        if (headerConsumers.stream().anyMatch(entry -> request.getHeader(getHeaderKeyFunction.apply(entry.getKey())) != null)) {
-            headerConsumers.stream()
-                    .filter(entry -> {
-                        String id = Optional.ofNullable(request.getHeader(getHeaderKeyFunction.apply(entry.getKey()))).orElse("");
-                        if (id.isEmpty()) {
-                            return true;
-                        } else {
-                            entry.getValue().accept(id);
-                            return false;
-                        }
-                    }).findFirst()
-                    .ifPresent(entry -> {
-                                throw new THRequestInterceptionException(TTransportErrorType.BAD_TRACE_HEADER, getHeaderKeyFunction.apply(entry.getKey()));
-                            }
-                    );
+        List<String> missingHeaders = headerConsumers.stream()
+                .filter(entry -> {
+                    String id = Optional.ofNullable(request.getHeader(getHeaderKeyFunction.apply(entry.getKey()))).orElse("");
+                    entry.getValue().accept(id);
+                    return id.isEmpty();
+                }).map(entry -> getHeaderKeyFunction.apply(entry.getKey()))
+                .collect(Collectors.toList());
+
+        if (!missingHeaders.isEmpty()) {
+            throw new THRequestInterceptionException(TTransportErrorType.BAD_TRACE_HEADER, String.join(", ", missingHeaders));
         }
     }
 }
