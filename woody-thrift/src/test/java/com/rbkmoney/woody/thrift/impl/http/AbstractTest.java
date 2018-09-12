@@ -132,6 +132,14 @@ public class AbstractTest {
         }
     }
 
+    protected <T> T createThriftRPCClient(Class<T> iface, String url) {
+        return createThriftRPCClient(iface, null, null, url);
+    }
+
+    protected <T> T createThriftRPCClient(Class<T> iface, List<MetadataExtensionKit> extensionKits, String url) {
+        return createThriftRPCClient(iface, null, null, extensionKits, url);
+    }
+
     protected <T> T createThriftRPCClient(Class<T> iface, IdGenerator idGenerator, ClientEventListener eventListener) {
         return createThriftRPCClient(iface, idGenerator, eventListener, getUrlString());
     }
@@ -159,7 +167,9 @@ public class AbstractTest {
             clientBuilder.withNetworkTimeout(timeout);
             clientBuilder.withAddress(new URI(url));
             //clientBuilder.withHttpClient(HttpClients.createMinimal());
-            clientBuilder.withIdGenerator(idGenerator);
+            if (idGenerator != null) {
+                clientBuilder.withIdGenerator(idGenerator);
+            }
             if (eventListener != null) {
                 clientBuilder.withEventListener(eventListener);
             }

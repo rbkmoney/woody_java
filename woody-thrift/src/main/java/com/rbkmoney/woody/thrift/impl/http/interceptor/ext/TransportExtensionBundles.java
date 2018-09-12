@@ -18,12 +18,9 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
+import java.util.function.Function;
 
 import static com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle.ContextBundle.createCtxBundle;
 import static com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle.createExtBundle;
@@ -60,6 +57,11 @@ public class TransportExtensionBundles {
                         reqCCtx.setRequestHeader(THttpHeader.TRACE_ID.getKey(), span.getTraceId());
                         reqCCtx.setRequestHeader(THttpHeader.SPAN_ID.getKey(), span.getId());
                         reqCCtx.setRequestHeader(THttpHeader.PARENT_ID.getKey(), span.getParentId());
+
+                        //old headers
+                        reqCCtx.setRequestHeader(THttpHeader.TRACE_ID.getOldKey(), span.getTraceId());
+                        reqCCtx.setRequestHeader(THttpHeader.SPAN_ID.getOldKey(), span.getId());
+                        reqCCtx.setRequestHeader(THttpHeader.PARENT_ID.getOldKey(), span.getParentId());
                     },
                     respCCtx -> {
                     }
@@ -68,30 +70,29 @@ public class TransportExtensionBundles {
                     (InterceptorExtension<THSExtensionContext>) reqSCtx -> {
                         HttpServletRequest request = reqSCtx.getProviderRequest();
                         Span span = reqSCtx.getTraceData().getServiceSpan().getSpan();
-                        Stream.of(
-                                new SimpleEntry<>(THttpHeader.TRACE_ID, (Consumer<String>) (id) -> span.setTraceId(id)),
-                                new SimpleEntry<>(THttpHeader.PARENT_ID, (Consumer<String>) (id) -> span.setParentId(id)),
-                                new SimpleEntry<>(THttpHeader.SPAN_ID, (Consumer<String>) (id) -> span.setId(id))
-                        )
-                                .filter(entry -> {
-                                    String id = Optional.ofNullable(request.getHeader(entry.getKey().getKey())).orElse("");
-                                    if (id.isEmpty()) {
-                                        return true;
-                                    } else {
-                                        entry.getValue().accept(id);
-                                        return false;
-                                    }
-                                })
-                                .findFirst()
-                                .ifPresent(entry -> {
-                                    throw new THRequestInterceptionException(TTransportErrorType.BAD_TRACE_HEADER, entry.getKey().getKey());
-                                });
+                        List<Map.Entry<THttpHeader, Consumer<String>>> headerConsumers = Arrays.asList(
+                                new SimpleEntry<>(THttpHeader.TRACE_ID, (id) -> span.setTraceId(id)),
+                                new SimpleEntry<>(THttpHeader.PARENT_ID, (id) -> span.setParentId(id)),
+                                new SimpleEntry<>(THttpHeader.SPAN_ID, (id) -> span.setId(id))
+                        );
+
+                        //old headers
+                        validateAndProcessTraceHeaders(request, (tHttpHeader) -> tHttpHeader.getOldKey(), headerConsumers);
+                        validateAndProcessTraceHeaders(request, (tHttpHeader) -> tHttpHeader.getKey(), headerConsumers);
+                        if (!span.isFilled()) {
+                            throw new THRequestInterceptionException(TTransportErrorType.BAD_TRACE_HEADER, "No trace headers found");
+                        }
                     },
                     (InterceptorExtension<THSExtensionContext>) respSCtx -> {
                         Span span = respSCtx.getTraceData().getServiceSpan().getSpan();
                         respSCtx.setResponseHeader(THttpHeader.TRACE_ID.getKey(), span.getTraceId());
                         respSCtx.setResponseHeader(THttpHeader.PARENT_ID.getKey(), span.getParentId());
                         respSCtx.setResponseHeader(THttpHeader.SPAN_ID.getKey(), span.getId());
+
+                        //old headers
+                        respSCtx.setResponseHeader(THttpHeader.TRACE_ID.getOldKey(), span.getTraceId());
+                        respSCtx.setResponseHeader(THttpHeader.PARENT_ID.getOldKey(), span.getParentId());
+                        respSCtx.setResponseHeader(THttpHeader.SPAN_ID.getOldKey(), span.getId());
                     }
             )
     );
@@ -152,8 +153,11 @@ public class TransportExtensionBundles {
                         metadata.putValue(THMetadataProperties.TH_RESPONSE_STATUS, status);
                         metadata.putValue(THMetadataProperties.TH_RESPONSE_MESSAGE, respCCtx.getResponseMessage());
 
-                        WErrorDefinition errorDefinition = THProviderErrorMapper.createErrorDefinition(new THResponseInfo(status, respCCtx.getResponseHeader(THttpHeader.ERROR_CLASS.getKey()), respCCtx.getResponseHeader(THttpHeader.ERROR_REASON.getKey()), respCCtx.getResponseMessage()), () -> {
-                            throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, THttpHeader.ERROR_CLASS.getKey());
+                        String errorClassHeaderKey = respCCtx.getResponseHeader(THttpHeader.ERROR_CLASS.getKey()) != null ? THttpHeader.ERROR_CLASS.getKey() : THttpHeader.ERROR_CLASS.getOldKey();
+                        String errorReasonHeaderKey = respCCtx.getResponseHeader(THttpHeader.ERROR_REASON.getKey()) != null ? THttpHeader.ERROR_REASON.getKey() : THttpHeader.ERROR_REASON.getOldKey();
+                        THResponseInfo thResponseInfo = new THResponseInfo(status, respCCtx.getResponseHeader(errorClassHeaderKey), respCCtx.getResponseHeader(errorReasonHeaderKey), respCCtx.getResponseMessage());
+                        WErrorDefinition errorDefinition = THProviderErrorMapper.createErrorDefinition(thResponseInfo, () -> {
+                            throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, errorClassHeaderKey);
                         });
 
                         metadata.putValue(MetadataProperties.ERROR_DEFINITION, errorDefinition);
@@ -177,8 +181,14 @@ public class TransportExtensionBundles {
                         } else {
                             THResponseInfo responseInfo = THProviderErrorMapper.getResponseInfo(serviceSpan);
                             response.setStatus(responseInfo.getStatus());
-                            Optional.ofNullable(responseInfo.getErrClass()).ifPresent(val -> response.setHeader(THttpHeader.ERROR_CLASS.getKey(), val));
-                            Optional.ofNullable(responseInfo.getErrReason()).ifPresent(val -> response.setHeader(THttpHeader.ERROR_REASON.getKey(), val));
+                            Optional.ofNullable(responseInfo.getErrClass()).ifPresent(val -> {
+                                response.setHeader(THttpHeader.ERROR_CLASS.getKey(), val);
+                                response.setHeader(THttpHeader.ERROR_CLASS.getOldKey(), val);
+                            });
+                            Optional.ofNullable(responseInfo.getErrReason()).ifPresent(val -> {
+                                response.setHeader(THttpHeader.ERROR_REASON.getKey(), val);
+                                response.setHeader(THttpHeader.ERROR_REASON.getOldKey(), val);
+                            });
                             serviceSpan.getMetadata().putValue(THMetadataProperties.TH_TRANSPORT_RESPONSE_SET_FLAG, true);
                         }
                     }
@@ -216,6 +226,25 @@ public class TransportExtensionBundles {
         Throwable t = ContextUtils.getCallError(contextSpan);
         if (t != null) {
             log.debug("Response has error:", t);
+        }
+    }
+
+    private static void validateAndProcessTraceHeaders(HttpServletRequest request, Function<THttpHeader, String> getHeaderKeyFunction, List<Map.Entry<THttpHeader, Consumer<String>>> headerConsumers) {
+        if (headerConsumers.stream().anyMatch(entry -> request.getHeader(getHeaderKeyFunction.apply(entry.getKey())) != null)) {
+            headerConsumers.stream()
+                    .filter(entry -> {
+                        String id = Optional.ofNullable(request.getHeader(getHeaderKeyFunction.apply(entry.getKey()))).orElse("");
+                        if (id.isEmpty()) {
+                            return true;
+                        } else {
+                            entry.getValue().accept(id);
+                            return false;
+                        }
+                    }).findFirst()
+                    .ifPresent(entry -> {
+                                throw new THRequestInterceptionException(TTransportErrorType.BAD_TRACE_HEADER, getHeaderKeyFunction.apply(entry.getKey()));
+                            }
+                    );
         }
     }
 }
