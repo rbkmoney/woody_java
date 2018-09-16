@@ -4,9 +4,9 @@ import com.rbkmoney.woody.api.event.ClientEventListener;
 import com.rbkmoney.woody.api.event.ServiceEventListener;
 import com.rbkmoney.woody.api.generator.IdGenerator;
 import com.rbkmoney.woody.api.trace.context.metadata.MetadataExtensionKit;
-import org.apache.http.impl.client.HttpClientBuilder;
+import com.rbkmoney.woody.rpc.OwnerServiceSrv;
+import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
@@ -105,6 +105,10 @@ public class AbstractTest {
         return new THServiceBuilder().build(type, handler);
     }
 
+    protected <T> Servlet createThriftRPCService(Class<T> iface, T handler) {
+        return createThriftRPCService(iface, handler, null);
+    }
+
     protected <T> Servlet createThriftRPCService(Class<T> iface, T handler, ServiceEventListener eventListener) {
         return createThriftRPCService(iface, handler, eventListener, null);
     }
@@ -123,13 +127,25 @@ public class AbstractTest {
     }
 
     protected <T> T createThriftClient(Class<T> iface) throws TTransportException {
+        return createThriftRPCClient(iface, getUrlString());
+    }
+
+    protected <T> T createThriftClient(Class<T> iface, String url) throws TTransportException {
         try {
-            THttpClient thc = new THttpClient(getUrlString(), HttpClients.createMinimal());
+            THttpClient thc = new THttpClient(url, HttpClients.createMinimal());
             TProtocol tProtocol = new TBinaryProtocol(thc);
             return THClientBuilder.createThriftClient(iface, tProtocol);
         } catch (TTransportException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected <T> T createThriftRPCClient(Class<T> iface, String url) {
+        return createThriftRPCClient(iface, null, null, url);
+    }
+
+    protected <T> T createThriftRPCClient(Class<T> iface, List<MetadataExtensionKit> extensionKits, String url) {
+        return createThriftRPCClient(iface, null, null, extensionKits, url);
     }
 
     protected <T> T createThriftRPCClient(Class<T> iface, IdGenerator idGenerator, ClientEventListener eventListener) {
@@ -152,14 +168,25 @@ public class AbstractTest {
     protected <T> T createThriftRPCClient(Class<T> iface, IdGenerator idGenerator, ClientEventListener eventListener, List<MetadataExtensionKit> extensionKits, String url) {
         return createThriftRPCClient(iface, idGenerator, eventListener, extensionKits, url, networkTimeout);
     }
-        protected <T> T createThriftRPCClient(Class<T> iface, IdGenerator idGenerator, ClientEventListener eventListener, List<MetadataExtensionKit> extensionKits, String url, int timeout) {
+
+    protected <T> T createThriftRPCClient(Class<T> iface, IdGenerator idGenerator, ClientEventListener eventListener, List<MetadataExtensionKit> extensionKits, String url, int timeout) {
+        return createThriftRPCClient(iface, idGenerator, eventListener, extensionKits, url, timeout, HttpClients.createMinimal());
+    }
+
+    protected <T> T createThriftRPCClient(Class<T> iface, String url, int timeout, HttpClient httpClient) {
+        return createThriftRPCClient(iface, null, null, null, url, timeout, httpClient);
+    }
+
+    protected <T> T createThriftRPCClient(Class<T> iface, IdGenerator idGenerator, ClientEventListener eventListener, List<MetadataExtensionKit> extensionKits, String url, int timeout, HttpClient httpClient) {
         try {
             //todo fix loosing log events for THClientBuilder
             THSpawnClientBuilder clientBuilder = new THSpawnClientBuilder();
             clientBuilder.withNetworkTimeout(timeout);
             clientBuilder.withAddress(new URI(url));
-            //clientBuilder.withHttpClient(HttpClients.createMinimal());
-            clientBuilder.withIdGenerator(idGenerator);
+            clientBuilder.withHttpClient(httpClient);
+            if (idGenerator != null) {
+                clientBuilder.withIdGenerator(idGenerator);
+            }
             if (eventListener != null) {
                 clientBuilder.withEventListener(eventListener);
             }

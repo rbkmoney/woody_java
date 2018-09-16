@@ -41,15 +41,20 @@ public class MetadataExtensionBundle extends ExtensionBundle {
                                             if (applied |= extKit.getConverter().apply(key)) {
                                                 unusedKits.remove(extKit);
                                                 Object metaVal = extKit.getExtension().getValue(key, customMetadata);
-                                                reqCCtx.setRequestHeader(formatHeaderKey(key), extKit.getConverter().convertToString(key, metaVal));
+                                                String valueString = extKit.getConverter().convertToString(key, metaVal);
+                                                reqCCtx.setRequestHeader(formatHeaderKey(key), valueString);
+                                                //old headers
+                                                reqCCtx.setRequestHeader(formatOldHeaderKey(key), valueString);
                                                 break;
                                             }
                                         }
                                     } catch (MetadataConversionException e) {
-                                        throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, formatHeaderKey(key), e);
+                                        throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, key, e);
                                     }
                                     if (!applied) {
-                                        reqCCtx.setRequestHeader(formatHeaderKey(key), String.valueOf(customMetadata.<Object>getValue(key)));
+                                        String valueString = String.valueOf(customMetadata.<Object>getValue(key));
+                                        reqCCtx.setRequestHeader(formatHeaderKey(key), valueString);
+                                        reqCCtx.setRequestHeader(formatOldHeaderKey(key), valueString);
                                     }
                                 } else {
                                     throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, key);
@@ -72,10 +77,11 @@ public class MetadataExtensionBundle extends ExtensionBundle {
                             HttpServletRequest request = reqSCtx.getProviderRequest();
                             Set<MetadataExtensionKit> unusedKits = new LinkedHashSet<>(extensionKits);
                             Enumeration<String> headerKeys = request.getHeaderNames();
+                            Metadata customMetaData = reqSCtx.getTraceData().getActiveSpan().getCustomMetadata();
                             for (String headerKey; headerKeys.hasMoreElements();) {
                                 headerKey = headerKeys.nextElement();
                                 String metaKey = formatMetaKey(headerKey);
-                                if (metaKey != null) {
+                                if (metaKey != null && !customMetaData.containsKey(metaKey)) {
                                     boolean applied = false;
                                     String metaStrVal = request.getHeader(headerKey);
                                     try {
@@ -83,7 +89,7 @@ public class MetadataExtensionBundle extends ExtensionBundle {
                                             if (applied |= extKit.getConverter().apply(metaKey)) {
                                                 unusedKits.remove(extKit);
                                                 Object metaVal = extKit.getConverter().convertToObject(metaKey, metaStrVal);
-                                                extKit.getExtension().setValue(metaKey, metaVal, reqSCtx.getTraceData().getActiveSpan().getCustomMetadata());
+                                                extKit.getExtension().setValue(metaKey, metaVal, customMetaData);
                                                 break;
                                             }
                                         }
@@ -91,7 +97,7 @@ public class MetadataExtensionBundle extends ExtensionBundle {
                                         throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, headerKey, e);
                                     }
                                     if (!applied) {
-                                        reqSCtx.getTraceData().getActiveSpan().getCustomMetadata().putValue(metaKey, metaStrVal);
+                                        customMetaData.putValue(metaKey, metaStrVal);
                                     }
                                 }
                             }
@@ -110,8 +116,15 @@ public class MetadataExtensionBundle extends ExtensionBundle {
         return THttpHeader.META.getKey() + metaKey.toLowerCase();
     }
 
+    @Deprecated
+    private static String formatOldHeaderKey(String metaKey) {
+        return THttpHeader.META.getOldKey() + metaKey.toLowerCase();
+    }
+
     private static String formatMetaKey(String headerKey) {
         String keyPrefix = THttpHeader.META.getKey();
-        return headerKey.startsWith(keyPrefix) ? headerKey.substring(keyPrefix.length()).toLowerCase() : null;
+        String oldKeyPrefix = THttpHeader.META.getOldKey();
+        return headerKey.startsWith(keyPrefix) ? headerKey.substring(keyPrefix.length()).toLowerCase() :
+                headerKey.startsWith(oldKeyPrefix) ? headerKey.substring(oldKeyPrefix.length()).toLowerCase() : null;
     }
 }

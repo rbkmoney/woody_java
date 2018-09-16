@@ -4,20 +4,29 @@ package com.rbkmoney.woody.thrift.impl.http.transport;
  * Created by vpankrashkin on 11.05.16.
  */
 public enum THttpHeader {
-    TRACE_ID("x-rbk-trace-id"),
-    SPAN_ID("x-rbk-span-id"),
-    PARENT_ID("x-rbk-parent-id"),
-    ERROR_CLASS("x-rbk-error-class"),
-    ERROR_REASON("x-rbk-error-reason"),
-    META("x-rbk-meta-");
+    TRACE_ID("woody.trace-id", "x-rbk-trace-id"),
+    SPAN_ID("woody.span-id", "x-rbk-span-id"),
+    PARENT_ID("woody.parent-id", "x-rbk-parent-id"),
+    ERROR_CLASS("woody.error-class", "x-rbk-error-class"),
+    ERROR_REASON("woody.error-reason", "x-rbk-error-reason"),
+    META("woody.meta-", "x-rbk-meta-");
 
     private String key;
 
-    THttpHeader(String name) {
-        this.key = name;
+    @Deprecated
+    private String oldKey;
+
+    THttpHeader(String key, String oldKey) {
+        this.key = key;
+        this.oldKey = oldKey;
     }
 
     public String getKey() {
         return key;
+    }
+
+    @Deprecated
+    public String getOldKey() {
+        return oldKey;
     }
 }
