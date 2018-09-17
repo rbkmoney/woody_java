@@ -1,7 +1,12 @@
 package com.rbkmoney.woody.api.event;
 
 import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
-import com.rbkmoney.woody.api.trace.*;
+import com.rbkmoney.woody.api.trace.ContextSpan;
+import com.rbkmoney.woody.api.trace.ContextUtils;
+import com.rbkmoney.woody.api.trace.Endpoint;
+import com.rbkmoney.woody.api.trace.TraceData;
+
+import java.time.Instant;
 
 import static com.rbkmoney.woody.api.trace.MetadataProperties.*;
 

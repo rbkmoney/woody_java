@@ -15,6 +15,7 @@ import com.rbkmoney.woody.api.transport.TransportEventInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.error.THErrorMapProcessor;
 import com.rbkmoney.woody.thrift.impl.http.event.THSEventLogListener;
 import com.rbkmoney.woody.thrift.impl.http.event.THServiceEvent;
+import com.rbkmoney.woody.thrift.impl.http.interceptor.THDeadlineInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THMessageInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THTransportInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.ext.MetadataExtensionBundle;
@@ -117,7 +118,7 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
 
     /**
      * @param isTransportLevel true - if this interceptor must be invoked on the lowers level (transport), next is thrift protocol level wit allows message read/write detection
-     * */
+     */
     protected CommonInterceptor createInterceptor(THErrorMapProcessor errorMapProcessor, boolean isTransportLevel) {
         List<CommonInterceptor> interceptors = new ArrayList<>();
 
@@ -127,7 +128,7 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
             ));
         }
 
-        List<ExtensionBundle> extensionBundles =  Arrays.asList(new MetadataExtensionBundle(metadataExtensionKits == null ? Collections.EMPTY_LIST : metadataExtensionKits));
+        List<ExtensionBundle> extensionBundles = Arrays.asList(new MetadataExtensionBundle(metadataExtensionKits == null ? Collections.EMPTY_LIST : metadataExtensionKits));
         interceptors.add(new ErrorMappingInterceptor(errorMapProcessor, getErrorDefinitionConsumer()));
         interceptors.add(new ContainerCommonInterceptor(
                 isTransportLevel ? new THTransportInterceptor(extensionBundles, false, true) : null,
@@ -135,6 +136,7 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
         ));
 
         if (isTransportLevel) {
+            interceptors.add(THDeadlineInterceptor.forService());
             //interceptors.add(new ProviderEventInterceptor(getOnSendEventListener(), null));
             interceptors.add(new ContextInterceptor(
                     TraceContext.forService(),

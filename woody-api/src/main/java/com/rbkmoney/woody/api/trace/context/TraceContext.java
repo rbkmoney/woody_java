@@ -2,9 +2,7 @@ package com.rbkmoney.woody.api.trace.context;
 
 import com.rbkmoney.woody.api.MDCUtils;
 import com.rbkmoney.woody.api.generator.IdGenerator;
-import com.rbkmoney.woody.api.trace.ContextSpan;
-import com.rbkmoney.woody.api.trace.Span;
-import com.rbkmoney.woody.api.trace.TraceData;
+import com.rbkmoney.woody.api.trace.*;
 
 import java.util.Optional;
 
@@ -190,6 +188,9 @@ public class TraceContext {
         } else {
             initSpan.setId(spanIdGenerator.generateId("", traceData.getServiceSpan().getCounter().incrementAndGet()));
             initSpan.setParentId(serviceSpan.getId());
+            if (initSpan.hasDeadline()) {
+                initSpan.setDeadline(serviceSpan.getDeadline());
+            }
         }
         initSpan.setTraceId(traceId);
         initTime(initSpan, timestamp);

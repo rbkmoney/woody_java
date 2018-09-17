@@ -30,4 +30,48 @@ public class MethodCallInterceptors {
             return result;
         };
     }
+
+//    public static MethodCallInterceptor trackedWithTimeoutCallInterceptor(MethodCallTracer callTracer) {
+//        return (src, args, caller) -> trackedCallInterceptor(callTracer).intercept(src, args, new InstanceMethodCaller(caller.getTargetMethod()) {
+//
+//            @Override
+//            public Object call(Object source, Object[] arguments) throws Throwable {
+//                TraceData traceData = TraceContext.getCurrentTraceData();
+//                FutureTask<Map.Entry<TraceData, Object>> futureResult = new FutureTask<>(
+//                        WFlow.create(
+//                                () -> {
+//                                    try {
+//                                        Object object = caller.call(source, arguments);
+//                                        return new AbstractMap.SimpleEntry<>(TraceContext.getCurrentTraceData(), object);
+//                                    } catch (Throwable throwable) {
+//                                        throw new WExecutionException(throwable, TraceContext.getCurrentTraceData());
+//                                    }
+//                                }
+//                        )
+//                );
+//                Thread thread = new Thread(futureResult);
+//                thread.start();
+//                try {
+//                    Map.Entry<TraceData, Object> result = futureResult.get(ContextUtils.getExecutionTimeout(), TimeUnit.MILLISECONDS);
+//                    traceData = result.getKey();
+//                    return result.getValue();
+//                } catch (TimeoutException ex) {
+//                    futureResult.cancel(true);
+//                    throw new WUnavailableResultException("deadline reached");
+//                } catch (ExecutionException ex) {
+//                    Throwable throwable = ex.getCause();
+//                    if (throwable instanceof WExecutionException) {
+//                        traceData = ((WExecutionException) throwable).getTraceData();
+//                    }
+//                    throw throwable.getCause();
+//                } catch (InterruptedException ex) {
+//                    Thread.currentThread().interrupt();
+//                    throw ex;
+//                } finally {
+//                    TraceContext.setCurrentTraceData(new TraceData(traceData, true));
+//                }
+//            }
+//        });
+//
+//    }
 }

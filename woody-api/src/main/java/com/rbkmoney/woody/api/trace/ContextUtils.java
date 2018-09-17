@@ -4,6 +4,8 @@ import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
 import com.rbkmoney.woody.api.trace.context.metadata.MetadataExtension;
 
+import java.time.Instant;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -50,6 +52,31 @@ public class ContextUtils {
         return span.getMetadata().getValue(MetadataProperties.ERROR_DEFINITION);
     }
 
+    public static Instant getDeadline(ContextSpan contextSpan) {
+        Span span = contextSpan.getSpan();
+        if (span.hasDeadline()) {
+            return Instant.ofEpochMilli(span.getDeadline());
+        }
+        return null;
+    }
+
+    public static void setDeadline(Instant deadline) {
+        setDeadline(TraceContext.getCurrentTraceData().getClientSpan(), deadline);
+    }
+
+    public static void setDeadline(ContextSpan span, Instant deadline) {
+        if (deadline != null) {
+            span.getSpan().setDeadline(deadline.toEpochMilli());
+        }
+    }
+
+    public static int getExecutionTimeout(ContextSpan span, int defaultTimeout) {
+        return Optional.ofNullable(getDeadline(span))
+                .map(deadline -> Math.toIntExact(deadline.toEpochMilli() - System.currentTimeMillis()))
+                .filter(executionTimeout -> executionTimeout > 0)
+                .orElse(defaultTimeout);
+    }
+
     public static void tryThrowInterceptionError(ContextSpan span) throws Throwable {
         Throwable t = getInterceptionError(span);
         if (t != null) {
@@ -73,7 +100,7 @@ public class ContextUtils {
         extension.setValue(key, val, TraceContext.getCurrentTraceData().getActiveSpan().getCustomMetadata());
     }
 
-    public static Object  setCustomMetadataValue(String key, Object val) {
+    public static Object setCustomMetadataValue(String key, Object val) {
         return TraceContext.getCurrentTraceData().getActiveSpan().getCustomMetadata().putValue(key, val);
     }
 

@@ -8,6 +8,7 @@ public class Span {
     private String name;
     private String id;
     private String parentId;
+    private long deadline;
     private long timestamp;
     private long duration;
 
@@ -19,6 +20,7 @@ public class Span {
         this.name = oldSpan.name;
         this.id = oldSpan.id;
         this.parentId = oldSpan.parentId;
+        this.deadline = oldSpan.deadline;
         this.timestamp = oldSpan.timestamp;
         this.duration = oldSpan.duration;
     }
@@ -55,6 +57,14 @@ public class Span {
         this.parentId = parentId;
     }
 
+    public long getDeadline() {
+        return deadline;
+    }
+
+    public void setDeadline(long deadline) {
+        this.deadline = deadline;
+    }
+
     public long getTimestamp() {
         return timestamp;
     }
@@ -79,11 +89,16 @@ public class Span {
         return isFilled() && timestamp != 0;
     }
 
+    public boolean hasDeadline() {
+        return deadline > 0;
+    }
+
     public void reset() {
         traceId = null;
         name = null;
         id = null;
         parentId = null;
+        deadline = 0;
         timestamp = 0;
         duration = 0;
     }
@@ -99,6 +114,7 @@ public class Span {
                 ", name='" + name + '\'' +
                 ", id='" + id + '\'' +
                 ", parentId='" + parentId + '\'' +
+                ", deadline=" + deadline +
                 ", timestamp=" + timestamp +
                 ", duration=" + duration +
                 '}';
