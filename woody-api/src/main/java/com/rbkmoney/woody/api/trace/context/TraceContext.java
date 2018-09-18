@@ -188,7 +188,7 @@ public class TraceContext {
         } else {
             initSpan.setId(spanIdGenerator.generateId("", traceData.getServiceSpan().getCounter().incrementAndGet()));
             initSpan.setParentId(serviceSpan.getId());
-            if (initSpan.hasDeadline()) {
+            if (!initSpan.hasDeadline()) {
                 initSpan.setDeadline(serviceSpan.getDeadline());
             }
         }

@@ -68,16 +68,10 @@ public class TestDeadlines extends AbstractTest {
             OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), owner.getId());
             switch (owner.getKey()) {
                 case "USE_CURRENT":
-                    new WFlow().createServiceFork(() -> {
-                        try {
-                            client.setOwnerOneway(new Owner(owner.getId(), owner.getName()));
-                        } catch (TException ex) {
-                            throw new RuntimeException(ex);
-                        }
-                    }).run();
+                    client.setOwnerOneway(new Owner(owner.getId(), owner.getName()));
                     break;
                 case "CHANGE_DEADLINE":
-                    new WFlow().createServiceFork(() -> {
+                    WFlow.create(() -> {
                         try {
                             Instant newDeadline = deadline.plusMillis(owner.getId());
                             ContextUtils.setDeadline(newDeadline);
@@ -87,8 +81,8 @@ public class TestDeadlines extends AbstractTest {
                         }
                     }).run();
                     break;
-                    default:
-                        throw new RuntimeException();
+                default:
+                    throw new RuntimeException();
             }
         }
 
@@ -218,7 +212,7 @@ public class TestDeadlines extends AbstractTest {
     @Test
     public void testDeadlinesTimings() throws TException {
         addServlet(testServlet, servletContextPath);
-        int timeout = 222;
+        int timeout = 1000;
 
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), timeout);
         client.getOwner(1);

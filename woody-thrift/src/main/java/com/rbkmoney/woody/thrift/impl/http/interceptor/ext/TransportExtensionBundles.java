@@ -2,6 +2,7 @@ package com.rbkmoney.woody.thrift.impl.http.interceptor.ext;
 
 import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
 import com.rbkmoney.woody.api.flow.error.WErrorType;
+import com.rbkmoney.woody.api.flow.error.WUnavailableResultException;
 import com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle;
 import com.rbkmoney.woody.api.interceptor.ext.InterceptorExtension;
 import com.rbkmoney.woody.api.trace.*;
@@ -18,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.URL;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -47,6 +50,46 @@ public class TransportExtensionBundles {
                         }
                     },
                     respSCtx -> {
+                    }
+            )
+    );
+
+    public static final ExtensionBundle DEADLINE_BUNDLE = createExtBundle(
+            createCtxBundle(
+                    (InterceptorExtension<THCExtensionContext>) reqCCtx -> {
+                        ClientSpan clientSpan = reqCCtx.getTraceData().getClientSpan();
+                        Instant deadline = ContextUtils.getDeadline(clientSpan);
+                        if (deadline != null) {
+                            reqCCtx.setRequestHeader(THttpHeader.DEADLINE.getKey(), deadline.toString());
+                            //old header
+                            reqCCtx.setRequestHeader(THttpHeader.DEADLINE.getOldKey(), deadline.toString());
+                        }
+                    },
+                    respCCtx -> {
+                    }
+            ),
+            createCtxBundle(
+                    (InterceptorExtension<THSExtensionContext>) reqSCtx -> {
+                        HttpServletRequest request = reqSCtx.getProviderRequest();
+                        ServiceSpan serviceSpan = reqSCtx.getTraceData().getServiceSpan();
+                        String deadlineHeaderValue = request.getHeader(THttpHeader.DEADLINE.getKey()) != null ? request.getHeader(THttpHeader.DEADLINE.getKey()) : request.getHeader(THttpHeader.DEADLINE.getOldKey());
+
+                        if (deadlineHeaderValue != null) {
+                            try {
+                                Instant deadline = Instant.parse(deadlineHeaderValue);
+                                ContextUtils.setDeadline(serviceSpan, deadline);
+                            } catch (DateTimeParseException ex) {
+                                throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, THttpHeader.DEADLINE.getKey(), ex);
+                            }
+                        }
+                    },
+                    (InterceptorExtension<THSExtensionContext>) respSCtx -> {
+                        Instant deadline = ContextUtils.getDeadline(respSCtx.getTraceData().getServiceSpan());
+                        if (deadline != null) {
+                            respSCtx.setResponseHeader(THttpHeader.DEADLINE.getKey(), deadline.toString());
+                            //old header
+                            respSCtx.setResponseHeader(THttpHeader.DEADLINE.getOldKey(), deadline.toString());
+                        }
                     }
             )
     );
@@ -200,7 +243,8 @@ public class TransportExtensionBundles {
             RPC_ID_BUNDLE,
             CALL_ENDPOINT_BUNDLE,
             TRANSPORT_STATE_MAPPING_BUNDLE,
-            TRANSPORT_INJECTION_BUNDLE
+            TRANSPORT_INJECTION_BUNDLE,
+            DEADLINE_BUNDLE
     ));
 
     private static final List<ExtensionBundle> serviceList = Collections.unmodifiableList(Arrays.asList(
@@ -208,7 +252,8 @@ public class TransportExtensionBundles {
             RPC_ID_BUNDLE,
             CALL_ENDPOINT_BUNDLE,
             TRANSPORT_STATE_MAPPING_BUNDLE,
-            TRANSPORT_INJECTION_BUNDLE
+            TRANSPORT_INJECTION_BUNDLE,
+            DEADLINE_BUNDLE
     ));
 
     public static List<ExtensionBundle> getClientExtensions() {

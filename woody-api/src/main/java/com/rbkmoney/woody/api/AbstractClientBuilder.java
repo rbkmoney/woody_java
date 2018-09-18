@@ -115,8 +115,9 @@ public abstract class AbstractClientBuilder implements ClientBuilder {
                         TargetCallTracer.forClient(),
                         new ErrorMappingTracer(errorMapProcessor, errDefConsumer),
                         new EventTracer(listenerStub, getOnCallEndEventListener(), getErrorListener()),
-                        new ErrorGenTracer(errorMapProcessor)
-                ));
+                        new ErrorGenTracer(errorMapProcessor),
+                        DeadlineTracer.forClient(getNetworkTimeout())
+                        ));
     }
 
     protected TraceContext createTraceContext() {

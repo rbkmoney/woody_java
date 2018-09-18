@@ -21,7 +21,6 @@ import com.rbkmoney.woody.api.transport.TransportEventInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.error.THErrorMapProcessor;
 import com.rbkmoney.woody.thrift.impl.http.event.THCEventLogListener;
 import com.rbkmoney.woody.thrift.impl.http.event.THClientEvent;
-import com.rbkmoney.woody.thrift.impl.http.interceptor.THDeadlineInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THMessageInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.THTransportInterceptor;
 import com.rbkmoney.woody.thrift.impl.http.interceptor.ext.MetadataExtensionBundle;
@@ -215,7 +214,6 @@ public class THClientBuilder extends AbstractClientBuilder {
     protected CommonInterceptor createTransportInterceptor() {
         List<ExtensionBundle> extensionBundles = Arrays.asList(new MetadataExtensionBundle(metadataExtensionKits == null ? Collections.EMPTY_LIST : metadataExtensionKits));
         return new CompositeInterceptor(
-                THDeadlineInterceptor.forClient(getNetworkTimeout()),
                 new ContainerCommonInterceptor(new THTransportInterceptor(extensionBundles, true, true), new THTransportInterceptor(extensionBundles, true, false)),
                 new TransportEventInterceptor(getOnSendEventListener(), getOnReceiveEventListener(), null)
         );
