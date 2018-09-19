@@ -1,5 +1,6 @@
 package com.rbkmoney.woody.api.proxy.tracer;
 
+import com.rbkmoney.woody.api.MDCUtils;
 import com.rbkmoney.woody.api.flow.error.WUnavailableResultException;
 import com.rbkmoney.woody.api.proxy.InstanceMethodCaller;
 import com.rbkmoney.woody.api.trace.ContextSpan;
@@ -35,8 +36,7 @@ public class DeadlineTracer extends EmptyTracer {
 
     @Override
     public void beforeCall(Object[] args, InstanceMethodCaller caller) throws Exception {
-        TraceData currentTraceData = TraceContext.getCurrentTraceData();
-        ContextSpan contextSpan = isClient ? currentTraceData.getClientSpan() : currentTraceData.getServiceSpan();
+        ContextSpan contextSpan = getContextSpan();
         Instant deadline = ContextUtils.getDeadline(contextSpan);
         if (deadline != null) {
             validateDeadline(deadline);
@@ -44,8 +44,22 @@ public class DeadlineTracer extends EmptyTracer {
             if (isClient && networkTimeout > 0) {
                 deadline = Instant.now().plusMillis(networkTimeout);
                 ContextUtils.setDeadline(contextSpan, deadline);
+                MDCUtils.putDeadline(deadline);
             }
         }
+    }
+
+    @Override
+    public void afterCall(Object[] args, InstanceMethodCaller caller, Object result) throws Exception {
+        ContextSpan contextSpan = getContextSpan();
+        if (ContextUtils.getDeadline(contextSpan) == null) {
+            MDCUtils.removeDeadline();
+        }
+    }
+
+    private ContextSpan getContextSpan() {
+        TraceData currentTraceData = TraceContext.getCurrentTraceData();
+        return isClient ? currentTraceData.getClientSpan() : currentTraceData.getServiceSpan();
     }
 
     private void validateDeadline(Instant deadline) {

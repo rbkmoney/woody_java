@@ -19,7 +19,6 @@
 
 package org.apache.thrift.transport;
 
-import com.rbkmoney.woody.api.flow.error.WUnavailableResultException;
 import com.rbkmoney.woody.api.interceptor.CommonInterceptor;
 import com.rbkmoney.woody.api.interceptor.EmptyCommonInterceptor;
 import com.rbkmoney.woody.api.trace.ContextUtils;
@@ -40,7 +39,6 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -75,7 +73,7 @@ import java.util.function.BooleanSupplier;
 
 public class THttpClient extends TTransport {
 
-    private URL url_ = null;
+    private final URL url_;
 
     private final ByteArrayOutputStream requestBuffer_ = new ByteArrayOutputStream();
 
@@ -137,7 +135,7 @@ public class THttpClient extends TTransport {
 
     public THttpClient(String url, CommonInterceptor interceptor) throws TTransportException {
         try {
-            url_ = new URL(url);
+            this.url_ = new URL(url);
             this.client = null;
             this.host = null;
             this.interceptor = interceptor == null ? new EmptyCommonInterceptor() : interceptor;
@@ -152,7 +150,7 @@ public class THttpClient extends TTransport {
 
     public THttpClient(String url, HttpClient client, CommonInterceptor interceptor) throws TTransportException {
         try {
-            url_ = new URL(url);
+            this.url_ = new URL(url);
             this.client = client;
             this.host = new HttpHost(url_.getHost(), -1 == url_.getPort() ? url_.getDefaultPort() : url_.getPort(), url_.getProtocol());
             this.interceptor = interceptor == null ? new EmptyCommonInterceptor() : interceptor;
@@ -356,7 +354,7 @@ public class THttpClient extends TTransport {
     }
 
     private int getSocketTimeout(int executionTimeout) {
-        return executionTimeout - getConnectionTimeout(executionTimeout);
+        return Math.max(executionTimeout - getConnectionTimeout(executionTimeout), -1);
     }
 
     public void flush() throws TTransportException {
@@ -385,8 +383,15 @@ public class THttpClient extends TTransport {
             intercept(() -> interceptor.interceptRequest(traceData, connection, url_, this.networkTimeout_), "Request interception error");
 
             int executionTimeout = ContextUtils.getExecutionTimeout(traceData.getClientSpan(), this.networkTimeout_);
-            connection.setConnectTimeout(getConnectionTimeout(executionTimeout));
-            connection.setReadTimeout(getSocketTimeout(executionTimeout));
+
+            int connectionTimeout = getConnectionTimeout(executionTimeout);
+            if (connectionTimeout > 0) {
+                connection.setConnectTimeout(connectionTimeout);
+            }
+            int socketTimeout = getSocketTimeout(executionTimeout);
+            if (socketTimeout > 0) {
+                connection.setReadTimeout(socketTimeout);
+            }
 
             connection.setDoOutput(true);
             connection.connect();

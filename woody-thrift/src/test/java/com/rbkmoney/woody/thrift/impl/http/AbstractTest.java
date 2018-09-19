@@ -37,7 +37,7 @@ import java.util.Map;
  * Created by vpankrashkin on 06.05.16.
  */
 public class AbstractTest {
-    public static final int networkTimeout = 200;
+    public static final int networkTimeout = 700;
     private HandlerCollection handlerCollection;
     protected Server server;
     protected int serverPort = 8080;

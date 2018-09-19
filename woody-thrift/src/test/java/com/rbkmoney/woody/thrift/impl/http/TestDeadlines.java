@@ -9,11 +9,13 @@ import com.rbkmoney.woody.api.trace.context.TraceContext;
 import com.rbkmoney.woody.rpc.Owner;
 import com.rbkmoney.woody.rpc.OwnerServiceSrv;
 import com.rbkmoney.woody.rpc.test_error;
+import com.rbkmoney.woody.thrift.impl.http.transport.THttpHeader;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.thrift.TException;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import javax.servlet.Servlet;
@@ -24,9 +26,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.IntSummaryStatistics;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static com.rbkmoney.woody.thrift.impl.http.transport.THttpHeader.DEADLINE;
@@ -63,8 +67,9 @@ public class TestDeadlines extends AbstractTest {
         @Override
         public void setOwner(Owner owner) throws TException {
             Instant deadline = ContextUtils.getDeadline(TraceContext.getCurrentTraceData().getServiceSpan());
-            assertNotNull(deadline);
-            assertEquals(owner.getName(), deadline.toString());
+            if (deadline != null && owner.getName() != null) {
+                assertEquals(owner.getName(), deadline.toString());
+            }
             OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), owner.getId());
             switch (owner.getKey()) {
                 case "USE_CURRENT":
@@ -73,7 +78,9 @@ public class TestDeadlines extends AbstractTest {
                 case "CHANGE_DEADLINE":
                     WFlow.create(() -> {
                         try {
-                            Instant newDeadline = deadline.plusMillis(owner.getId());
+                            Instant newDeadline = Optional.ofNullable(deadline)
+                                    .map(time -> time.plusMillis(owner.getId()))
+                                    .orElse(Instant.now().plusSeconds(Math.abs(owner.getId())));
                             ContextUtils.setDeadline(newDeadline);
                             client.setOwnerOneway(new Owner(owner.getId(), newDeadline.toString()));
                         } catch (TException ex) {
@@ -89,8 +96,9 @@ public class TestDeadlines extends AbstractTest {
         @Override
         public void setOwnerOneway(Owner owner) throws TException {
             Instant deadline = ContextUtils.getDeadline(TraceContext.getCurrentTraceData().getServiceSpan());
-            assertNotNull(deadline);
-            assertEquals(owner.getName(), deadline.toString());
+            if (deadline != null && owner.getName() != null) {
+                assertEquals(owner.getName(), deadline.toString());
+            }
         }
 
         @Override
@@ -155,6 +163,47 @@ public class TestDeadlines extends AbstractTest {
     }
 
     @Test
+    public void testWhenDeadlineHeaderIsIncorrect() throws Exception {
+        addServlet(testServlet, servletContextPath);
+        HttpClient httpClient = HttpClients.custom()
+                .addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
+                    assertTrue(request.containsHeader(THttpHeader.DEADLINE.getKey()));
+                    assertTrue(request.containsHeader(THttpHeader.DEADLINE.getOldKey()));
+                    request.setHeader(THttpHeader.DEADLINE.getKey(), "%%?%%???");
+                }).build();
+        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), httpClient);
+        try {
+            client.getIntValue();
+            fail();
+        } catch (WRuntimeException ex) {
+            WErrorDefinition errorDefinition = ex.getErrorDefinition();
+            assertEquals(WErrorType.UNEXPECTED_ERROR, errorDefinition.getErrorType());
+            assertEquals("bad header: woody.deadline", errorDefinition.getErrorReason());
+        }
+    }
+
+    @Test
+    public void testWhenOldDeadlineHeaderIsIncorrect() throws Exception {
+        addServlet(testServlet, servletContextPath);
+        HttpClient httpClient = HttpClients.custom()
+                .addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
+                    assertTrue(request.containsHeader(THttpHeader.DEADLINE.getKey()));
+                    assertTrue(request.containsHeader(THttpHeader.DEADLINE.getOldKey()));
+                    request.removeHeaders(THttpHeader.DEADLINE.getKey());
+                    request.setHeader(THttpHeader.DEADLINE.getOldKey(), "");
+                }).build();
+        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), httpClient);
+        try {
+            client.getIntValue();
+            fail();
+        } catch (WRuntimeException ex) {
+            WErrorDefinition errorDefinition = ex.getErrorDefinition();
+            assertEquals(WErrorType.UNEXPECTED_ERROR, errorDefinition.getErrorType());
+            assertEquals("bad header: x-rbk-deadline", errorDefinition.getErrorReason());
+        }
+    }
+
+    @Test
     public void testWhenDeadlineIsReachedOnClient() throws Exception {
         Instant deadline = Instant.now().minusSeconds(5);
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath));
@@ -192,9 +241,12 @@ public class TestDeadlines extends AbstractTest {
     }
 
     @Test
+    @Ignore
     public void testConnectTimeout() throws Exception {
-        ServerSocket serverSocket = new ServerSocket(8023, 1);
-        new Socket().connect(serverSocket.getLocalSocketAddress());
+        ServerSocket serverSocket = new ServerSocket(0, 1);
+        Socket socket = new Socket();
+        socket.setKeepAlive(true);
+        socket.connect(serverSocket.getLocalSocketAddress());
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, "http://localhost:" + serverSocket.getLocalPort(), 200);
         try {
             client.getIntValue();
@@ -207,6 +259,25 @@ public class TestDeadlines extends AbstractTest {
         if (!serverSocket.isClosed()) {
             serverSocket.close();
         }
+    }
+
+    @Test
+    public void testWhenTimeoutNotSet() throws TException {
+        int timeout = -1;
+        addServlet(testServlet, servletContextPath);
+        HttpClient httpClient = HttpClients.custom()
+                .addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
+                    assertFalse(request.containsHeader(DEADLINE.getKey()));
+                    assertFalse(request.containsHeader(DEADLINE.getOldKey()));
+                })
+                .addInterceptorFirst((HttpResponseInterceptor) (response, context) -> {
+                    assertFalse(response.containsHeader(DEADLINE.getKey()));
+                    assertFalse(response.containsHeader(DEADLINE.getOldKey()));
+                }).build();
+        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), timeout, httpClient);
+        Owner owner = new Owner(timeout, null);
+        owner.setKey("USE_CURRENT");
+        client.setOwner(owner);
     }
 
     @Test
@@ -247,7 +318,7 @@ public class TestDeadlines extends AbstractTest {
     }
 
     @Test
-    public void testWhenDeadlineSendFromService() throws TException {
+    public void testWhenDeadlineSendFromService() {
         addServlet(testServlet, servletContextPath);
         int timeout = 5000;
         Instant deadline = Instant.now().plusMillis(timeout);

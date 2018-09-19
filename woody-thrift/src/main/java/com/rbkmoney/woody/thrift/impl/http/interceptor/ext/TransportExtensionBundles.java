@@ -72,14 +72,14 @@ public class TransportExtensionBundles {
                     (InterceptorExtension<THSExtensionContext>) reqSCtx -> {
                         HttpServletRequest request = reqSCtx.getProviderRequest();
                         ServiceSpan serviceSpan = reqSCtx.getTraceData().getServiceSpan();
-                        String deadlineHeaderValue = request.getHeader(THttpHeader.DEADLINE.getKey()) != null ? request.getHeader(THttpHeader.DEADLINE.getKey()) : request.getHeader(THttpHeader.DEADLINE.getOldKey());
-
+                        String deadlineHeader = request.getHeader(THttpHeader.DEADLINE.getKey()) != null ? THttpHeader.DEADLINE.getKey() : THttpHeader.DEADLINE.getOldKey();
+                        String deadlineHeaderValue = request.getHeader(deadlineHeader);
                         if (deadlineHeaderValue != null) {
                             try {
                                 Instant deadline = Instant.parse(deadlineHeaderValue);
                                 ContextUtils.setDeadline(serviceSpan, deadline);
                             } catch (DateTimeParseException ex) {
-                                throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, THttpHeader.DEADLINE.getKey(), ex);
+                                throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, deadlineHeader, ex);
                             }
                         }
                     },
