@@ -171,7 +171,7 @@ public class TestClientAndServerHttpHeaders extends AbstractTest {
                     httpRequest.removeHeader(httpRequest.getFirstHeader(THttpHeader.PARENT_ID.getKey()));
                     httpRequest.removeHeader(httpRequest.getFirstHeader(THttpHeader.PARENT_ID.getOldKey()));
                 }).build();
-        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), 5000, httpClient);
+        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), httpClient);
         try {
             client.getIntValue();
             fail();
@@ -203,7 +203,7 @@ public class TestClientAndServerHttpHeaders extends AbstractTest {
                             assertEquals(httpResponse.getLastHeader(THttpHeader.PARENT_ID.getKey()).getValue(), httpResponse.getLastHeader(THttpHeader.PARENT_ID.getOldKey()).getValue());
                         }
                 ).build();
-        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), 5000, httpClient);
+        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), httpClient);
         client.getIntValue();
     }
 
@@ -225,7 +225,7 @@ public class TestClientAndServerHttpHeaders extends AbstractTest {
                             assertEquals(httpResponse.getLastHeader(THttpHeader.PARENT_ID.getKey()).getValue(), httpResponse.getLastHeader(THttpHeader.PARENT_ID.getOldKey()).getValue());
                         }
                 ).build();
-        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), 5000, httpClient);
+        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), httpClient);
         client.getIntValue();
     }
 
@@ -240,28 +240,12 @@ public class TestClientAndServerHttpHeaders extends AbstractTest {
                             assertEquals(httpResponse.getLastHeader(THttpHeader.ERROR_REASON.getOldKey()).getValue(), httpResponse.getLastHeader(THttpHeader.ERROR_REASON.getKey()).getValue());
                         }
                 ).build();
-        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), 5000, httpClient);
+        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), httpClient);
         try {
             client.getErrOwner(1);
             fail();
         } catch (TException ex) {
 
-        }
-    }
-
-    private void writeResultMessage(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException {
-        TBinaryProtocol tBinaryProtocol = new TBinaryProtocol(
-                new TIOStreamTransport(servletRequest.getInputStream(), servletResponse.getOutputStream())
-        );
-        try {
-            tBinaryProtocol.writeMessageBegin(tBinaryProtocol.readMessageBegin());
-            OwnerServiceSrv.getIntValue_result intValueResult = new OwnerServiceSrv.getIntValue_result();
-            intValueResult.setSuccess(42);
-            intValueResult.write(tBinaryProtocol);
-            tBinaryProtocol.writeMessageEnd();
-            tBinaryProtocol.getTransport().flush();
-        } catch (TException ex) {
-            throw new RuntimeException(ex);
         }
     }
 

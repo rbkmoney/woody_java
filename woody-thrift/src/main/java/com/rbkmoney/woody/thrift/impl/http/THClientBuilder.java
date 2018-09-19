@@ -129,7 +129,8 @@ public class THClientBuilder extends AbstractClientBuilder {
 
     @Override
     protected BiConsumer<WErrorDefinition, ContextSpan> getErrorDefinitionConsumer() {
-        return (eDef, contextSpan) -> {};
+        return (eDef, contextSpan) -> {
+        };
     }
 
     @Override
@@ -166,8 +167,7 @@ public class THClientBuilder extends AbstractClientBuilder {
     protected <T> T createProviderClient(Class<T> iface) {
         try {
             THttpClient tHttpClient = new THttpClient(getAddress().toString(), getHttpClient(), createTransportInterceptor());
-            tHttpClient.setConnectTimeout(getNetworkTimeout());
-            tHttpClient.setReadTimeout(getNetworkTimeout());
+            tHttpClient.setNetworkTimeout(getNetworkTimeout());
             TProtocol tProtocol = createProtocol(tHttpClient);
             return createThriftClient(iface, tProtocol);
         } catch (Exception e) {
@@ -179,7 +179,7 @@ public class THClientBuilder extends AbstractClientBuilder {
         if (!customClient && client instanceof TServiceClient) {
             TTransport tTransport = ((TServiceClient) client).getInputProtocol().getTransport();
             if (tTransport instanceof THttpClient) {
-                HttpClient httpClient = ((THttpClient)tTransport).getHttpClient();
+                HttpClient httpClient = ((THttpClient) tTransport).getHttpClient();
                 if (httpClient instanceof CloseableHttpClient) {
                     try {
                         ((CloseableHttpClient) httpClient).close();
@@ -212,9 +212,9 @@ public class THClientBuilder extends AbstractClientBuilder {
     }
 
     protected CommonInterceptor createTransportInterceptor() {
-        List<ExtensionBundle> extensionBundles =  Arrays.asList(new MetadataExtensionBundle(metadataExtensionKits == null ? Collections.EMPTY_LIST : metadataExtensionKits));
+        List<ExtensionBundle> extensionBundles = Arrays.asList(new MetadataExtensionBundle(metadataExtensionKits == null ? Collections.EMPTY_LIST : metadataExtensionKits));
         return new CompositeInterceptor(
-                new ContainerCommonInterceptor(new THTransportInterceptor(extensionBundles, true, true), new THTransportInterceptor(extensionBundles,true, false)),
+                new ContainerCommonInterceptor(new THTransportInterceptor(extensionBundles, true, true), new THTransportInterceptor(extensionBundles, true, false)),
                 new TransportEventInterceptor(getOnSendEventListener(), getOnReceiveEventListener(), null)
         );
     }

@@ -4,10 +4,7 @@ import com.rbkmoney.woody.api.event.ServiceEvent;
 import com.rbkmoney.woody.api.event.ServiceEventListener;
 import com.rbkmoney.woody.api.proxy.ProxyFactory;
 import com.rbkmoney.woody.api.proxy.SingleTargetProvider;
-import com.rbkmoney.woody.api.proxy.tracer.CompositeTracer;
-import com.rbkmoney.woody.api.proxy.tracer.EventTracer;
-import com.rbkmoney.woody.api.proxy.tracer.MethodCallTracer;
-import com.rbkmoney.woody.api.proxy.tracer.TargetCallTracer;
+import com.rbkmoney.woody.api.proxy.tracer.*;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -55,10 +52,11 @@ public abstract class AbstractServiceBuilder<Srv> implements ServiceBuilder<Srv>
     protected MethodCallTracer createEventTracer() {
         return new CompositeTracer(
                 TargetCallTracer.forServer(),
+                DeadlineTracer.forService(),
                 new EventTracer(getOnCallStartEventListener(),
                         getOnCallEndEventListener(),
                         getErrorListener()
-                ));
+                        ));
     }
 
     public void setAllowObjectProxyOverriding(boolean allowObjectProxyOverriding) {

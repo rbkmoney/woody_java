@@ -36,6 +36,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
@@ -72,19 +73,17 @@ import java.util.function.BooleanSupplier;
 
 public class THttpClient extends TTransport {
 
-    private URL url_ = null;
+    private final URL url_;
 
     private final ByteArrayOutputStream requestBuffer_ = new ByteArrayOutputStream();
 
     private InputStream inputStream_ = null;
 
-    private int connectTimeout_ = 0;
+    private int maxConnectTimeout_ = 250;
 
-    private int readTimeout_ = 0;
+    private int networkTimeout_ = 0;
 
     private Map<String, String> customHeaders_ = null;
-
-    private RequestConfig requestConfig = null;
 
     private final HttpHost host;
 
@@ -136,7 +135,7 @@ public class THttpClient extends TTransport {
 
     public THttpClient(String url, CommonInterceptor interceptor) throws TTransportException {
         try {
-            url_ = new URL(url);
+            this.url_ = new URL(url);
             this.client = null;
             this.host = null;
             this.interceptor = interceptor == null ? new EmptyCommonInterceptor() : interceptor;
@@ -151,7 +150,7 @@ public class THttpClient extends TTransport {
 
     public THttpClient(String url, HttpClient client, CommonInterceptor interceptor) throws TTransportException {
         try {
-            url_ = new URL(url);
+            this.url_ = new URL(url);
             this.client = client;
             this.host = new HttpHost(url_.getHost(), -1 == url_.getPort() ? url_.getDefaultPort() : url_.getPort(), url_.getProtocol());
             this.interceptor = interceptor == null ? new EmptyCommonInterceptor() : interceptor;
@@ -160,14 +159,12 @@ public class THttpClient extends TTransport {
         }
     }
 
-    public void setConnectTimeout(int timeout) {
-        connectTimeout_ = timeout;
-        requestConfig = null;
+    public void setNetworkTimeout(int timeout) {
+        this.networkTimeout_ = timeout;
     }
 
-    public void setReadTimeout(int timeout) {
-        readTimeout_ = timeout;
-        requestConfig = null;
+    public void setMaxConnectTimeout(int timeout) {
+        this.maxConnectTimeout_ = timeout;
     }
 
     public void setCustomHeaders(Map<String, String> headers) {
@@ -280,12 +277,6 @@ public class THttpClient extends TTransport {
             // Set request to path + query string
             post = new HttpPost(this.url_.getFile());
 
-            RequestConfig activeRequestConfig = requestConfig == null ? RequestConfig.custom()
-                    .setConnectTimeout(connectTimeout_)
-                    .setSocketTimeout(readTimeout_)
-                    .build() : requestConfig;
-            post.setConfig(activeRequestConfig);
-
             //
             // Headers are added to the HttpPost instance, not
             // to HttpClient.
@@ -297,7 +288,14 @@ public class THttpClient extends TTransport {
 
             TraceData traceData = TraceContext.getCurrentTraceData();
 
-            intercept(() -> interceptor.interceptRequest(traceData, newPost, this.url_), "Request interception error");
+            intercept(() -> interceptor.interceptRequest(traceData, newPost, this.url_, this.networkTimeout_), "Request interception error");
+
+            int executionTimeout = ContextUtils.getExecutionTimeout(traceData.getClientSpan(), this.networkTimeout_);
+            RequestConfig activeRequestConfig = RequestConfig.custom()
+                    .setConnectTimeout(getConnectionTimeout(executionTimeout))
+                    .setSocketTimeout(getSocketTimeout(executionTimeout))
+                    .build();
+            post.setConfig(activeRequestConfig);
 
             post.setEntity(new ByteArrayEntity(data));
 
@@ -347,6 +345,18 @@ public class THttpClient extends TTransport {
         }
     }
 
+    private int getConnectionTimeout(int executionTimeout) {
+        return BigDecimal.valueOf(executionTimeout)
+                .multiply(BigDecimal.valueOf(0.05))
+                .min(BigDecimal.valueOf(this.maxConnectTimeout_))
+                .max(BigDecimal.valueOf(1))
+                .intValue();
+    }
+
+    private int getSocketTimeout(int executionTimeout) {
+        return Math.max(executionTimeout - getConnectionTimeout(executionTimeout), -1);
+    }
+
     public void flush() throws TTransportException {
 
         if (null != this.client) {
@@ -362,14 +372,6 @@ public class THttpClient extends TTransport {
             // Create connection object
             HttpURLConnection connection = (HttpURLConnection) url_.openConnection();
 
-            // Timeouts, only if explicitly set
-            if (connectTimeout_ > 0) {
-                connection.setConnectTimeout(connectTimeout_);
-            }
-            if (readTimeout_ > 0) {
-                connection.setReadTimeout(readTimeout_);
-            }
-
             // Make the request
             connection.setRequestMethod("POST");
             setMainHeaders((key, val) -> connection.setRequestProperty(key, val));
@@ -378,7 +380,18 @@ public class THttpClient extends TTransport {
 
             TraceData traceData = TraceContext.getCurrentTraceData();
 
-            intercept(() -> interceptor.interceptRequest(traceData, connection, url_), "Request interception error");
+            intercept(() -> interceptor.interceptRequest(traceData, connection, url_, this.networkTimeout_), "Request interception error");
+
+            int executionTimeout = ContextUtils.getExecutionTimeout(traceData.getClientSpan(), this.networkTimeout_);
+
+            int connectionTimeout = getConnectionTimeout(executionTimeout);
+            if (connectionTimeout > 0) {
+                connection.setConnectTimeout(connectionTimeout);
+            }
+            int socketTimeout = getSocketTimeout(executionTimeout);
+            if (socketTimeout > 0) {
+                connection.setReadTimeout(socketTimeout);
+            }
 
             connection.setDoOutput(true);
             connection.connect();

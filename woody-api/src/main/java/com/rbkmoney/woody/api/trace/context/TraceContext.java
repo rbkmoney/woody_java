@@ -2,9 +2,7 @@ package com.rbkmoney.woody.api.trace.context;
 
 import com.rbkmoney.woody.api.MDCUtils;
 import com.rbkmoney.woody.api.generator.IdGenerator;
-import com.rbkmoney.woody.api.trace.ContextSpan;
-import com.rbkmoney.woody.api.trace.Span;
-import com.rbkmoney.woody.api.trace.TraceData;
+import com.rbkmoney.woody.api.trace.*;
 
 import java.util.Optional;
 
@@ -127,7 +125,7 @@ public class TraceContext {
             traceData = initServiceContext(traceData);
         }
         setCurrentTraceData(traceData);
-        MDCUtils.putContextIds(traceData.getActiveSpan().getSpan());
+        MDCUtils.putSpanData(traceData.getActiveSpan().getSpan());
 
         postInit.run();
     }
@@ -155,9 +153,9 @@ public class TraceContext {
             setCurrentTraceData(traceData);
 
             if (traceData.getServiceSpan().isFilled()) {
-                MDCUtils.putContextIds(traceData.getServiceSpan().getSpan());
+                MDCUtils.putSpanData(traceData.getServiceSpan().getSpan());
             } else {
-                MDCUtils.removeContextIds();
+                MDCUtils.removeSpanData();
             }
 
         }
@@ -190,6 +188,9 @@ public class TraceContext {
         } else {
             initSpan.setId(spanIdGenerator.generateId("", traceData.getServiceSpan().getCounter().incrementAndGet()));
             initSpan.setParentId(serviceSpan.getId());
+            if (!initSpan.hasDeadline()) {
+                initSpan.setDeadline(serviceSpan.getDeadline());
+            }
         }
         initSpan.setTraceId(traceId);
         initTime(initSpan, timestamp);

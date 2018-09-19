@@ -117,7 +117,7 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
 
     /**
      * @param isTransportLevel true - if this interceptor must be invoked on the lowers level (transport), next is thrift protocol level wit allows message read/write detection
-     * */
+     */
     protected CommonInterceptor createInterceptor(THErrorMapProcessor errorMapProcessor, boolean isTransportLevel) {
         List<CommonInterceptor> interceptors = new ArrayList<>();
 
@@ -127,7 +127,7 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
             ));
         }
 
-        List<ExtensionBundle> extensionBundles =  Arrays.asList(new MetadataExtensionBundle(metadataExtensionKits == null ? Collections.EMPTY_LIST : metadataExtensionKits));
+        List<ExtensionBundle> extensionBundles = Arrays.asList(new MetadataExtensionBundle(metadataExtensionKits == null ? Collections.EMPTY_LIST : metadataExtensionKits));
         interceptors.add(new ErrorMappingInterceptor(errorMapProcessor, getErrorDefinitionConsumer()));
         interceptors.add(new ContainerCommonInterceptor(
                 isTransportLevel ? new THTransportInterceptor(extensionBundles, false, true) : null,
