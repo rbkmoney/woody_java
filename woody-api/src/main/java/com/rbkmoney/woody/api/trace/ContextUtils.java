@@ -77,8 +77,8 @@ public class ContextUtils {
     public static int getExecutionTimeout(ContextSpan span, int defaultTimeout) {
         Instant deadline = getDeadline(span);
         if (deadline != null) {
-            long executionTimeout = Math.toIntExact(deadline.toEpochMilli() - System.currentTimeMillis());
-            return executionTimeout > 0 ? (int) executionTimeout : 0;
+            int executionTimeout = Math.toIntExact(deadline.toEpochMilli() - System.currentTimeMillis());
+            return executionTimeout > 0 ? executionTimeout : 0;
         }
         return defaultTimeout;
     }
