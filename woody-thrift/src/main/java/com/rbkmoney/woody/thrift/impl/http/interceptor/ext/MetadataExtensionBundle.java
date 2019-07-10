@@ -43,8 +43,6 @@ public class MetadataExtensionBundle extends ExtensionBundle {
                                                 Object metaVal = extKit.getExtension().getValue(key, customMetadata);
                                                 String valueString = extKit.getConverter().convertToString(key, metaVal);
                                                 reqCCtx.setRequestHeader(formatHeaderKey(key), valueString);
-                                                //old headers
-                                                reqCCtx.setRequestHeader(formatOldHeaderKey(key), valueString);
                                                 break;
                                             }
                                         }
@@ -54,7 +52,6 @@ public class MetadataExtensionBundle extends ExtensionBundle {
                                     if (!applied) {
                                         String valueString = String.valueOf(customMetadata.<Object>getValue(key));
                                         reqCCtx.setRequestHeader(formatHeaderKey(key), valueString);
-                                        reqCCtx.setRequestHeader(formatOldHeaderKey(key), valueString);
                                     }
                                 } else {
                                     throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, key);
@@ -116,15 +113,9 @@ public class MetadataExtensionBundle extends ExtensionBundle {
         return THttpHeader.META.getKey() + metaKey.toLowerCase();
     }
 
-    @Deprecated
-    private static String formatOldHeaderKey(String metaKey) {
-        return THttpHeader.META.getOldKey() + metaKey.toLowerCase();
-    }
 
     private static String formatMetaKey(String headerKey) {
         String keyPrefix = THttpHeader.META.getKey();
-        String oldKeyPrefix = THttpHeader.META.getOldKey();
-        return headerKey.startsWith(keyPrefix) ? headerKey.substring(keyPrefix.length()).toLowerCase() :
-                headerKey.startsWith(oldKeyPrefix) ? headerKey.substring(oldKeyPrefix.length()).toLowerCase() : null;
+        return headerKey.startsWith(keyPrefix) ? headerKey.substring(keyPrefix.length()).toLowerCase() : null;
     }
 }

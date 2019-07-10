@@ -2,7 +2,6 @@ package com.rbkmoney.woody.thrift.impl.http.interceptor.ext;
 
 import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
 import com.rbkmoney.woody.api.flow.error.WErrorType;
-import com.rbkmoney.woody.api.flow.error.WUnavailableResultException;
 import com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle;
 import com.rbkmoney.woody.api.interceptor.ext.InterceptorExtension;
 import com.rbkmoney.woody.api.trace.*;
@@ -61,8 +60,6 @@ public class TransportExtensionBundles {
                         Instant deadline = ContextUtils.getDeadline(clientSpan);
                         if (deadline != null) {
                             reqCCtx.setRequestHeader(THttpHeader.DEADLINE.getKey(), deadline.toString());
-                            //old header
-                            reqCCtx.setRequestHeader(THttpHeader.DEADLINE.getOldKey(), deadline.toString());
                         }
                     },
                     respCCtx -> {
@@ -72,7 +69,7 @@ public class TransportExtensionBundles {
                     (InterceptorExtension<THSExtensionContext>) reqSCtx -> {
                         HttpServletRequest request = reqSCtx.getProviderRequest();
                         ServiceSpan serviceSpan = reqSCtx.getTraceData().getServiceSpan();
-                        String deadlineHeader = request.getHeader(THttpHeader.DEADLINE.getKey()) != null ? THttpHeader.DEADLINE.getKey() : THttpHeader.DEADLINE.getOldKey();
+                        String deadlineHeader = request.getHeader(THttpHeader.DEADLINE.getKey());
                         String deadlineHeaderValue = request.getHeader(deadlineHeader);
                         if (deadlineHeaderValue != null) {
                             try {
@@ -87,8 +84,6 @@ public class TransportExtensionBundles {
                         Instant deadline = ContextUtils.getDeadline(respSCtx.getTraceData().getServiceSpan());
                         if (deadline != null) {
                             respSCtx.setResponseHeader(THttpHeader.DEADLINE.getKey(), deadline.toString());
-                            //old header
-                            respSCtx.setResponseHeader(THttpHeader.DEADLINE.getOldKey(), deadline.toString());
                         }
                     }
             )
@@ -101,11 +96,6 @@ public class TransportExtensionBundles {
                         reqCCtx.setRequestHeader(THttpHeader.TRACE_ID.getKey(), span.getTraceId());
                         reqCCtx.setRequestHeader(THttpHeader.SPAN_ID.getKey(), span.getId());
                         reqCCtx.setRequestHeader(THttpHeader.PARENT_ID.getKey(), span.getParentId());
-
-                        //old headers
-                        reqCCtx.setRequestHeader(THttpHeader.TRACE_ID.getOldKey(), span.getTraceId());
-                        reqCCtx.setRequestHeader(THttpHeader.SPAN_ID.getOldKey(), span.getId());
-                        reqCCtx.setRequestHeader(THttpHeader.PARENT_ID.getOldKey(), span.getParentId());
                     },
                     respCCtx -> {
                     }
@@ -115,28 +105,17 @@ public class TransportExtensionBundles {
                         HttpServletRequest request = reqSCtx.getProviderRequest();
                         Span span = reqSCtx.getTraceData().getServiceSpan().getSpan();
                         List<Map.Entry<THttpHeader, Consumer<String>>> headerConsumers = Arrays.asList(
-                                new SimpleEntry<>(THttpHeader.TRACE_ID, (id) -> span.setTraceId(id)),
-                                new SimpleEntry<>(THttpHeader.PARENT_ID, (id) -> span.setParentId(id)),
-                                new SimpleEntry<>(THttpHeader.SPAN_ID, (id) -> span.setId(id))
+                                new SimpleEntry<>(THttpHeader.TRACE_ID, span::setTraceId),
+                                new SimpleEntry<>(THttpHeader.PARENT_ID, span::setParentId),
+                                new SimpleEntry<>(THttpHeader.SPAN_ID, span::setId)
                         );
-
-                        if (headerConsumers.stream().anyMatch(entry -> request.getHeader(entry.getKey().getKey()) != null)) {
-                            validateAndProcessTraceHeaders(request, (tHttpHeader) -> tHttpHeader.getKey(), headerConsumers);
-                        } else {
-                            //old headers
-                            validateAndProcessTraceHeaders(request, (tHttpHeader) -> tHttpHeader.getOldKey(), headerConsumers);
-                        }
+                        validateAndProcessTraceHeaders(request, THttpHeader::getKey, headerConsumers);
                     },
                     (InterceptorExtension<THSExtensionContext>) respSCtx -> {
                         Span span = respSCtx.getTraceData().getServiceSpan().getSpan();
                         respSCtx.setResponseHeader(THttpHeader.TRACE_ID.getKey(), span.getTraceId());
                         respSCtx.setResponseHeader(THttpHeader.PARENT_ID.getKey(), span.getParentId());
                         respSCtx.setResponseHeader(THttpHeader.SPAN_ID.getKey(), span.getId());
-
-                        //old headers
-                        respSCtx.setResponseHeader(THttpHeader.TRACE_ID.getOldKey(), span.getTraceId());
-                        respSCtx.setResponseHeader(THttpHeader.PARENT_ID.getOldKey(), span.getParentId());
-                        respSCtx.setResponseHeader(THttpHeader.SPAN_ID.getOldKey(), span.getId());
                     }
             )
     );
@@ -197,8 +176,8 @@ public class TransportExtensionBundles {
                         metadata.putValue(THMetadataProperties.TH_RESPONSE_STATUS, status);
                         metadata.putValue(THMetadataProperties.TH_RESPONSE_MESSAGE, respCCtx.getResponseMessage());
 
-                        String errorClassHeaderKey = respCCtx.getResponseHeader(THttpHeader.ERROR_CLASS.getKey()) != null ? THttpHeader.ERROR_CLASS.getKey() : THttpHeader.ERROR_CLASS.getOldKey();
-                        String errorReasonHeaderKey = respCCtx.getResponseHeader(THttpHeader.ERROR_REASON.getKey()) != null ? THttpHeader.ERROR_REASON.getKey() : THttpHeader.ERROR_REASON.getOldKey();
+                        String errorClassHeaderKey = respCCtx.getResponseHeader(THttpHeader.ERROR_CLASS.getKey());
+                        String errorReasonHeaderKey = respCCtx.getResponseHeader(THttpHeader.ERROR_REASON.getKey());
                         THResponseInfo thResponseInfo = new THResponseInfo(status, respCCtx.getResponseHeader(errorClassHeaderKey), respCCtx.getResponseHeader(errorReasonHeaderKey), respCCtx.getResponseMessage());
                         WErrorDefinition errorDefinition = THProviderErrorMapper.createErrorDefinition(thResponseInfo, () -> {
                             throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, errorClassHeaderKey);
@@ -227,11 +206,9 @@ public class TransportExtensionBundles {
                             response.setStatus(responseInfo.getStatus());
                             Optional.ofNullable(responseInfo.getErrClass()).ifPresent(val -> {
                                 response.setHeader(THttpHeader.ERROR_CLASS.getKey(), val);
-                                response.setHeader(THttpHeader.ERROR_CLASS.getOldKey(), val);
                             });
                             Optional.ofNullable(responseInfo.getErrReason()).ifPresent(val -> {
                                 response.setHeader(THttpHeader.ERROR_REASON.getKey(), val);
-                                response.setHeader(THttpHeader.ERROR_REASON.getOldKey(), val);
                             });
                             serviceSpan.getMetadata().putValue(THMetadataProperties.TH_TRANSPORT_RESPONSE_SET_FLAG, true);
                         }

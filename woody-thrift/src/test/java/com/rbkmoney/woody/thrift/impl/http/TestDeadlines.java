@@ -26,7 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.IntSummaryStatistics;
@@ -115,7 +114,6 @@ public class TestDeadlines extends AbstractTest {
             protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
                 assertNotNull(request.getHeader(DEADLINE.getKey()));
                 assertEquals(deadline.toString(), request.getHeader(DEADLINE.getKey()));
-                assertEquals(request.getHeader(DEADLINE.getKey()), request.getHeader(DEADLINE.getOldKey()));
                 writeResultMessage(request, response);
             }
         }, "/check_deadline_header");
@@ -135,7 +133,6 @@ public class TestDeadlines extends AbstractTest {
             @Override
             protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
                 assertNotNull(request.getHeader(DEADLINE.getKey()));
-                assertEquals(request.getHeader(DEADLINE.getKey()), request.getHeader(DEADLINE.getOldKey()));
                 writeResultMessage(request, response);
             }
         }, "/check_when_deadline_not_set");
@@ -151,7 +148,6 @@ public class TestDeadlines extends AbstractTest {
                 .addInterceptorFirst((HttpResponseInterceptor) (response, context) -> {
                     assertTrue(response.containsHeader(DEADLINE.getKey()));
                     assertEquals(deadline.toString(), response.getLastHeader(DEADLINE.getKey()).getValue());
-                    assertEquals(response.getLastHeader(DEADLINE.getKey()).getValue(), response.getLastHeader(DEADLINE.getOldKey()).getValue());
                 }).build();
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), httpClient);
         new WFlow().createServiceFork(
@@ -168,7 +164,6 @@ public class TestDeadlines extends AbstractTest {
         HttpClient httpClient = HttpClients.custom()
                 .addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
                     assertTrue(request.containsHeader(THttpHeader.DEADLINE.getKey()));
-                    assertTrue(request.containsHeader(THttpHeader.DEADLINE.getOldKey()));
                     request.setHeader(THttpHeader.DEADLINE.getKey(), "%%?%%???");
                 }).build();
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), httpClient);
@@ -179,27 +174,6 @@ public class TestDeadlines extends AbstractTest {
             WErrorDefinition errorDefinition = ex.getErrorDefinition();
             assertEquals(WErrorType.UNEXPECTED_ERROR, errorDefinition.getErrorType());
             assertEquals("bad header: woody.deadline", errorDefinition.getErrorReason());
-        }
-    }
-
-    @Test
-    public void testWhenOldDeadlineHeaderIsIncorrect() throws Exception {
-        addServlet(testServlet, servletContextPath);
-        HttpClient httpClient = HttpClients.custom()
-                .addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
-                    assertTrue(request.containsHeader(THttpHeader.DEADLINE.getKey()));
-                    assertTrue(request.containsHeader(THttpHeader.DEADLINE.getOldKey()));
-                    request.removeHeaders(THttpHeader.DEADLINE.getKey());
-                    request.setHeader(THttpHeader.DEADLINE.getOldKey(), "");
-                }).build();
-        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), httpClient);
-        try {
-            client.getIntValue();
-            fail();
-        } catch (WRuntimeException ex) {
-            WErrorDefinition errorDefinition = ex.getErrorDefinition();
-            assertEquals(WErrorType.UNEXPECTED_ERROR, errorDefinition.getErrorType());
-            assertEquals("bad header: x-rbk-deadline", errorDefinition.getErrorReason());
         }
     }
 
@@ -268,11 +242,9 @@ public class TestDeadlines extends AbstractTest {
         HttpClient httpClient = HttpClients.custom()
                 .addInterceptorFirst((HttpRequestInterceptor) (request, context) -> {
                     assertFalse(request.containsHeader(DEADLINE.getKey()));
-                    assertFalse(request.containsHeader(DEADLINE.getOldKey()));
                 })
                 .addInterceptorFirst((HttpResponseInterceptor) (response, context) -> {
                     assertFalse(response.containsHeader(DEADLINE.getKey()));
-                    assertFalse(response.containsHeader(DEADLINE.getOldKey()));
                 }).build();
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), timeout, httpClient);
         Owner owner = new Owner(timeout, null);

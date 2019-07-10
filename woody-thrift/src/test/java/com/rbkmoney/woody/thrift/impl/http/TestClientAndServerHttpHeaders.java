@@ -16,18 +16,13 @@ import com.rbkmoney.woody.rpc.OwnerServiceSrv;
 import com.rbkmoney.woody.rpc.test_error;
 import com.rbkmoney.woody.thrift.impl.http.transport.THttpHeader;
 import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.thrift.TException;
-import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.transport.TIOStreamTransport;
 import org.junit.Test;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -82,7 +77,6 @@ public class TestClientAndServerHttpHeaders extends AbstractTest {
             protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
                 for (THttpHeader tHttpHeader : Arrays.asList(THttpHeader.SPAN_ID, THttpHeader.TRACE_ID, THttpHeader.PARENT_ID)) {
                     assertNotNull(request.getHeader(tHttpHeader.getKey()));
-                    assertEquals(request.getHeader(tHttpHeader.getKey()), request.getHeader(tHttpHeader.getOldKey()));
                 }
                 writeResultMessage(request, response);
             }
@@ -137,11 +131,7 @@ public class TestClientAndServerHttpHeaders extends AbstractTest {
             @Override
             protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
                 assertEquals(request.getHeader(THttpHeader.META.getKey() + metadataWithExtensionKit.getKey()), metadataWithExtensionKit.getValue());
-                assertEquals(request.getHeader(THttpHeader.META.getOldKey() + metadataWithExtensionKit.getKey()), metadataWithExtensionKit.getValue());
-
                 assertEquals(request.getHeader(THttpHeader.META.getKey() + metadataWithoutExtensionKit.getKey()), metadataWithoutExtensionKit.getValue());
-                assertEquals(request.getHeader(THttpHeader.META.getOldKey() + metadataWithoutExtensionKit.getKey()), metadataWithoutExtensionKit.getValue());
-
                 writeResultMessage(request, response);
             }
         }, "/check_meta_headers");
@@ -165,11 +155,8 @@ public class TestClientAndServerHttpHeaders extends AbstractTest {
         CloseableHttpClient httpClient = HttpClients.custom()
                 .addInterceptorFirst((HttpRequestInterceptor) (httpRequest, httpContext) -> {
                     httpRequest.removeHeader(httpRequest.getFirstHeader(THttpHeader.SPAN_ID.getKey()));
-                    httpRequest.removeHeader(httpRequest.getFirstHeader(THttpHeader.SPAN_ID.getOldKey()));
                     httpRequest.removeHeader(httpRequest.getFirstHeader(THttpHeader.TRACE_ID.getKey()));
-                    httpRequest.removeHeader(httpRequest.getFirstHeader(THttpHeader.TRACE_ID.getOldKey()));
                     httpRequest.removeHeader(httpRequest.getFirstHeader(THttpHeader.PARENT_ID.getKey()));
-                    httpRequest.removeHeader(httpRequest.getFirstHeader(THttpHeader.PARENT_ID.getOldKey()));
                 }).build();
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), httpClient);
         try {
@@ -181,71 +168,6 @@ public class TestClientAndServerHttpHeaders extends AbstractTest {
             assertEquals(WErrorType.UNEXPECTED_ERROR, errorDefinition.getErrorType());
             assertEquals(WErrorSource.INTERNAL, errorDefinition.getErrorSource());
             assertEquals("Bad Request", errorDefinition.getErrorMessage());
-            assertEquals("x-rbk-trace-id, x-rbk-parent-id, x-rbk-span-id missing", errorDefinition.getErrorReason());
-        }
-    }
-
-    @Test
-    public void testWhenTraceDataWithOldHeaders() throws TException {
-        addServlet(testServlet, servletContextPath);
-        CloseableHttpClient httpClient = HttpClients.custom()
-                .addInterceptorFirst((HttpRequestInterceptor) (httpRequest, httpContext) -> {
-                    httpRequest.removeHeader(httpRequest.getFirstHeader(THttpHeader.SPAN_ID.getKey()));
-                    httpRequest.removeHeader(httpRequest.getFirstHeader(THttpHeader.TRACE_ID.getKey()));
-                    httpRequest.removeHeader(httpRequest.getFirstHeader(THttpHeader.PARENT_ID.getKey()));
-                })
-                .addInterceptorLast((HttpResponseInterceptor) (httpResponse, httpContext) -> {
-                            assertTrue(httpResponse.containsHeader(THttpHeader.SPAN_ID.getKey()));
-                            assertEquals(httpResponse.getLastHeader(THttpHeader.SPAN_ID.getKey()).getValue(), httpResponse.getLastHeader(THttpHeader.SPAN_ID.getOldKey()).getValue());
-                            assertTrue(httpResponse.containsHeader(THttpHeader.TRACE_ID.getKey()));
-                            assertEquals(httpResponse.getLastHeader(THttpHeader.TRACE_ID.getKey()).getValue(), httpResponse.getLastHeader(THttpHeader.TRACE_ID.getOldKey()).getValue());
-                            assertTrue(httpResponse.containsHeader(THttpHeader.PARENT_ID.getKey()));
-                            assertEquals(httpResponse.getLastHeader(THttpHeader.PARENT_ID.getKey()).getValue(), httpResponse.getLastHeader(THttpHeader.PARENT_ID.getOldKey()).getValue());
-                        }
-                ).build();
-        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), httpClient);
-        client.getIntValue();
-    }
-
-    @Test
-    public void testWhenTraceDataWithNewHeaders() throws TException {
-        addServlet(testServlet, servletContextPath);
-        CloseableHttpClient httpClient = HttpClients.custom()
-                .addInterceptorFirst((HttpRequestInterceptor) (httpRequest, httpContext) -> {
-                    httpRequest.removeHeader(httpRequest.getFirstHeader(THttpHeader.SPAN_ID.getOldKey()));
-                    httpRequest.removeHeader(httpRequest.getFirstHeader(THttpHeader.TRACE_ID.getOldKey()));
-                    httpRequest.removeHeader(httpRequest.getFirstHeader(THttpHeader.PARENT_ID.getOldKey()));
-                })
-                .addInterceptorLast((HttpResponseInterceptor) (httpResponse, httpContext) -> {
-                            assertTrue(httpResponse.containsHeader(THttpHeader.SPAN_ID.getOldKey()));
-                            assertEquals(httpResponse.getLastHeader(THttpHeader.SPAN_ID.getOldKey()).getValue(), httpResponse.getLastHeader(THttpHeader.SPAN_ID.getKey()).getValue());
-                            assertTrue(httpResponse.containsHeader(THttpHeader.TRACE_ID.getOldKey()));
-                            assertEquals(httpResponse.getLastHeader(THttpHeader.TRACE_ID.getKey()).getValue(), httpResponse.getLastHeader(THttpHeader.TRACE_ID.getOldKey()).getValue());
-                            assertTrue(httpResponse.containsHeader(THttpHeader.PARENT_ID.getOldKey()));
-                            assertEquals(httpResponse.getLastHeader(THttpHeader.PARENT_ID.getKey()).getValue(), httpResponse.getLastHeader(THttpHeader.PARENT_ID.getOldKey()).getValue());
-                        }
-                ).build();
-        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), httpClient);
-        client.getIntValue();
-    }
-
-    @Test
-    public void testWhenThrowError() {
-        addServlet(testServlet, servletContextPath);
-        CloseableHttpClient httpClient = HttpClients.custom()
-                .addInterceptorFirst((HttpResponseInterceptor) (httpResponse, httpContext) -> {
-                            assertTrue(httpResponse.containsHeader(THttpHeader.ERROR_CLASS.getOldKey()));
-                            assertEquals(httpResponse.getLastHeader(THttpHeader.ERROR_CLASS.getOldKey()).getValue(), httpResponse.getLastHeader(THttpHeader.ERROR_CLASS.getKey()).getValue());
-                            assertTrue(httpResponse.containsHeader(THttpHeader.ERROR_REASON.getOldKey()));
-                            assertEquals(httpResponse.getLastHeader(THttpHeader.ERROR_REASON.getOldKey()).getValue(), httpResponse.getLastHeader(THttpHeader.ERROR_REASON.getKey()).getValue());
-                        }
-                ).build();
-        OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), httpClient);
-        try {
-            client.getErrOwner(1);
-            fail();
-        } catch (TException ex) {
-
         }
     }
 
