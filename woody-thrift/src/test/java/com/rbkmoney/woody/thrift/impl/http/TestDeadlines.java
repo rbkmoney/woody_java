@@ -109,7 +109,7 @@ public class TestDeadlines extends AbstractTest {
 
     @Test
     public void testClientSendDeadlineHeader() throws Exception {
-        Instant deadline = Instant.now().plusSeconds(20);
+        Instant deadline = Instant.now().plusSeconds(30);
         addServlet(new HttpServlet() {
             @Override
             protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
