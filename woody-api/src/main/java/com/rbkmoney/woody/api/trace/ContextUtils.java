@@ -5,7 +5,6 @@ import com.rbkmoney.woody.api.trace.context.TraceContext;
 import com.rbkmoney.woody.api.trace.context.metadata.MetadataExtension;
 
 import java.time.Instant;
-import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -70,11 +69,18 @@ public class ContextUtils {
         }
     }
 
+    /**
+     * @param span context with current deadline
+     * @param defaultTimeout default timeout
+     * @return return 0 if deadline <= 0, else return diff deadline - currentTime
+     */
     public static int getExecutionTimeout(ContextSpan span, int defaultTimeout) {
-        return Optional.ofNullable(getDeadline(span))
-                .map(deadline -> Math.toIntExact(deadline.toEpochMilli() - System.currentTimeMillis()))
-                .filter(executionTimeout -> executionTimeout > 0)
-                .orElse(defaultTimeout);
+        Instant deadline = getDeadline(span);
+        if (deadline != null) {
+            int executionTimeout = Math.toIntExact(deadline.toEpochMilli() - System.currentTimeMillis());
+            return executionTimeout > 0 ? executionTimeout : 0;
+        }
+        return defaultTimeout;
     }
 
     public static void tryThrowInterceptionError(ContextSpan span) throws Throwable {
