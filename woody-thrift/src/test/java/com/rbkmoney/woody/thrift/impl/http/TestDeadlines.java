@@ -13,6 +13,7 @@ import com.rbkmoney.woody.thrift.impl.http.transport.THttpHeader;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.thrift.TException;
 import org.junit.Ignore;
@@ -108,7 +109,7 @@ public class TestDeadlines extends AbstractTest {
 
     @Test
     public void testClientSendDeadlineHeader() throws Exception {
-        Instant deadline = Instant.now().plusSeconds(5);
+        Instant deadline = Instant.now().plusSeconds(20);
         addServlet(new HttpServlet() {
             @Override
             protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -143,7 +144,7 @@ public class TestDeadlines extends AbstractTest {
     @Test
     public void testServerReceiveDeadline() throws Exception {
         addServlet(testServlet, servletContextPath);
-        Instant deadline = Instant.now().plusSeconds(5);
+        Instant deadline = Instant.now().plusSeconds(20);
         HttpClient httpClient = HttpClients.custom()
                 .addInterceptorFirst((HttpResponseInterceptor) (response, context) -> {
                     assertTrue(response.containsHeader(DEADLINE.getKey()));
@@ -199,6 +200,7 @@ public class TestDeadlines extends AbstractTest {
     @Test
     public void testWhenDeadlineIsReachedOnServer() throws Exception {
         addServlet(testServlet, servletContextPath);
+
         HttpClient httpClient = HttpClients.custom()
                 .addInterceptorFirst(
                         (HttpRequestInterceptor) (request, context) -> request.setHeader(DEADLINE.getKey(), Instant.now().minusSeconds(5).toString())
@@ -292,7 +294,7 @@ public class TestDeadlines extends AbstractTest {
     @Test
     public void testWhenDeadlineSendFromService() {
         addServlet(testServlet, servletContextPath);
-        int timeout = 5000;
+        int timeout = 30000;
         Instant deadline = Instant.now().plusMillis(timeout);
         OwnerServiceSrv.Iface client = createThriftRPCClient(OwnerServiceSrv.Iface.class, getUrlString(servletContextPath), timeout);
         new WFlow().createServiceFork(

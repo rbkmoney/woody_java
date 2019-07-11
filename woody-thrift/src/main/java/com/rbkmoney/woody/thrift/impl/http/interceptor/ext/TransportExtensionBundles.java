@@ -69,7 +69,7 @@ public class TransportExtensionBundles {
                     (InterceptorExtension<THSExtensionContext>) reqSCtx -> {
                         HttpServletRequest request = reqSCtx.getProviderRequest();
                         ServiceSpan serviceSpan = reqSCtx.getTraceData().getServiceSpan();
-                        String deadlineHeader = request.getHeader(THttpHeader.DEADLINE.getKey());
+                        String deadlineHeader = THttpHeader.DEADLINE.getKey();
                         String deadlineHeaderValue = request.getHeader(deadlineHeader);
                         if (deadlineHeaderValue != null) {
                             try {
@@ -176,8 +176,8 @@ public class TransportExtensionBundles {
                         metadata.putValue(THMetadataProperties.TH_RESPONSE_STATUS, status);
                         metadata.putValue(THMetadataProperties.TH_RESPONSE_MESSAGE, respCCtx.getResponseMessage());
 
-                        String errorClassHeaderKey = respCCtx.getResponseHeader(THttpHeader.ERROR_CLASS.getKey());
-                        String errorReasonHeaderKey = respCCtx.getResponseHeader(THttpHeader.ERROR_REASON.getKey());
+                        String errorClassHeaderKey = THttpHeader.ERROR_CLASS.getKey();
+                        String errorReasonHeaderKey = THttpHeader.ERROR_REASON.getKey();
                         THResponseInfo thResponseInfo = new THResponseInfo(status, respCCtx.getResponseHeader(errorClassHeaderKey), respCCtx.getResponseHeader(errorReasonHeaderKey), respCCtx.getResponseMessage());
                         WErrorDefinition errorDefinition = THProviderErrorMapper.createErrorDefinition(thResponseInfo, () -> {
                             throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, errorClassHeaderKey);
