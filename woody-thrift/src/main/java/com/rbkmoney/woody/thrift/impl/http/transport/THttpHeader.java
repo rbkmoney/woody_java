@@ -10,7 +10,7 @@ public enum THttpHeader {
     DEADLINE("woody.deadline"),
     ERROR_CLASS("woody.error-class"),
     ERROR_REASON("woody.error-reason"),
-    META("woody.meta-");
+    META("woody.meta.");
 
     private String key;
 
