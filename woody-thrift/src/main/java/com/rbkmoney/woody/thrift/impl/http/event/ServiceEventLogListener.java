@@ -29,7 +29,7 @@ public class ServiceEventLogListener implements ServiceEventListener<THServiceEv
                     log.info("SERVER Event: {}, Status: {}, Time: {}, Duration: {}", event.getEventType(), event.isSuccessfulCall() ? "ok" : "error", event.getTimeStamp(), event.getDuration());
                     break;
                 case ERROR:
-                    log.info("SERVER Event: {}, ErrType: {}, TErrType: {}, ErrName: {},  Time: {}", event.getEventType(), event.getErrorDefinition(), event.getThriftErrorType(), Optional.ofNullable(event.getErrorDefinition()).map(ed -> ed.getErrorName()).orElse(""), event.getTimeStamp());
+                    log.error("SERVER Event: {}, ErrType: {}, TErrType: {}, ErrName: {},  Time: {}", event.getEventType(), event.getErrorDefinition(), event.getThriftErrorType(), Optional.ofNullable(event.getErrorDefinition()).map(ed -> ed.getErrorName()).orElse(""), event.getTimeStamp());
                     break;
                 default:
                     log.info("SERVER Unknown error: {}", event);

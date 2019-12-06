@@ -29,7 +29,7 @@ public class ClientEventLogListener implements ClientEventListener<THClientEvent
                     log.info("CLIENT Event: {}, Status: {}, Time: {}, Duration: {}", event.getEventType(), event.isSuccessfulCall() ? "ok" : "error", event.getTimeStamp(), event.getDuration());
                     break;
                 case ERROR:
-                    log.info("CLIENT Event: {}, ErrType: {}, TErrType: {}, ErrName: {},  Time: {}, Duration: {}", event.getEventType(), event.getErrorDefinition(), event.getThriftErrorType(), Optional.ofNullable(event.getErrorDefinition()).map(ed -> ed.getErrorName()).orElse(""), event.getTimeStamp(), event.getDuration());
+                    log.error("CLIENT Event: {}, ErrType: {}, TErrType: {}, ErrName: {},  Time: {}, Duration: {}", event.getEventType(), event.getErrorDefinition(), event.getThriftErrorType(), Optional.ofNullable(event.getErrorDefinition()).map(ed -> ed.getErrorName()).orElse(""), event.getTimeStamp(), event.getDuration());
                     break;
                 default:
                     log.info("CLIENT Unknown error: {}", event);

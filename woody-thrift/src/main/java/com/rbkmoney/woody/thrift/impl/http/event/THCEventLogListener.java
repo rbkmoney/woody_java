@@ -45,7 +45,7 @@ public class THCEventLogListener implements ClientEventListener<THClientEvent> {
                     Throwable error = ContextUtils.getCallError(event.getActiveSpan());
                     if (error == null)
                         error = ContextUtils.getInterceptionError(event.getActiveSpan());
-                    log.warn("CLN: {}, [ErrDef: {}, TErrType: {}], Time: {}ms", event.getEventType(), event.getErrorDefinition(), event.getThriftErrorType(), (System.currentTimeMillis() - event.getTimeStamp()), error);
+                    log.error("CLN: {}, [ErrDef: {}, TErrType: {}], Time: {}ms", event.getEventType(), event.getErrorDefinition(), event.getThriftErrorType(), (System.currentTimeMillis() - event.getTimeStamp()), error);
                     break;
                 default:
                     log.info("CLN Unknown error: {}", event);
