@@ -8,6 +8,6 @@ build('woody_java', 'docker-host') {
         javaLibPipeline = load("build_utils/jenkins_lib/pipeJavaLib.groovy")
     }
 
-    def buildImageTag = "4799280a02cb73761a3ba3641285aac8ec4ec482"
+    def buildImageTag = "c66dc597fdc30abcb7a6368ba7cc13c02151f8de"
     javaLibPipeline(buildImageTag)
 }

@@ -75,9 +75,11 @@ public class THBusinessErrorMapper implements WErrorMapper {
 
     private boolean isDeclaredError(Class errClass, Method callMethod) {
         Class[] declaredErrors = errorsMap.get(callMethod);
-        for (int i = 0; i < declaredErrors.length; ++i) {
-            if (declaredErrors[i].isAssignableFrom(errClass)) {
-                return true;
+        if (declaredErrors != null) {
+            for (int i = 0; i < declaredErrors.length; ++i) {
+                if (declaredErrors[i].isAssignableFrom(errClass)) {
+                    return true;
+                }
             }
         }
         return false;
