@@ -10,6 +10,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>woody-api</artifactId>
+    
+    <name>Woody API</name>
+
     <packaging>jar</packaging>
 
     <dependencies>
