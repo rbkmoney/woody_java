@@ -1,9 +1,5 @@
 package com.rbkmoney.woody.rpc;
 
-/**
- * Created by vpankrashkin on 19.04.16.
- */
-
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TCompactProtocol;
 import org.apache.thrift.protocol.TProtocol;
@@ -13,7 +9,6 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.*;
-
 
 public class TestHttp {
 

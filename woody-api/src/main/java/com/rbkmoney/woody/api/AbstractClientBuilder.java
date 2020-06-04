@@ -17,9 +17,6 @@ import java.net.URI;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
-/**
- * Created by vpankrashkin on 25.04.16.
- */
 public abstract class AbstractClientBuilder implements ClientBuilder {
     protected static final ClientEventListener DEFAULT_EVENT_LISTENER = (ClientEventListener<ClientEvent>) event -> {
     };
@@ -124,19 +121,19 @@ public abstract class AbstractClientBuilder implements ClientBuilder {
         return TraceContext.forClient(idGenerator);
     }
 
-    abstract protected BiConsumer<WErrorDefinition, ContextSpan> getErrorDefinitionConsumer();
+    protected abstract BiConsumer<WErrorDefinition, ContextSpan> getErrorDefinitionConsumer();
 
-    abstract protected Runnable getErrorListener();
+    protected abstract Runnable getErrorListener();
 
-    abstract protected Runnable getOnCallStartEventListener();
+    protected abstract Runnable getOnCallStartEventListener();
 
-    abstract protected Runnable getOnSendEventListener();
+    protected abstract Runnable getOnSendEventListener();
 
-    abstract protected Runnable getOnReceiveEventListener();
+    protected abstract Runnable getOnReceiveEventListener();
 
-    abstract protected Runnable getOnCallEndEventListener();
+    protected abstract Runnable getOnCallEndEventListener();
 
-    abstract protected ErrorMapProcessor createErrorMapProcessor(Class iface);
+    protected abstract ErrorMapProcessor createErrorMapProcessor(Class iface);
 
-    abstract protected <T> T createProviderClient(Class<T> iface);
+    protected abstract <T> T createProviderClient(Class<T> iface);
 }

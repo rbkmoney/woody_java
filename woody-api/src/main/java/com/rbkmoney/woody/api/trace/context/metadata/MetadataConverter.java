@@ -1,8 +1,5 @@
 package com.rbkmoney.woody.api.trace.context.metadata;
 
-/**
- * Created by vpankrashkin on 20.01.17.
- */
 public interface MetadataConverter<T> {
     /**
      * @throws MetadataConversionException if conversion error occurs

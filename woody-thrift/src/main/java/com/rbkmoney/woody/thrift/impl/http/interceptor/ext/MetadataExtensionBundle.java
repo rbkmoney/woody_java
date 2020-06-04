@@ -18,9 +18,6 @@ import java.util.regex.Pattern;
 
 import static com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle.ContextBundle.createCtxBundle;
 
-/**
- * Created by vpankrashkin on 23.01.17.
- */
 public class MetadataExtensionBundle extends ExtensionBundle {
     private static final Pattern KEY_PATTERN = Pattern.compile("[\\w-.]{1,53}");
 
@@ -30,83 +27,83 @@ public class MetadataExtensionBundle extends ExtensionBundle {
 
     private static ContextBundle createClientBundle(List<MetadataExtensionKit> extensionKits) {
         return createCtxBundle(
-                        (InterceptorExtension<THCExtensionContext>) reqCCtx -> {
-                            Metadata customMetadata = reqCCtx.getTraceData().getActiveSpan().getCustomMetadata();
-                            Set<MetadataExtensionKit> unusedKits = new LinkedHashSet<>(extensionKits);
-                            for (String key : customMetadata.getKeys()) {
-                                if (KEY_PATTERN.matcher(key).matches()) {
-                                    boolean applied = false;
-                                    try {
-                                        for (MetadataExtensionKit extKit : extensionKits) {
-                                            if (applied |= extKit.getConverter().apply(key)) {
-                                                unusedKits.remove(extKit);
-                                                Object metaVal = extKit.getExtension().getValue(key, customMetadata);
-                                                String valueString = extKit.getConverter().convertToString(key, metaVal);
-                                                reqCCtx.setRequestHeader(formatHeaderKey(key), valueString);
-                                                break;
-                                            }
-                                        }
-                                    } catch (MetadataConversionException e) {
-                                        throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, key, e);
-                                    }
-                                    if (!applied) {
-                                        String valueString = String.valueOf(customMetadata.<Object>getValue(key));
+                (InterceptorExtension<THCExtensionContext>) reqCCtx -> {
+                    Metadata customMetadata = reqCCtx.getTraceData().getActiveSpan().getCustomMetadata();
+                    Set<MetadataExtensionKit> unusedKits = new LinkedHashSet<>(extensionKits);
+                    for (String key : customMetadata.getKeys()) {
+                        if (KEY_PATTERN.matcher(key).matches()) {
+                            boolean applied = false;
+                            try {
+                                for (MetadataExtensionKit extKit : extensionKits) {
+                                    if (applied |= extKit.getConverter().apply(key)) {
+                                        unusedKits.remove(extKit);
+                                        Object metaVal = extKit.getExtension().getValue(key, customMetadata);
+                                        String valueString = extKit.getConverter().convertToString(key, metaVal);
                                         reqCCtx.setRequestHeader(formatHeaderKey(key), valueString);
+                                        break;
                                     }
-                                } else {
-                                    throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, key);
                                 }
+                            } catch (MetadataConversionException e) {
+                                throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, key, e);
                             }
-                            for (MetadataExtensionKit extKit: unusedKits) {
-                                if (!extKit.getConverter().applyToString()) {
-                                    throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, extKit.getConverter().getClass().getName() + " request not applied");
-                                }
+                            if (!applied) {
+                                String valueString = String.valueOf(customMetadata.<Object>getValue(key));
+                                reqCCtx.setRequestHeader(formatHeaderKey(key), valueString);
                             }
-                        },
-                        respCCtx -> {
+                        } else {
+                            throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, key);
                         }
-                );
+                    }
+                    for (MetadataExtensionKit extKit : unusedKits) {
+                        if (!extKit.getConverter().applyToString()) {
+                            throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, extKit.getConverter().getClass().getName() + " request not applied");
+                        }
+                    }
+                },
+                respCCtx -> {
+                }
+        );
     }
 
     private static ContextBundle createServiceBundle(List<MetadataExtensionKit> extensionKits) {
         return createCtxBundle(
-                        (InterceptorExtension<THSExtensionContext>) reqSCtx -> {
-                            HttpServletRequest request = reqSCtx.getProviderRequest();
-                            Set<MetadataExtensionKit> unusedKits = new LinkedHashSet<>(extensionKits);
-                            Enumeration<String> headerKeys = request.getHeaderNames();
-                            Metadata customMetaData = reqSCtx.getTraceData().getActiveSpan().getCustomMetadata();
-                            for (String headerKey; headerKeys.hasMoreElements();) {
-                                headerKey = headerKeys.nextElement();
-                                String metaKey = formatMetaKey(headerKey);
-                                if (metaKey != null && !customMetaData.containsKey(metaKey)) {
-                                    boolean applied = false;
-                                    String metaStrVal = request.getHeader(headerKey);
-                                    try {
-                                        for (MetadataExtensionKit extKit : extensionKits) {
-                                            if (applied |= extKit.getConverter().apply(metaKey)) {
-                                                unusedKits.remove(extKit);
-                                                Object metaVal = extKit.getConverter().convertToObject(metaKey, metaStrVal);
-                                                extKit.getExtension().setValue(metaKey, metaVal, customMetaData);
-                                                break;
-                                            }
-                                        }
-                                    } catch (MetadataConversionException e) {
-                                        throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, headerKey, e);
-                                    }
-                                    if (!applied) {
-                                        customMetaData.putValue(metaKey, metaStrVal);
+                (InterceptorExtension<THSExtensionContext>) reqSCtx -> {
+                    HttpServletRequest request = reqSCtx.getProviderRequest();
+                    Set<MetadataExtensionKit> unusedKits = new LinkedHashSet<>(extensionKits);
+                    Enumeration<String> headerKeys = request.getHeaderNames();
+                    Metadata customMetaData = reqSCtx.getTraceData().getActiveSpan().getCustomMetadata();
+                    for (String headerKey; headerKeys.hasMoreElements(); ) {
+                        headerKey = headerKeys.nextElement();
+                        String metaKey = formatMetaKey(headerKey);
+                        if (metaKey != null && !customMetaData.containsKey(metaKey)) {
+                            boolean applied = false;
+                            String metaStrVal = request.getHeader(headerKey);
+                            try {
+                                for (MetadataExtensionKit extKit : extensionKits) {
+                                    if (applied |= extKit.getConverter().apply(metaKey)) {
+                                        unusedKits.remove(extKit);
+                                        Object metaVal = extKit.getConverter().convertToObject(metaKey, metaStrVal);
+                                        extKit.getExtension().setValue(metaKey, metaVal, customMetaData);
+                                        break;
                                     }
                                 }
+                            } catch (MetadataConversionException e) {
+                                throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, headerKey, e);
                             }
-                            for (MetadataExtensionKit extKit: unusedKits) {
-                                if (!extKit.getConverter().applyToString()) {
-                                    throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, extKit.getConverter().getClass().getName() + "response not applied");
-                                }
+                            if (!applied) {
+                                customMetaData.putValue(metaKey, metaStrVal);
                             }
-                        },
-                        respSCtx -> {
                         }
-                );
+                    }
+                    for (MetadataExtensionKit extKit : unusedKits) {
+                        if (!extKit.getConverter().applyToString()) {
+                            throw new THRequestInterceptionException(TTransportErrorType.BAD_HEADER, extKit.getConverter().getClass().getName() + "response not applied");
+                        }
+                    }
+                },
+                respSCtx -> {
+                }
+        );
     }
 
     private static String formatHeaderKey(String metaKey) {

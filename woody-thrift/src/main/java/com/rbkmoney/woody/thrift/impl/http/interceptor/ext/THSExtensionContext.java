@@ -8,9 +8,6 @@ import com.rbkmoney.woody.thrift.impl.http.THMetadataProperties;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * Created by vpankrashkin on 14.12.16.
- */
 public class THSExtensionContext extends ExtensionContext {
     public THSExtensionContext(TraceData traceData, Object providerContext, Object[] contextParameters) {
         super(traceData, providerContext, contextParameters);

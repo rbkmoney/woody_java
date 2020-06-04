@@ -9,9 +9,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-/**
- * Created by vpankrashkin on 13.12.16.
- */
 public class ExtendableInterceptor implements Interceptor {
     private final InterceptorExtension[] extensions;
     private final BiFunction<TraceData, Throwable, Boolean> errContextResolver;
@@ -21,7 +18,7 @@ public class ExtendableInterceptor implements Interceptor {
     }
 
     public ExtendableInterceptor(List<InterceptorExtension> extensions, BiFunction<TraceData, Throwable, Boolean> errContextResolver) {
-        this.extensions = extensions.toArray(new InterceptorExtension[extensions.size()]);
+        this.extensions = extensions.toArray(new InterceptorExtension[0]);
         this.errContextResolver = errContextResolver;
     }
 

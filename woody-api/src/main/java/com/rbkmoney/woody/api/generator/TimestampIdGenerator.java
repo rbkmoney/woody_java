@@ -1,8 +1,5 @@
 package com.rbkmoney.woody.api.generator;
 
-/**
- * Created by vpankrashkin on 06.05.16.
- */
 public class TimestampIdGenerator implements IdGenerator {
 
     @Override

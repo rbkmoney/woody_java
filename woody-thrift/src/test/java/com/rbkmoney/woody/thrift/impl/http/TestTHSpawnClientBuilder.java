@@ -8,9 +8,6 @@ import org.junit.Ignore;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-/**
- * Created by vpankrashkin on 10.06.16.
- */
 @Ignore
 public class TestTHSpawnClientBuilder extends AbstractConcurrentClientTest {
 

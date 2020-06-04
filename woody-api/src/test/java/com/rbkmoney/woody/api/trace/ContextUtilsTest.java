@@ -18,18 +18,4 @@ public class ContextUtilsTest {
         Assert.assertEquals(0, executionTimeout);
     }
 
-
-    @Test
-    public void timeTest() {
-
-        Instant instant = Instant.now();
-
-        String expected = instant.toString();
-
-        long epochMilli = instant.toEpochMilli();
-
-        Instant parsedTime = Instant.ofEpochMilli(epochMilli);
-
-        Assert.assertEquals(expected, parsedTime.toString());
-    }
 }

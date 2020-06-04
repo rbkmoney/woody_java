@@ -3,9 +3,6 @@ package com.rbkmoney.woody.api.proxy.tracer;
 
 import com.rbkmoney.woody.api.proxy.InstanceMethodCaller;
 
-/**
- * Created by vpankrashkin on 25.04.16.
- */
 public class EventTracer implements MethodCallTracer {
 
     private final Runnable beforeCallListener;

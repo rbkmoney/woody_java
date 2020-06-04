@@ -25,9 +25,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-/**
- * Created by tolkonepiu on 09.06.16.
- */
 public class MDCLogTest extends AbstractTest {
 
     private final Logger log = LoggerFactory.getLogger(this.getClass());

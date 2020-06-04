@@ -134,7 +134,7 @@ public class WExecutorService implements ExecutorService, Closeable {
 
     private <T> Collection<? extends Callable<T>> buildWCollection(
             final Collection<? extends Callable<T>> originalCollection) {
-        final Collection<Callable<T>> collection = new ArrayList<Callable<T>>();
+        final Collection<Callable<T>> collection = new ArrayList<>();
         for (final Callable<T> t : originalCollection) {
             collection.add(WFlow.create(t));
         }

@@ -2,9 +2,6 @@ package com.rbkmoney.woody.thrift.impl.http.event;
 
 import com.rbkmoney.woody.api.event.ServiceEvent;
 
-/**
- * Created by vpankrashkin on 12.05.16.
- */
 public interface ServiceActionListener {
     ServiceEvent callHandler(ServiceEvent event);
 

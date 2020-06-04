@@ -10,9 +10,6 @@ import com.rbkmoney.woody.api.trace.context.TraceContext;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
-/**
- * Created by vpankrashkin on 17.01.17.
- */
 public class ErrorMappingTracer extends EmptyTracer  {
     private final ErrorMapProcessor errorProcessor;
     private final BiConsumer<WErrorDefinition, ContextSpan> errDefConsumer;

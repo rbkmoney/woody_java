@@ -1,8 +1,5 @@
 package com.rbkmoney.woody.api.event;
 
-/**
- * Created by vpankrashkin on 28.04.16.
- */
 public class CompositeEventListener<E extends Event> implements EventListener<E> {
     private final EventListener<E>[] listeners;
 

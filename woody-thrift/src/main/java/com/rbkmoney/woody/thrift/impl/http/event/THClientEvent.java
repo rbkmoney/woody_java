@@ -8,9 +8,6 @@ import com.rbkmoney.woody.thrift.impl.http.THMetadataProperties;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 
-/**
- * Created by vpankrashkin on 06.05.16.
- */
 public class THClientEvent extends ClientEvent {
     public THClientEvent(TraceData traceData) {
         super(traceData);

@@ -7,9 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Created by vpankrashkin on 20.12.16.
- */
 public class THErrorMapProcessor extends ErrorMapProcessor {
 
     private static List<WErrorMapper> getMappers(Class ifaceClass) {

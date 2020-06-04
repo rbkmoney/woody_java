@@ -1,14 +1,13 @@
 package com.rbkmoney.woody.api.trace;
 
-/**
- * Created by vpankrashkin on 21.04.16.
- */
+import java.time.Instant;
+
 public class Span {
     private String traceId;
     private String name;
     private String id;
     private String parentId;
-    private long deadline;
+    private Instant deadline;
     private long timestamp;
     private long duration;
 
@@ -57,11 +56,11 @@ public class Span {
         this.parentId = parentId;
     }
 
-    public long getDeadline() {
+    public Instant getDeadline() {
         return deadline;
     }
 
-    public void setDeadline(long deadline) {
+    public void setDeadline(Instant deadline) {
         this.deadline = deadline;
     }
 
@@ -90,7 +89,7 @@ public class Span {
     }
 
     public boolean hasDeadline() {
-        return deadline > 0;
+        return deadline != null;
     }
 
     public void reset() {
@@ -98,7 +97,7 @@ public class Span {
         name = null;
         id = null;
         parentId = null;
-        deadline = 0;
+        deadline = null;
         timestamp = 0;
         duration = 0;
     }

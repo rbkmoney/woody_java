@@ -17,9 +17,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 
-/**
- * Created by vpankrashkin on 06.05.16.
- */
 public class TestClientEventHandling extends AbstractTest {
 
         OwnerServiceSrv.Iface handler = new OwnerServiceStub() {

@@ -1,8 +1,5 @@
 package com.rbkmoney.woody.api.flow.error;
 
-/**
- * Created by vpankrashkin on 26.12.16.
- */
 public class WUndefinedResultException extends WRuntimeException {
     private static WErrorDefinition createErrDef(String msg, Throwable cause) {
         WErrorDefinition errorDefinition = new WErrorDefinition(WErrorSource.INTERNAL);

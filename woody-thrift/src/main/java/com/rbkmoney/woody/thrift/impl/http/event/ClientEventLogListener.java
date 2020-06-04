@@ -1,14 +1,12 @@
 package com.rbkmoney.woody.thrift.impl.http.event;
 
 import com.rbkmoney.woody.api.event.ClientEventListener;
+import com.rbkmoney.woody.api.flow.error.WErrorDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-/**
- * Created by vpankrashkin on 12.05.16.
- */
 public class ClientEventLogListener implements ClientEventListener<THClientEvent> {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -29,7 +27,7 @@ public class ClientEventLogListener implements ClientEventListener<THClientEvent
                     log.info("CLIENT Event: {}, Status: {}, Time: {}, Duration: {}", event.getEventType(), event.isSuccessfulCall() ? "ok" : "error", event.getTimeStamp(), event.getDuration());
                     break;
                 case ERROR:
-                    log.info("CLIENT Event: {}, ErrType: {}, TErrType: {}, ErrName: {},  Time: {}, Duration: {}", event.getEventType(), event.getErrorDefinition(), event.getThriftErrorType(), Optional.ofNullable(event.getErrorDefinition()).map(ed -> ed.getErrorName()).orElse(""), event.getTimeStamp(), event.getDuration());
+                    log.info("CLIENT Event: {}, ErrType: {}, TErrType: {}, ErrName: {},  Time: {}, Duration: {}", event.getEventType(), event.getErrorDefinition(), event.getThriftErrorType(), Optional.ofNullable(event.getErrorDefinition()).map(WErrorDefinition::getErrorName).orElse(""), event.getTimeStamp(), event.getDuration());
                     break;
                 default:
                     log.info("CLIENT Unknown error: {}", event);

@@ -1,8 +1,5 @@
 package com.rbkmoney.woody.api.trace;
 
-/**
- * Created by vpankrashkin on 25.04.16.
- */
 public class MetadataProperties {
     public static final String INSTANCE_METHOD_CALLER = "md_instance_method_caller";
     public static final String CALL_ARGUMENTS = "md_call_args";

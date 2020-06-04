@@ -1,8 +1,6 @@
 package com.rbkmoney.woody.api.proxy;
 
 /**
- * Created by vpankrashkin on 09.06.16.
- *
  * This interface is used for hiding implementation logic of proxied target creation.
  */
 public interface InvocationTargetProvider<T> {

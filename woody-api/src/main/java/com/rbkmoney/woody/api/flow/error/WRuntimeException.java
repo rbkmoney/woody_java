@@ -2,9 +2,6 @@ package com.rbkmoney.woody.api.flow.error;
 
 import java.util.Objects;
 
-/**
- * Created by vpankrashkin on 26.12.16.
- */
 public class WRuntimeException extends RuntimeException {
     private final WErrorDefinition errorDefinition;
 

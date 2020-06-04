@@ -1,8 +1,5 @@
 package com.rbkmoney.woody.api.proxy;
 
-/**
- * Created by vpankrashkin on 09.06.16.
- */
 public class SingleTargetProvider<T> implements InvocationTargetProvider<T> {
     private final Class<T> targetType;
     private final T target;

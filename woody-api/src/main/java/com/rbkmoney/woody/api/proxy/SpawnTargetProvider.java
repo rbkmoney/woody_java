@@ -2,9 +2,6 @@ package com.rbkmoney.woody.api.proxy;
 
 import java.util.function.Supplier;
 
-/**
- * Created by vpankrashkin on 09.06.16.
- */
 public class SpawnTargetProvider<T> implements InvocationTargetProvider<T> {
     private final Class<T> targetType;
     private final Supplier<T> supplier;

@@ -4,9 +4,6 @@ import com.rbkmoney.woody.api.trace.ContextUtils;
 import com.rbkmoney.woody.api.trace.TraceData;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
 
-/**
- * Created by vpankrashkin on 10.05.16.
- */
 public class ContextInterceptor implements CommonInterceptor {
     private final TraceContext traceContext;
     private final CommonInterceptor interceptor;

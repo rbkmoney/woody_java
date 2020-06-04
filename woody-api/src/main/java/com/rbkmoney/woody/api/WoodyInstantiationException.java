@@ -1,8 +1,5 @@
 package com.rbkmoney.woody.api;
 
-/**
- * Created by vpankrashkin on 05.05.16.
- */
 public class WoodyInstantiationException extends RuntimeException {
     public WoodyInstantiationException() {
         super();

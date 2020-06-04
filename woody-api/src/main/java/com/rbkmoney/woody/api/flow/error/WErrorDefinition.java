@@ -2,9 +2,6 @@ package com.rbkmoney.woody.api.flow.error;
 
 import java.util.Objects;
 
-/**
- * Created by vpankrashkin on 12.12.16.
- */
 public class WErrorDefinition {
     private final WErrorSource generationSource;
     private WErrorType errorType;

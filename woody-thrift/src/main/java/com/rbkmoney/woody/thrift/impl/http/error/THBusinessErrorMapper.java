@@ -20,12 +20,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
-/**
- * Created by vpankrashkin on 26.12.16.
- */
 public class THBusinessErrorMapper implements WErrorMapper {
-    public static final Function<String, String> BUSINESS_ERROR_REASON_FUNC = errName -> errName;
+    public static final UnaryOperator<String> BUSINESS_ERROR_REASON_FUNC = errName -> errName;
 
     private final Map<Method, Class[]> errorsMap;
 
@@ -55,7 +53,7 @@ public class THBusinessErrorMapper implements WErrorMapper {
             String errName = getDeclaredErrName(t);
             if (!(errorDefinition != null &&
                     errorDefinition.getErrorType() == WErrorType.BUSINESS_ERROR && Objects.equals(
-                    errorDefinition.getErrorName(),errName))) {
+                    errorDefinition.getErrorName(), errName))) {
                 errorDefinition = new WErrorDefinition(WErrorSource.INTERNAL);
                 errorDefinition.setErrorType(WErrorType.BUSINESS_ERROR);
                 errorDefinition.setErrorSource(WErrorSource.INTERNAL);

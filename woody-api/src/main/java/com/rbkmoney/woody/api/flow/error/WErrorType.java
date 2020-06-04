@@ -1,8 +1,5 @@
 package com.rbkmoney.woody.api.flow.error;
 
-/**
- * Created by vpankrashkin on 12.12.16.
- */
 public enum WErrorType {
     UNAVAILABLE_RESULT("Resource Unavailable"),
     UNDEFINED_RESULT("Result Unknown"),
@@ -24,7 +21,7 @@ public enum WErrorType {
         if (key == null) {
             return null;
         }
-        for (WErrorType errorType: WErrorType.values()) {
+        for (WErrorType errorType : WErrorType.values()) {
             if (errorType.getKey().equalsIgnoreCase(key)) {
                 return errorType;
             }

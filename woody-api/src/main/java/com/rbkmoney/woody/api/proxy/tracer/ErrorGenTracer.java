@@ -4,9 +4,6 @@ import com.rbkmoney.woody.api.flow.error.ErrorMapProcessor;
 import com.rbkmoney.woody.api.proxy.InstanceMethodCaller;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
 
-/**
- * Created by vpankrashkin on 17.01.17.
- */
 public class ErrorGenTracer extends EmptyTracer {
     private final ErrorMapProcessor errorProcessor;
 

@@ -14,9 +14,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-/**
- * Created by vpankrashkin on 13.12.16.
- */
 public class THCExtensionContext extends ExtensionContext {
     private static final int REQ_URL_CONNECTION_TYPE = 1;
     private static final int REQ_HTTP_CLIENT_TYPE = 2;

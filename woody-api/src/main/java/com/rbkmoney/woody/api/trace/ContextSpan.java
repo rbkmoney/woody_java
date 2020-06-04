@@ -1,8 +1,5 @@
 package com.rbkmoney.woody.api.trace;
 
-/**
- * Created by vpankrashkin on 22.04.16.
- */
 public class ContextSpan {
     protected final Span span;
     protected final Metadata metadata;

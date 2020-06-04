@@ -1,8 +1,5 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
-/**
- * Created by vpankrashkin on 29.04.16.
- */
 public class THMetadataProperties {
     public static final String TH_PROPERTY_PREFIX = "md_thrift_http_";
 

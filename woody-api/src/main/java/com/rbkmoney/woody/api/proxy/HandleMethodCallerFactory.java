@@ -5,9 +5,6 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 
-/**
- * Created by vpankrashkin on 22.04.16.
- */
 public class HandleMethodCallerFactory implements MethodCallerFactory {
 
     @Override
@@ -28,7 +25,6 @@ public class HandleMethodCallerFactory implements MethodCallerFactory {
             };
 
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         } finally {
             targetProvider.releaseTarget(target);

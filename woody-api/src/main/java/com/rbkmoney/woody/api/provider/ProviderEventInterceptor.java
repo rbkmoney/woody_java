@@ -6,9 +6,6 @@ import com.rbkmoney.woody.api.interceptor.CommonInterceptor;
 import com.rbkmoney.woody.api.trace.MetadataProperties;
 import com.rbkmoney.woody.api.trace.TraceData;
 
-/**
- * Created by vpankrashkin on 27.04.16.
- */
 public class ProviderEventInterceptor implements CommonInterceptor {
     private final Runnable reqListener;
     private final Runnable respListener;

@@ -17,9 +17,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
-/**
- * Created by vpankrashkin on 19.04.16.
- */
 @Ignore
 public class TestSocket {
 

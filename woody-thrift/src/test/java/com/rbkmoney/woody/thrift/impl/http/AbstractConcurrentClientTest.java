@@ -23,9 +23,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Created by vpankrashkin on 10.06.16.
- */
 public abstract class AbstractConcurrentClientTest extends AbstractTest {
     protected long runTime = 5000;
     protected int nThreads = 8;
