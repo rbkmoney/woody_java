@@ -67,7 +67,7 @@ public class ContextUtils {
     }
 
     /**
-     * @param span context with current deadline
+     * @param span           context with current deadline
      * @param defaultTimeout default timeout
      * @return return 0 if deadline <= 0, else return diff deadline - currentTime
      */

@@ -11,25 +11,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * Created by tolkonepiu on 09.06.16.
- */
 public class TestMDCInConcurent {
 
     Logger log = LoggerFactory.getLogger(this.getClass());
-
-    private WExecutorService executorService;
-
-    @Before
-    public void before() {
-        executorService = new WExecutorService(Executors.newFixedThreadPool(2));
-
-    }
-
     Runnable runnable = () -> {
         try {
             Span span = TraceContext.getCurrentTraceData().getActiveSpan().getSpan();
@@ -41,7 +32,6 @@ public class TestMDCInConcurent {
             t.printStackTrace();
         }
     };
-
     Callable callable = () -> {
         try {
             Span span = TraceContext.getCurrentTraceData().getActiveSpan().getSpan();
@@ -54,7 +44,13 @@ public class TestMDCInConcurent {
         }
         return null;
     };
+    private WExecutorService executorService;
 
+    @Before
+    public void before() {
+        executorService = new WExecutorService(Executors.newFixedThreadPool(2));
+
+    }
 
     @Test
     public void testMDCCallable() throws ExecutionException, InterruptedException {

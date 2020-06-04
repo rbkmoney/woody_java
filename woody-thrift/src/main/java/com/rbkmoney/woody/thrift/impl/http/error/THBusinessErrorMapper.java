@@ -19,13 +19,16 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
-import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 public class THBusinessErrorMapper implements WErrorMapper {
     public static final UnaryOperator<String> BUSINESS_ERROR_REASON_FUNC = errName -> errName;
 
     private final Map<Method, Class[]> errorsMap;
+
+    public THBusinessErrorMapper(Class iface) {
+        this.errorsMap = getDeclaredErrorsMap(iface);
+    }
 
     private Map<Method, Class[]> getDeclaredErrorsMap(Class iface) {
         Map<Method, Class[]> errorsMap = new TreeMap<>(MethodShadow.METHOD_COMPARATOR);
@@ -35,10 +38,6 @@ public class THBusinessErrorMapper implements WErrorMapper {
                         .toArray(Class[]::new))
         );
         return errorsMap;
-    }
-
-    public THBusinessErrorMapper(Class iface) {
-        this.errorsMap = getDeclaredErrorsMap(iface);
     }
 
     @Override

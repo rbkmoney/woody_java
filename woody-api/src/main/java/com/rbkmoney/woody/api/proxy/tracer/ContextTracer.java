@@ -31,7 +31,7 @@ public class ContextTracer implements MethodCallTracer {
     }
 
     @Override
-    public void callError(Object[] args, InstanceMethodCaller caller, Throwable error) throws Exception{
+    public void callError(Object[] args, InstanceMethodCaller caller, Throwable error) throws Exception {
         try {
             targetTracer.callError(args, caller, error);
         } finally {

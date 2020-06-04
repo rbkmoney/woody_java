@@ -6,7 +6,7 @@ import com.rbkmoney.woody.api.interceptor.CommonInterceptor;
 import com.rbkmoney.woody.api.trace.MetadataProperties;
 import com.rbkmoney.woody.api.trace.TraceData;
 
-public class TransportEventInterceptor implements CommonInterceptor{
+public class TransportEventInterceptor implements CommonInterceptor {
     private final Runnable reqListener;
     private final Runnable respListener;
     private final Runnable errListener;

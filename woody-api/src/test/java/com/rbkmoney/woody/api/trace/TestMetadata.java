@@ -1,11 +1,9 @@
 package com.rbkmoney.woody.api.trace;
 
 import org.junit.Test;
+
 import static org.junit.Assert.*;
 
-/**
- * Created by vpankrashkin on 24.01.17.
- */
 public class TestMetadata {
     @Test
     public void testValueOverriding() {
