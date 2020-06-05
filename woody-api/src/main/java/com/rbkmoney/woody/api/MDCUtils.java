@@ -5,9 +5,6 @@ import org.slf4j.MDC;
 
 import java.time.Instant;
 
-/**
- * Created by tolkonepiu on 08.06.16.
- */
 public class MDCUtils {
 
     public static final String SPAN_ID = "span_id";
@@ -25,7 +22,7 @@ public class MDCUtils {
         MDC.put(TRACE_ID, span.getTraceId() != null ? span.getTraceId() : "");
         MDC.put(PARENT_ID, span.getParentId() != null ? span.getParentId() : "");
         if (span.hasDeadline()) {
-            MDC.put(DEADLINE, Instant.ofEpochMilli(span.getDeadline()).toString());
+            MDC.put(DEADLINE, span.getDeadline().toString());
         }
     }
 

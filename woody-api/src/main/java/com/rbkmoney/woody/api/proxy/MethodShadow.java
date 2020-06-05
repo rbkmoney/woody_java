@@ -8,9 +8,6 @@ import java.util.stream.Stream;
 
 import static java.lang.reflect.Modifier.isPrivate;
 
-/**
- * Created by vpankrashkin on 22.04.16.
- */
 public class MethodShadow {
 
     public static Method[] getShadowedMethods(Class ifaceA, Collection<Class> ifacesB) {
@@ -50,8 +47,7 @@ public class MethodShadow {
     public static Method[] getOverlappingMethods(Method[] aMethods, Method[] bMethods) {
         return Arrays.stream(aMethods)
                 .filter(tm -> Arrays.stream(bMethods)
-                        .filter(sm -> isSameSignature(tm, sm))
-                        .findAny().isPresent())
+                        .anyMatch(sm -> isSameSignature(tm, sm)))
                 .toArray(Method[]::new);
     }
 

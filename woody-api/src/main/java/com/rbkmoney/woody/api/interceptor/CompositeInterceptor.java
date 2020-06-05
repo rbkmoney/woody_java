@@ -2,9 +2,6 @@ package com.rbkmoney.woody.api.interceptor;
 
 import com.rbkmoney.woody.api.trace.TraceData;
 
-/**
- * Created by vpankrashkin on 28.04.16.
- */
 public class CompositeInterceptor implements CommonInterceptor {
     private final CommonInterceptor[] interceptors;
     private final boolean breakOnError;

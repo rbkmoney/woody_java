@@ -2,9 +2,6 @@ package com.rbkmoney.woody.thrift.impl.http.event;
 
 import com.rbkmoney.woody.api.event.ClientEventListener;
 
-/**
- * Created by vpankrashkin on 12.05.16.
- */
 public class ClientEventListenerImpl implements ClientEventListener<THClientEvent> {
     private ClientActionListener eventActionListener;
 

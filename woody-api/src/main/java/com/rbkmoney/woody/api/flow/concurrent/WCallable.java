@@ -6,7 +6,6 @@ import com.rbkmoney.woody.api.trace.context.TraceContext;
 
 import java.util.concurrent.Callable;
 
-
 public class WCallable<T> implements Callable<T> {
 
     private final TraceData traceData;

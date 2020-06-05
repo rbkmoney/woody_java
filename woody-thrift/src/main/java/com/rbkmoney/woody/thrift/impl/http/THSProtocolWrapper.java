@@ -7,9 +7,6 @@ import org.apache.thrift.protocol.TMessage;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.protocol.TProtocolDecorator;
 
-/**
- * Created by vpankrashkin on 10.05.16.
- */
 public class THSProtocolWrapper extends TProtocolDecorator {
     private final boolean isCLient;
     private final CommonInterceptor interceptor;

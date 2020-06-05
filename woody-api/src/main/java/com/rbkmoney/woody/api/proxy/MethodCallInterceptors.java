@@ -4,9 +4,6 @@ import com.rbkmoney.woody.api.proxy.tracer.MethodCallTracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Created by vpankrashkin on 22.04.16.
- */
 public class MethodCallInterceptors {
 
     private static final Logger log = LoggerFactory.getLogger(MethodCallInterceptors.class);

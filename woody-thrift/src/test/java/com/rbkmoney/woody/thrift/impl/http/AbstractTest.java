@@ -33,9 +33,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by vpankrashkin on 06.05.16.
- */
 public class AbstractTest {
     public static final int networkTimeout = 10000;
     private HandlerCollection handlerCollection;

@@ -29,9 +29,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.function.BiConsumer;
 
-/**
- * Created by vpankrashkin on 28.04.16.
- */
 public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
     private List<MetadataExtensionKit> metadataExtensionKits;
     private boolean logEnabled = true;
@@ -166,8 +163,7 @@ public class THServiceBuilder extends AbstractServiceBuilder<Servlet> {
             if (constructor == null) {
                 throw new IllegalArgumentException("Service class doesn't have required constructor to be created");
             }
-            TProcessor tProcessor = (TProcessor) constructor.newInstance(handler);
-            return tProcessor;
+            return (TProcessor) constructor.newInstance(handler);
         } catch (NoSuchMethodException | InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new IllegalArgumentException("Failed to createCtxBundle provider service", e);
         }

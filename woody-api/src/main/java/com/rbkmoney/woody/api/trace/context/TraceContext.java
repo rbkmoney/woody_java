@@ -2,18 +2,16 @@ package com.rbkmoney.woody.api.trace.context;
 
 import com.rbkmoney.woody.api.MDCUtils;
 import com.rbkmoney.woody.api.generator.IdGenerator;
-import com.rbkmoney.woody.api.trace.*;
+import com.rbkmoney.woody.api.trace.Span;
+import com.rbkmoney.woody.api.trace.TraceData;
 
 import java.util.Optional;
 
-/**
- * Created by vpankrashkin on 25.04.16.
- */
 public class TraceContext {
     public static final String NO_PARENT_ID = "undefined";
 
-    private final static ThreadLocal<TraceData> currentTraceData = ThreadLocal.withInitial(() -> new TraceData());
-    private final static ThreadLocal<TraceData> savedTraceData = new ThreadLocal<>();
+    private static final ThreadLocal<TraceData> currentTraceData = ThreadLocal.withInitial(TraceData::new);
+    private static final ThreadLocal<TraceData> savedTraceData = new ThreadLocal<>();
 
     public static TraceData getCurrentTraceData() {
         return currentTraceData.get();
@@ -64,8 +62,7 @@ public class TraceContext {
     }
 
     private static TraceData createNewTraceData(TraceData oldTraceData) {
-        TraceData traceData = new TraceData(oldTraceData, true);
-        return traceData;
+        return new TraceData(oldTraceData, true);
     }
 
     private final IdGenerator traceIdGenerator;
@@ -202,9 +199,9 @@ public class TraceContext {
     }
 
     private TraceData destroyClientContext(TraceData traceData) {
-         traceData = savedTraceData.get();
-         savedTraceData.remove();
-         return traceData;
+        traceData = savedTraceData.get();
+        savedTraceData.remove();
+        return traceData;
     }
 
     private TraceData initServiceContext(TraceData traceData) {
@@ -233,10 +230,10 @@ public class TraceContext {
     private boolean isClientInitAuto(TraceData traceData) {
         Span serverSpan = traceData.getServiceSpan().getSpan();
 
-        assert !(traceData.getClientSpan().isStarted() & traceData.getServiceSpan().isStarted());
-        assert !(traceData.getClientSpan().isFilled() & traceData.getServiceSpan().isFilled());
+        assert !(traceData.getClientSpan().isStarted() && traceData.getServiceSpan().isStarted());
+        assert !(traceData.getClientSpan().isFilled() && traceData.getServiceSpan().isFilled());
 
-        return serverSpan.isFilled() ? serverSpan.isStarted() : true;
+        return !serverSpan.isFilled() || serverSpan.isStarted();
     }
 
     private boolean isClientDestroyAuto(TraceData traceData) {

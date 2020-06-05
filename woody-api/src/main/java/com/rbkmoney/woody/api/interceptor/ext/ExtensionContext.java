@@ -2,9 +2,6 @@ package com.rbkmoney.woody.api.interceptor.ext;
 
 import com.rbkmoney.woody.api.trace.TraceData;
 
-/**
- * Created by vpankrashkin on 13.12.16.
- */
 public class ExtensionContext {
     private final TraceData traceData;
     private final Object providerContext;

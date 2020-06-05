@@ -6,9 +6,6 @@ import org.apache.thrift.protocol.TProtocolFactory;
 
 import java.util.function.BiFunction;
 
-/**
- * Created by vpankrashkin on 17.01.17.
- */
 class BuilderUtils {
 
     static TProtocolFactory wrapProtocolFactory(TProtocolFactory protocolFactory, CommonInterceptor interceptor, boolean isClient) {

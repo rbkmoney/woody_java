@@ -15,10 +15,6 @@ import java.util.List;
 import static com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle.ContextBundle.createCtxBundle;
 import static com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle.createExtBundle;
 
-
-/**
- * Created by vpankrashkin on 14.12.16.
- */
 public class MessageExtensionBundles {
     public static final ExtensionBundle CALL_INFO_INJECTION_BUNDLE = createExtBundle(
             createCtxBundle(
@@ -33,7 +29,7 @@ public class MessageExtensionBundles {
                         TMessage tMessage = (TMessage) respCtx.getProviderContext();
                         Metadata metadata = respCtx.getTraceData().getClientSpan().getMetadata();
                         metadata.putValue(THMetadataProperties.TH_CALL_RESULT_MSG_TYPE, tMessage.type);
-                        metadata.putValue(MetadataProperties.CALL_REQUEST_PROCESSED_FLAG, true );
+                        metadata.putValue(MetadataProperties.CALL_REQUEST_PROCESSED_FLAG, true);
                     }
             )
     );

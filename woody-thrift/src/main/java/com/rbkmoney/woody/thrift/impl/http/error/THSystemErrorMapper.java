@@ -4,9 +4,6 @@ import com.rbkmoney.woody.api.flow.error.*;
 import com.rbkmoney.woody.api.trace.ContextSpan;
 import com.rbkmoney.woody.api.trace.ContextUtils;
 
-/**
- * Created by vpankrashkin on 26.12.16.
- */
 public class THSystemErrorMapper implements WErrorMapper {
 
     @Override

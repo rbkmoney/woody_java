@@ -6,9 +6,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 
-/**
- * Created by vpankrashkin on 22.04.16.
- */
 public class ProxyFactory {
     private final Object object = new Object();
     private final MethodCallerFactory callerFactory;

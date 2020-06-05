@@ -17,9 +17,6 @@ import javax.servlet.Servlet;
 
 import static org.easymock.EasyMock.*;
 
-/**
- * Created by vpankrashkin on 12.05.16.
- */
 public class TestEventOrder extends AbstractTest {
 
     ClientEventListenerImpl clientEventListener = new ClientEventListenerImpl();

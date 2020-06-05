@@ -2,15 +2,11 @@ package com.rbkmoney.woody.api.flow.error;
 
 import com.rbkmoney.woody.api.trace.ContextSpan;
 import com.rbkmoney.woody.api.trace.ContextUtils;
-import com.rbkmoney.woody.api.trace.MetadataProperties;
 import com.rbkmoney.woody.api.trace.TraceData;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by vpankrashkin on 20.12.16.
- */
 public class ErrorMapProcessor {
     private final boolean isClient;
     private final List<WErrorMapper> mappers;
@@ -34,7 +30,7 @@ public class ErrorMapProcessor {
 
     /**
      * @throws RuntimeException expected if any error occurs
-     * */
+     */
     public Exception processMapToError(TraceData traceData) {
         ContextSpan contextSpan = isClient ? traceData.getClientSpan() : traceData.getServiceSpan();
         WErrorDefinition errorDefinition = ContextUtils.getErrorDefinition(contextSpan);

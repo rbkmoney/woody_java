@@ -13,9 +13,6 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
-/**
- * Created by tolkonepiu on 09.06.16.
- */
 public class SnowflakeIdGenerator implements IdGenerator {
 
     public static final String DEFAULT_SUFFIX = "";
@@ -30,9 +27,9 @@ public class SnowflakeIdGenerator implements IdGenerator {
     private static final int SEQUENCE_BITS = 12;
 
     private static final int NODE_ID_BITS = 10;
-    private static final long SEQUENCE_MASK = -1L ^ (-1L << SEQUENCE_BITS);
+    private static final long SEQUENCE_MASK = ~(-1L << SEQUENCE_BITS);
 
-    private static final int NODE_ID_MASK = -1 ^ (-1 << NODE_ID_BITS);
+    private static final int NODE_ID_MASK = ~(-1 << NODE_ID_BITS);
     private static final int NODE_ID_SHIFT = SEQUENCE_BITS;
 
     private static final int TIMESTAMP_SHIFT = SEQUENCE_BITS + NODE_ID_BITS;
@@ -123,7 +120,7 @@ public class SnowflakeIdGenerator implements IdGenerator {
     }
 
     private String nextId(long timestamp) {
-        long seq = sequence.getAndAccumulate(1, (prev, x) -> prev+x >= SEQUENCE_MASK ? 0 : prev+x);
+        long seq = sequence.getAndAccumulate(1, (prev, x) -> prev + x >= SEQUENCE_MASK ? 0 : prev + x);
         long id = ((timestamp - EPOCH_OFFSET) << TIMESTAMP_SHIFT) |
                 (nodeId << NODE_ID_SHIFT) |
                 (seq & SEQUENCE_MASK);
@@ -132,7 +129,7 @@ public class SnowflakeIdGenerator implements IdGenerator {
 
     /**
      * @return id not more than 0xFFFF
-     * */
+     */
     private long generateNodeId() {
         try {
             InetAddress ip = InetAddress.getLocalHost();

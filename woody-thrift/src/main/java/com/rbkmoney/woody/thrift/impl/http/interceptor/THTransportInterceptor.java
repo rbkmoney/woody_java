@@ -12,9 +12,6 @@ import com.rbkmoney.woody.thrift.impl.http.interceptor.ext.TransportExtensionBun
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Created by vpankrashkin on 29.04.16.
- */
 public class THTransportInterceptor extends ExtendableInterceptor implements CommonInterceptor {
     private final boolean isClient;
 
@@ -24,7 +21,7 @@ public class THTransportInterceptor extends ExtendableInterceptor implements Com
 
     public THTransportInterceptor(List<ExtensionBundle> extensionBundles, boolean isClient, boolean isRequest) {
         super(
-                isCl -> TransportExtensionBundles.getExtensions(isCl),
+                TransportExtensionBundles::getExtensions,
                 extensionBundles,
                 isClient,
                 isRequest

@@ -2,9 +2,6 @@ package com.rbkmoney.woody.rpc;
 
 import org.apache.thrift.TException;
 
-/**
- * Created by vpankrashkin on 19.04.16.
- */
 public class OwnerServiceImpl implements OwnerServiceSrv.Iface {
     @Override
     public int getIntValue() throws TException {

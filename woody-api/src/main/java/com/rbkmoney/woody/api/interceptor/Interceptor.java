@@ -4,9 +4,6 @@ import com.rbkmoney.woody.api.trace.ContextSpan;
 import com.rbkmoney.woody.api.trace.ContextUtils;
 import com.rbkmoney.woody.api.trace.TraceData;
 
-/**
- * Created by vpankrashkin on 13.12.16.
- */
 public interface Interceptor {
     /**
      * @return true - if flow is successfully intercepted and ready for further processing; false - if interception failed and processing must be switched to err handling

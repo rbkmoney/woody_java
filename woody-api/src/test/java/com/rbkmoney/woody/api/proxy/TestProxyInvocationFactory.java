@@ -7,9 +7,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertSame;
 
-/**
- * Created by vpankrashkin on 23.04.16.
- */
 @Ignore
 public class TestProxyInvocationFactory {
     @Test

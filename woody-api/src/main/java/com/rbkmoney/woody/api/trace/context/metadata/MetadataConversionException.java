@@ -1,8 +1,5 @@
 package com.rbkmoney.woody.api.trace.context.metadata;
 
-/**
- * Created by vpankrashkin on 20.01.17.
- */
 public class MetadataConversionException extends RuntimeException {
     public MetadataConversionException() {
     }

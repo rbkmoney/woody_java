@@ -18,9 +18,6 @@ import java.util.concurrent.Semaphore;
 
 import static org.junit.Assert.*;
 
-/**
- * Created by vpankrashkin on 06.05.16.
- */
 public class TestTransportErrorMapper extends AbstractTest {
     private final Semaphore semaphore = new Semaphore(0);
 

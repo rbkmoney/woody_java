@@ -4,9 +4,6 @@ import com.rbkmoney.woody.api.interceptor.ResponseInterceptor;
 import com.rbkmoney.woody.api.trace.TraceData;
 import com.rbkmoney.woody.thrift.impl.http.error.THErrorMapProcessor;
 
-/**
- * Created by vpankrashkin on 11.05.16.
- */
 public class THSResponseMetadataInterceptor implements ResponseInterceptor {
     private final THErrorMapProcessor errorMapProcessor;
 

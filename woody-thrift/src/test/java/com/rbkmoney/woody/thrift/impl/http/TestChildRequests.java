@@ -23,10 +23,6 @@ import javax.servlet.Servlet;
 
 import static java.lang.System.out;
 
-/**
- * Created by vpankrashkin on 12.05.16.
- */
-
 public class TestChildRequests extends AbstractTest {
 
 

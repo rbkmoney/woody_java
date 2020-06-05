@@ -1,8 +1,5 @@
 package com.rbkmoney.woody.api.flow.error;
 
-/**
- * Created by vpankrashkin on 26.12.16.
- */
 public class WUnavailableResultException extends WRuntimeException {
 
     private static WErrorDefinition createErrDef(String reason, Throwable cause) {

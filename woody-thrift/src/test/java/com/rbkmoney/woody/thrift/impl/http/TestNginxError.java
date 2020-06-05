@@ -19,9 +19,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.*;
 
-/**
- * Created by inalarsanukaev on 02.02.17.
- */
 public class TestNginxError extends AbstractTest {
     @Test
     public void testNginx500Error() throws TException {

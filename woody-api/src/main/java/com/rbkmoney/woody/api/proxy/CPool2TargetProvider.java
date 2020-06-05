@@ -10,9 +10,6 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 
 import java.util.function.Supplier;
 
-/**
- * Created by vpankrashkin on 09.06.16.
- */
 public class CPool2TargetProvider<T> implements InvocationTargetProvider<T> {
     private final ObjectPool<T> pool;
     private final Class<T> targetType;
@@ -43,7 +40,7 @@ public class CPool2TargetProvider<T> implements InvocationTargetProvider<T> {
     }
 
     @Override
-    public T getTarget() throws IllegalStateException {
+    public T getTarget() {
         try {
             return pool.borrowObject();
         } catch (Exception e) {
@@ -60,7 +57,7 @@ public class CPool2TargetProvider<T> implements InvocationTargetProvider<T> {
     }
 
     @Override
-    public void releaseTarget(T target) throws IllegalStateException {
+    public void releaseTarget(T target) {
         try {
             pool.returnObject(target);
         } catch (Exception e) {

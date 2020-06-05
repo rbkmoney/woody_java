@@ -17,8 +17,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
- * Created by vpankrashkin on 09.06.16.
- * <p>
  * This builder provides the ability to build thread-safe clients around not thread-safe Thrift clients.
  * It creates new Thrift client instance for every call which is dropped after call finishes.
  */
@@ -84,12 +82,11 @@ public class THSpawnClientBuilder extends THClientBuilder {
     }
 
     private <T> InvocationTargetProvider<T> createTargetProvider(Class<T> iface) {
-        SpawnTargetProvider<T> targetProvider = new THSpawnTargetProvider<>(
+        return new THSpawnTargetProvider<>(
                 iface,
                 () -> createProviderClient(iface),
                 this::destroyProviderClient,
                 isCustomHttpClient());
-        return targetProvider;
     }
 
     private static class THSpawnTargetProvider<T> extends SpawnTargetProvider<T> {

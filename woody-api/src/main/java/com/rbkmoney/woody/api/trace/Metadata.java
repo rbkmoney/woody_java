@@ -4,9 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by vpankrashkin on 21.04.16.
- */
 public class Metadata {
     private static final int DEFAULT_INIT_SIZE = 16;
     private static final float DEFAULT_LOAD_FACTOR = 0.75f;

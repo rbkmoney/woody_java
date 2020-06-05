@@ -27,9 +27,6 @@ import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
-/**
- * Created by vpankrashkin on 24.01.17.
- */
 public class TestCustomMetadataExtension extends AbstractTest {
     OwnerServiceSrv.Iface handler = new OwnerServiceStub() {
         @Override

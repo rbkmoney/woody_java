@@ -2,9 +2,6 @@ package com.rbkmoney.woody.api.proxy.tracer;
 
 import com.rbkmoney.woody.api.proxy.InstanceMethodCaller;
 
-/**
- * Created by vpankrashkin on 23.04.16.
- */
 public interface MethodCallTracer {
     void beforeCall(Object[] args, InstanceMethodCaller caller) throws Exception;
 

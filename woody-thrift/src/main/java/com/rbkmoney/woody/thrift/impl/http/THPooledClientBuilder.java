@@ -21,8 +21,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
- * Created by vpankrashkin on 09.06.16.
- * <p>
  * This builder provides the ability to build thread-safe clients around not thread-safe Thrift clients.
  * It uses apache commons-pool2 for internal Thrift client pooling.
  */

@@ -9,9 +9,6 @@ import com.rbkmoney.woody.thrift.impl.http.THMetadataProperties;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * Created by vpankrashkin on 06.05.16.
- */
 public class THServiceEvent extends ServiceEvent {
     public THServiceEvent(TraceData traceData) {
         super(traceData);

@@ -7,9 +7,6 @@ import com.rbkmoney.woody.api.trace.context.metadata.MetadataExtension;
 import java.time.Instant;
 import java.util.function.Function;
 
-/**
- * Created by vpankrashkin on 11.05.16.
- */
 public class ContextUtils {
     public static <T> T createErrIfNotIntercepted(ContextSpan span, Function<Throwable, T> errConstructor) {
         Throwable err = getInterceptionError(span);
@@ -54,7 +51,7 @@ public class ContextUtils {
     public static Instant getDeadline(ContextSpan contextSpan) {
         Span span = contextSpan.getSpan();
         if (span.hasDeadline()) {
-            return Instant.ofEpochMilli(span.getDeadline());
+            return span.getDeadline();
         }
         return null;
     }
@@ -65,12 +62,12 @@ public class ContextUtils {
 
     public static void setDeadline(ContextSpan span, Instant deadline) {
         if (deadline != null) {
-            span.getSpan().setDeadline(deadline.toEpochMilli());
+            span.getSpan().setDeadline(deadline);
         }
     }
 
     /**
-     * @param span context with current deadline
+     * @param span           context with current deadline
      * @param defaultTimeout default timeout
      * @return return 0 if deadline <= 0, else return diff deadline - currentTime
      */
@@ -78,7 +75,7 @@ public class ContextUtils {
         Instant deadline = getDeadline(span);
         if (deadline != null) {
             int executionTimeout = Math.toIntExact(deadline.toEpochMilli() - System.currentTimeMillis());
-            return executionTimeout > 0 ? executionTimeout : 0;
+            return Math.max(executionTimeout, 0);
         }
         return defaultTimeout;
     }

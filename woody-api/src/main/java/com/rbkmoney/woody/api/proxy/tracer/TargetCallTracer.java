@@ -9,9 +9,6 @@ import com.rbkmoney.woody.api.trace.Metadata;
 import com.rbkmoney.woody.api.trace.MetadataProperties;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
 
-/**
- * Created by vpankrashkin on 25.04.16.
- */
 public class TargetCallTracer implements MethodCallTracer {
     private final boolean isClient;
     private final boolean isAuto;

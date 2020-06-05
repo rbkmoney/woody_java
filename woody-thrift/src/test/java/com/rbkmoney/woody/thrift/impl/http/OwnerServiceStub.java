@@ -5,9 +5,6 @@ import com.rbkmoney.woody.rpc.OwnerServiceSrv;
 import com.rbkmoney.woody.rpc.test_error;
 import org.apache.thrift.TException;
 
-/**
- * Created by vpankrashkin on 19.04.16.
- */
 public class OwnerServiceStub implements OwnerServiceSrv.Iface {
     @Override
     public int getIntValue() throws TException {

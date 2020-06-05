@@ -4,15 +4,11 @@ import com.rbkmoney.woody.api.flow.concurrent.WCallable;
 import com.rbkmoney.woody.api.flow.concurrent.WRunnable;
 import com.rbkmoney.woody.api.generator.ConfiguredSnowflakeIdGenerator;
 import com.rbkmoney.woody.api.generator.IdGenerator;
-import com.rbkmoney.woody.api.generator.SnowflakeIdGenerator;
 import com.rbkmoney.woody.api.trace.TraceData;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
 
 import java.util.concurrent.Callable;
 
-/**
- * Created by vpankrashkin on 08.12.16.
- */
 public class WFlow {
 
     private final IdGenerator traceIdGenerator;
@@ -70,6 +66,7 @@ public class WFlow {
     public static <T> WCallable<T> createServiceFork(Callable<T> callable, IdGenerator idGenerator) {
         return create(callable, TraceContext.initNewServiceTrace(new TraceData(), idGenerator, idGenerator));
     }
+
     public static <T> WCallable<T> createServiceFork(Callable<T> callable, IdGenerator traceIdGenerator, IdGenerator spanIdGenerator) {
         return create(callable, TraceContext.initNewServiceTrace(new TraceData(), traceIdGenerator, spanIdGenerator));
     }

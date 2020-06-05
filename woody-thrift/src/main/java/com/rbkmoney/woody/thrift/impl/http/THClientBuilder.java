@@ -45,9 +45,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
-/**
- * Created by vpankrashkin on 28.04.16.
- */
 public class THClientBuilder extends AbstractClientBuilder {
 
 
@@ -212,7 +209,7 @@ public class THClientBuilder extends AbstractClientBuilder {
     }
 
     protected CommonInterceptor createTransportInterceptor() {
-        List<ExtensionBundle> extensionBundles = Arrays.asList(new MetadataExtensionBundle(metadataExtensionKits == null ? Collections.EMPTY_LIST : metadataExtensionKits));
+        List<ExtensionBundle> extensionBundles = Arrays.asList(new MetadataExtensionBundle(metadataExtensionKits == null ? Collections.emptyList() : metadataExtensionKits));
         return new CompositeInterceptor(
                 new ContainerCommonInterceptor(new THTransportInterceptor(extensionBundles, true, true), new THTransportInterceptor(extensionBundles, true, false)),
                 new TransportEventInterceptor(getOnSendEventListener(), getOnReceiveEventListener(), null)

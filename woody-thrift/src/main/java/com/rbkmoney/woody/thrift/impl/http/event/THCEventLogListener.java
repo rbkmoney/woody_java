@@ -9,9 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 
-/**
- * Created by vpankrashkin on 12.05.16.
- */
 public class THCEventLogListener implements ClientEventListener<THClientEvent> {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 

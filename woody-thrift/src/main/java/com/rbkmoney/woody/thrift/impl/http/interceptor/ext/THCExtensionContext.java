@@ -14,9 +14,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-/**
- * Created by vpankrashkin on 13.12.16.
- */
 public class THCExtensionContext extends ExtensionContext {
     private static final int REQ_URL_CONNECTION_TYPE = 1;
     private static final int REQ_HTTP_CLIENT_TYPE = 2;
@@ -46,14 +43,14 @@ public class THCExtensionContext extends ExtensionContext {
 
     /**
      * @return the last header value for multi value case, null if header is not found
-     * */
+     */
     public String getResponseHeader(String key) {
         Object providerContext = getProviderContext();
         switch (getResponseContextType(providerContext)) {
             case RESP_URL_CONNECTION_TYPE:
                 return ((HttpURLConnection) providerContext).getHeaderField(key);
             case RESP_HTTP_CLIENT_TYPE:
-                Header header =((HttpResponse) providerContext).getLastHeader(key);
+                Header header = ((HttpResponse) providerContext).getLastHeader(key);
                 return header == null ? null : header.getValue();
             default:
                 throw new RuntimeException("Unknown type:" + providerContext.getClass());
@@ -72,7 +69,7 @@ public class THCExtensionContext extends ExtensionContext {
         }
     }
 
-    public int  getResponseStatus() {
+    public int getResponseStatus() {
         Object providerContext = getProviderContext();
         try {
             switch (getResponseContextType(providerContext)) {
@@ -89,7 +86,7 @@ public class THCExtensionContext extends ExtensionContext {
         }
     }
 
-    public String  getResponseMessage() {
+    public String getResponseMessage() {
         Object providerContext = getProviderContext();
         try {
             switch (getResponseContextType(providerContext)) {
@@ -112,7 +109,7 @@ public class THCExtensionContext extends ExtensionContext {
             case REQ_URL_CONNECTION_TYPE:
                 return ((HttpURLConnection) providerContext).getURL();
             case REQ_HTTP_CLIENT_TYPE:
-                return  ContextUtils.getContextValue(URL.class, getContextParameters(), 0);
+                return ContextUtils.getContextValue(URL.class, getContextParameters(), 0);
             default:
                 throw new RuntimeException("Unknown type:" + providerContext.getClass());
         }

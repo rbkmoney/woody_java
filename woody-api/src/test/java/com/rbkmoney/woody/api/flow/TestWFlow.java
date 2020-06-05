@@ -6,9 +6,6 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-/**
- * Created by vpankrashkin on 11.12.16.
- */
 public class TestWFlow {
     @Test
     public void testRunnableServiceFork() {
@@ -16,7 +13,7 @@ public class TestWFlow {
         new WFlow().createServiceFork(() -> {
             assertFalse(TraceContext.getCurrentTraceData().isRoot());
             assertFalse(TraceContext.getCurrentTraceData().isClient());
-    }).run();
+        }).run();
         assertTrue(TraceContext.getCurrentTraceData().isRoot());
     }
 

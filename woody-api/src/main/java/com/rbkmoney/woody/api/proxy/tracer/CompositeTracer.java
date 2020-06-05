@@ -5,9 +5,6 @@ import com.rbkmoney.woody.api.proxy.InstanceMethodCaller;
 import java.util.Arrays;
 import java.util.Collection;
 
-/**
- * Created by vpankrashkin on 04.05.16.
- */
 public class CompositeTracer implements MethodCallTracer {
     private final MethodCallTracer[] tracers;
 
@@ -16,7 +13,7 @@ public class CompositeTracer implements MethodCallTracer {
     }
 
     public CompositeTracer(Collection<? extends MethodCallTracer> tracers) {
-        this.tracers = tracers.stream().toArray(MethodCallTracer[]::new);
+        this.tracers = tracers.toArray(new MethodCallTracer[0]);
     }
 
     @Override

@@ -1,8 +1,5 @@
 package com.rbkmoney.woody.api.interceptor.ext;
 
-/**
- * Created by vpankrashkin on 14.12.16.
- */
 public class ExtensionBundle {
     private final ContextBundle clientBundle;
     private final ContextBundle serviceBundle;

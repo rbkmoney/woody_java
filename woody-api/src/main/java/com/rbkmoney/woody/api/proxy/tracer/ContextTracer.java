@@ -4,8 +4,6 @@ import com.rbkmoney.woody.api.proxy.InstanceMethodCaller;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
 
 /**
- * Created by vpankrashkin on 26.04.16.
- *
  * Used to control context lifecycle on interface method call and return
  */
 public class ContextTracer implements MethodCallTracer {
@@ -33,7 +31,7 @@ public class ContextTracer implements MethodCallTracer {
     }
 
     @Override
-    public void callError(Object[] args, InstanceMethodCaller caller, Throwable error) throws Exception{
+    public void callError(Object[] args, InstanceMethodCaller caller, Throwable error) throws Exception {
         try {
             targetTracer.callError(args, caller, error);
         } finally {

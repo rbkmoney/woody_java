@@ -6,13 +6,8 @@ import com.rbkmoney.woody.api.trace.ContextUtils;
 import com.rbkmoney.woody.api.trace.Endpoint;
 import com.rbkmoney.woody.api.trace.TraceData;
 
-import java.time.Instant;
-
 import static com.rbkmoney.woody.api.trace.MetadataProperties.*;
 
-/**
- * Created by vpankrashkin on 06.05.16.
- */
 public abstract class Event {
     private final TraceData traceData;
 

@@ -1,8 +1,5 @@
 package com.rbkmoney.woody.thrift.impl.http;
 
-/**
- * Created by vpankrashkin on 22.12.16.
- */
 public class THResponseInfo {
     private final int status;
     private final String errClass;

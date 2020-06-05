@@ -18,10 +18,8 @@ import org.apache.thrift.transport.TTransportException;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
-/**
- * Created by vpankrashkin on 26.12.16.
- */
 public class THProviderErrorMapper implements WErrorMapper {
 
     private static final String UNKNOWN_ERROR_MESSAGE = "internal thrift application error";
@@ -29,10 +27,10 @@ public class THProviderErrorMapper implements WErrorMapper {
     public static final Function<Object, String> THRIFT_PROTOCOL_ERROR_REASON_FUNC = obj -> "thrift protocol error";
     public static final Function<Object, String> UNKNOWN_PROVIDER_ERROR_REASON_FUNC = msg -> "unknown provider error: " + msg;
     public static final Function<Object, String> UNKNOWN_CALL_REASON_FUNC = callName -> "unknown method: " + callName;
-    public static final Function<String, String> BAD_CONTENT_TYPE_REASON_FUNC = cType -> "content type wrong/missing";
-    public static final Function<String, String> RPC_ID_HEADER_MISSING_REASON_FUNC = header -> header+ " missing";
-    public static final Function<String, String> BAD_HEADER_REASON_FUNC = header -> "bad header: " + header;
-    public static final Function<String, String> BAD_REQUEST_TYPE_REASON_FUNC = rewMethod -> "http method wrong";
+    public static final UnaryOperator<String> BAD_CONTENT_TYPE_REASON_FUNC = cType -> "content type wrong/missing";
+    public static final UnaryOperator<String> RPC_ID_HEADER_MISSING_REASON_FUNC = header -> header + " missing";
+    public static final UnaryOperator<String> BAD_HEADER_REASON_FUNC = header -> "bad header: " + header;
+    public static final UnaryOperator<String> BAD_REQUEST_TYPE_REASON_FUNC = rewMethod -> "http method wrong";
 
     public static WErrorDefinition createErrorDefinition(THResponseInfo responseInfo, Supplier invalidErrClass) {
         WErrorDefinition errorDefinition = null;
@@ -207,33 +205,33 @@ public class THProviderErrorMapper implements WErrorMapper {
             tErrorType = TErrorType.PROTOCOL;
             errReason = THRIFT_PROTOCOL_ERROR_REASON_FUNC.apply(err);
         } else if (err instanceof TTransportException) {
-                tErrorType = TErrorType.TRANSPORT;
-                errReason = THRIFT_TRANSPORT_ERROR_REASON_FUNC.apply(err);
-        } else if (err instanceof  THRequestInterceptionException) {
             tErrorType = TErrorType.TRANSPORT;
-                TTransportErrorType ttErrType = ((THRequestInterceptionException) err).getErrorType();
-                String reason = String.valueOf(((THRequestInterceptionException) err).getReason());
-                ttErrType = ttErrType == null ? TTransportErrorType.UNKNOWN : ttErrType;
+            errReason = THRIFT_TRANSPORT_ERROR_REASON_FUNC.apply(err);
+        } else if (err instanceof THRequestInterceptionException) {
+            tErrorType = TErrorType.TRANSPORT;
+            TTransportErrorType ttErrType = ((THRequestInterceptionException) err).getErrorType();
+            String reason = String.valueOf(((THRequestInterceptionException) err).getReason());
+            ttErrType = ttErrType == null ? TTransportErrorType.UNKNOWN : ttErrType;
 
-                metadata.putValue(THMetadataProperties.TH_ERROR_SUBTYPE, ttErrType);
-                switch (ttErrType) {
-                    case BAD_CONTENT_TYPE:
-                        errReason = BAD_CONTENT_TYPE_REASON_FUNC.apply(reason);
-                        break;
-                    case BAD_REQUEST_TYPE:
-                        errReason = BAD_REQUEST_TYPE_REASON_FUNC.apply(reason);
-                        break;
-                    case BAD_TRACE_HEADER:
-                        errReason = RPC_ID_HEADER_MISSING_REASON_FUNC.apply(reason);
-                        break;
-                    case BAD_HEADER:
-                        errReason = BAD_HEADER_REASON_FUNC.apply(reason);
-                        break;
-                    case UNKNOWN:
-                    default:
-                        errReason = THRIFT_TRANSPORT_ERROR_REASON_FUNC.apply(reason);
-                        break;
-                }
+            metadata.putValue(THMetadataProperties.TH_ERROR_SUBTYPE, ttErrType);
+            switch (ttErrType) {
+                case BAD_CONTENT_TYPE:
+                    errReason = BAD_CONTENT_TYPE_REASON_FUNC.apply(reason);
+                    break;
+                case BAD_REQUEST_TYPE:
+                    errReason = BAD_REQUEST_TYPE_REASON_FUNC.apply(reason);
+                    break;
+                case BAD_TRACE_HEADER:
+                    errReason = RPC_ID_HEADER_MISSING_REASON_FUNC.apply(reason);
+                    break;
+                case BAD_HEADER:
+                    errReason = BAD_HEADER_REASON_FUNC.apply(reason);
+                    break;
+                case UNKNOWN:
+                default:
+                    errReason = THRIFT_TRANSPORT_ERROR_REASON_FUNC.apply(reason);
+                    break;
+            }
 
         } else {
             tErrorType = TErrorType.UNKNOWN;

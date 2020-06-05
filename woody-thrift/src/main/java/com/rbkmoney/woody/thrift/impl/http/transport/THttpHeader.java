@@ -1,8 +1,5 @@
 package com.rbkmoney.woody.thrift.impl.http.transport;
 
-/**
- * Created by vpankrashkin on 11.05.16.
- */
 public enum THttpHeader {
     TRACE_ID("woody.trace-id"),
     SPAN_ID("woody.span-id"),

@@ -30,9 +30,6 @@ import static com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle.createExtBu
 import static com.rbkmoney.woody.api.interceptor.ext.ExtensionBundle.createServiceExtBundle;
 import static java.util.AbstractMap.SimpleEntry;
 
-/**
- * Created by vpankrashkin on 14.12.16.
- */
 public class TransportExtensionBundles {
     private static final Logger log = LoggerFactory.getLogger(TransportExtensionBundles.class);
 

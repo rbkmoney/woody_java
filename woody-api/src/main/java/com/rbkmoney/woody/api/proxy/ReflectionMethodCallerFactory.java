@@ -3,9 +3,6 @@ package com.rbkmoney.woody.api.proxy;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-/**
- * Created by vpankrashkin on 22.04.16.
- */
 public class ReflectionMethodCallerFactory implements MethodCallerFactory {
     @Override
     public InstanceMethodCaller getInstance(InvocationTargetProvider targetProvider, Method method) {

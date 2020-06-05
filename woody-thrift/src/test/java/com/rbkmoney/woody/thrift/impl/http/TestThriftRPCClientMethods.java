@@ -10,9 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 import static org.junit.Assert.*;
 
-/**
- * Created by vpankrashkin on 05.05.16.
- */
 @Ignore
 public class TestThriftRPCClientMethods {
 

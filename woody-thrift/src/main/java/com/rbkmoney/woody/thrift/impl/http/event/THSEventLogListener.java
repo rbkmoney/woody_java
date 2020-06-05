@@ -11,9 +11,6 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Iterator;
 
-/**
- * Created by vpankrashkin on 12.05.16.
- */
 public class THSEventLogListener implements ServiceEventListener<THServiceEvent> {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 

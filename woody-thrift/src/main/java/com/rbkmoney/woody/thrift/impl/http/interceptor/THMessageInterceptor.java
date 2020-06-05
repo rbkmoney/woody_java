@@ -12,9 +12,6 @@ import com.rbkmoney.woody.thrift.impl.http.interceptor.ext.THSExtensionContext;
 import java.util.Collections;
 import java.util.List;
 
-/**
- * Created by vpankrashkin on 05.05.16.
- */
 public class THMessageInterceptor extends ExtendableInterceptor implements CommonInterceptor {
     private final boolean isClient;
 
@@ -24,7 +21,7 @@ public class THMessageInterceptor extends ExtendableInterceptor implements Commo
 
     public THMessageInterceptor(List<ExtensionBundle> extensionBundles, boolean isClient, boolean isRequest) {
         super(
-                isCl -> MessageExtensionBundles.getExtensions(isCl),
+                MessageExtensionBundles::getExtensions,
                 extensionBundles,
                 isClient,
                 isRequest

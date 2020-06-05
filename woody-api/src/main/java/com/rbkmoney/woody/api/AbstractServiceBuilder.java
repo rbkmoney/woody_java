@@ -8,9 +8,6 @@ import com.rbkmoney.woody.api.proxy.tracer.*;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/**
- * Created by vpankrashkin on 10.05.16.
- */
 public abstract class AbstractServiceBuilder<Srv> implements ServiceBuilder<Srv> {
     protected static final ServiceEventListener DEFAULT_EVENT_LISTENER = (ServiceEventListener<ServiceEvent>) event -> {
     };
@@ -63,16 +60,16 @@ public abstract class AbstractServiceBuilder<Srv> implements ServiceBuilder<Srv>
         this.allowObjectProxyOverriding = allowObjectProxyOverriding;
     }
 
-    abstract protected Runnable getErrorListener();
+    protected abstract Runnable getErrorListener();
 
-    abstract protected Runnable getOnCallStartEventListener();
+    protected abstract Runnable getOnCallStartEventListener();
 
-    abstract protected Runnable getOnSendEventListener();
+    protected abstract Runnable getOnSendEventListener();
 
-    abstract protected Runnable getOnReceiveEventListener();
+    protected abstract Runnable getOnReceiveEventListener();
 
-    abstract protected Runnable getOnCallEndEventListener();
+    protected abstract Runnable getOnCallEndEventListener();
 
-    abstract protected <T> Srv createProviderService(Class<T> serviceInterface, T handler);
+    protected abstract <T> Srv createProviderService(Class<T> serviceInterface, T handler);
 
 }

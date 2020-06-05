@@ -1,8 +1,5 @@
 package com.rbkmoney.woody.api.trace;
 
-/**
- * Created by vpankrashkin on 21.04.16.
- */
 public class TraceData {
     private final ClientSpan clientSpan;
     private final ServiceSpan serviceSpan;
@@ -62,7 +59,7 @@ public class TraceData {
      * @return true - if call is running as root client or child client call for server request handling; false - if call is running in server request handing
      */
     public boolean isClient() {
-        return serviceSpan.isFilled() ? clientSpan.isFilled() : true;
+        return !serviceSpan.isFilled() || clientSpan.isFilled();
     }
 
     public ContextSpan getActiveSpan() {
