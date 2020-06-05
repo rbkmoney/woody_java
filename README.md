@@ -1,5 +1,7 @@
 # com.rbkmoney.woody
 
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/rbkmoney/woody_java.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/rbkmoney/woody_java/alerts/)
+
 Java реализация [Библиотеки RPC вызовов для общения между микросервисами](http://52.29.202.218/design/ms/platform/rpc-lib/).
 
 ## Описание
