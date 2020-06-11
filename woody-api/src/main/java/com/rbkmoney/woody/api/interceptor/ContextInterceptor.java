@@ -3,8 +3,13 @@ package com.rbkmoney.woody.api.interceptor;
 import com.rbkmoney.woody.api.trace.ContextUtils;
 import com.rbkmoney.woody.api.trace.TraceData;
 import com.rbkmoney.woody.api.trace.context.TraceContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ContextInterceptor implements CommonInterceptor {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ContextInterceptor.class);
+
     private final TraceContext traceContext;
     private final CommonInterceptor interceptor;
 
@@ -15,12 +20,14 @@ public class ContextInterceptor implements CommonInterceptor {
 
     @Override
     public boolean interceptRequest(TraceData traceData, Object providerContext, Object... contextParams) {
+        LOG.trace("Intercept request context");
         traceContext.init();
         return interceptor.interceptRequest(traceData, providerContext, contextParams);
     }
 
     @Override
     public boolean interceptResponse(TraceData traceData, Object providerContext, Object... contextParams) {
+        LOG.trace("Intercept response context");
         try {
             return interceptor.interceptResponse(traceData, providerContext, contextParams);
         } finally {

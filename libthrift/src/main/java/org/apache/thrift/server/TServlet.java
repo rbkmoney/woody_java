@@ -10,6 +10,8 @@ import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.protocol.TProtocolFactory;
 import org.apache.thrift.transport.TIOStreamTransport;
 import org.apache.thrift.transport.TTransport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -28,122 +30,142 @@ import java.util.Map;
  */
 public class TServlet extends HttpServlet {
 
-  private final TProcessor processor;
+    private static final Logger LOG = LoggerFactory.getLogger(TServlet.class);
 
-  private final TProtocolFactory inProtocolFactory;
+    private final TProcessor processor;
 
-  private final TProtocolFactory outProtocolFactory;
+    private final TProtocolFactory inProtocolFactory;
 
-  private final Collection<Map.Entry<String, String>> customHeaders;
+    private final TProtocolFactory outProtocolFactory;
 
-  private final CommonInterceptor defaultInterceptor = new EmptyCommonInterceptor() {
-    @Override
-    public boolean interceptResponse(TraceData traceData, Object providerContext, Object... contextParams) {
-      Throwable t = ContextUtils.getCallError(traceData.getServiceSpan());
-      if (t != null) {
-        ContextUtils.setInterceptionError(traceData.getServiceSpan(), t);
-        return false;
-      }
-      return true;
-    }
-  };
+    private final Collection<Map.Entry<String, String>> customHeaders;
 
-  private  CommonInterceptor interceptor;
+    private final CommonInterceptor defaultInterceptor = new EmptyCommonInterceptor() {
 
-  public TServlet(TProcessor processor, TProtocolFactory inProtocolFactory,
-                   TProtocolFactory outProtocolFactory, CommonInterceptor interceptor) {
-    super();
-    this.processor = processor;
-    this.inProtocolFactory = inProtocolFactory;
-    this.outProtocolFactory = outProtocolFactory;
-    this.customHeaders = new ArrayList<>();
-    this.interceptor = interceptor == null ? defaultInterceptor : interceptor;
-  }
+        private final Logger log = LoggerFactory.getLogger(getClass());
 
-  /**
-   * @see HttpServlet#HttpServlet()
-   */
-  public TServlet(TProcessor processor, TProtocolFactory inProtocolFactory,
-                   TProtocolFactory outProtocolFactory) {
-    this(processor, inProtocolFactory, outProtocolFactory, null);
-  }
-
-  /**
-   * @see HttpServlet#HttpServlet()
-   */
-  public TServlet(TProcessor processor, TProtocolFactory protocolFactory) {
-    this(processor, protocolFactory, protocolFactory);
-  }
-
-  public TServlet(TProcessor processor, TProtocolFactory protocolFactory, CommonInterceptor interceptor) {
-    this(processor, protocolFactory, protocolFactory, interceptor);
-  }
-
-  @Override
-  protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    doPost(req, resp);
-  }
-
-  /**
-   * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
-   *      response)
-   */
-  @Override
-  protected void doPost(HttpServletRequest request, HttpServletResponse response)
-          throws ServletException, IOException {
-
-    TraceData traceData = TraceContext.getCurrentTraceData();
-    OutputStream out = null;
-    try {
-      InputStream in = request.getInputStream();
-      out = response.getOutputStream();
-        response.setContentType("application/x-thrift");
-        if (!interceptor.interceptRequest(traceData, request, response)) {
-          ContextUtils.tryThrowInterceptionError(traceData.getServiceSpan());
-        }
-
-        if (null != this.customHeaders) {
-          for (Map.Entry<String, String> header : this.customHeaders) {
-            response.addHeader(header.getKey(), header.getValue());
-          }
-        }
-
-        TTransport transport = new TIOStreamTransport(in, out);
-
-        TProtocol inProtocol = inProtocolFactory.getProtocol(transport);
-        TProtocol outProtocol = outProtocolFactory.getProtocol(transport);
-
-        processor.process(inProtocol, outProtocol);
-    } catch (Throwable te) {
-      ContextUtils.setCallError(traceData.getServiceSpan(), te);
-    } finally {
-        if (!interceptor.interceptResponse(traceData, response)) {
-            Throwable t = ContextUtils.getInterceptionError(traceData.getServiceSpan());
+        @Override
+        public boolean interceptResponse(TraceData traceData, Object providerContext, Object... contextParams) {
+            log.trace("Intercept response. Check on error");
+            Throwable t = ContextUtils.getCallError(traceData.getServiceSpan());
             if (t != null) {
-                throw new ServletException(t);
+                ContextUtils.setInterceptionError(traceData.getServiceSpan(), t);
+                return false;
             }
+            return true;
         }
-        if (out != null) {
-            out.flush();
+    };
+
+    private CommonInterceptor interceptor;
+
+    public TServlet(TProcessor processor, TProtocolFactory inProtocolFactory,
+                    TProtocolFactory outProtocolFactory, CommonInterceptor interceptor) {
+        super();
+        this.processor = processor;
+        this.inProtocolFactory = inProtocolFactory;
+        this.outProtocolFactory = outProtocolFactory;
+        this.customHeaders = new ArrayList<>();
+        this.interceptor = interceptor == null ? defaultInterceptor : interceptor;
+    }
+
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public TServlet(TProcessor processor, TProtocolFactory inProtocolFactory,
+                    TProtocolFactory outProtocolFactory) {
+        this(processor, inProtocolFactory, outProtocolFactory, null);
+    }
+
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public TServlet(TProcessor processor, TProtocolFactory protocolFactory) {
+        this(processor, protocolFactory, protocolFactory);
+    }
+
+    public TServlet(TProcessor processor, TProtocolFactory protocolFactory, CommonInterceptor interceptor) {
+        this(processor, protocolFactory, protocolFactory, interceptor);
+    }
+
+    @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doPost(req, resp);
+    }
+
+    /**
+     * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
+     * response)
+     */
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        TraceData traceData = TraceContext.getCurrentTraceData();
+        OutputStream out = null;
+        try {
+            InputStream in = request.getInputStream();
+            out = response.getOutputStream();
+            response.setContentType("application/x-thrift");
+
+            boolean success = interceptor.interceptRequest(traceData, request, response);
+            if (!success) {
+                LOG.trace("Unsuccessful intercept request: {}", traceData.getActiveSpan().getSpan());
+                ContextUtils.tryThrowInterceptionError(traceData.getServiceSpan());
+            }
+
+            if (null != this.customHeaders) {
+                for (Map.Entry<String, String> header : this.customHeaders) {
+                    response.addHeader(header.getKey(), header.getValue());
+                }
+            }
+
+            TTransport transport = new TIOStreamTransport(in, out);
+
+            TProtocol inProtocol = inProtocolFactory.getProtocol(transport);
+            TProtocol outProtocol = outProtocolFactory.getProtocol(transport);
+
+            processor.process(inProtocol, outProtocol);
+
+        } catch (Throwable tw) {
+            LOG.error("Unexpected exception during handle request", tw);
+            ContextUtils.setCallError(traceData.getServiceSpan(), tw);
+        } finally {
+            flushResponse(out, traceData, response);
         }
     }
-  }
 
-  /**
-   * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
-   *      response)
-   */
-  protected void doGet(HttpServletRequest request, HttpServletResponse response)
-          throws ServletException, IOException {
-    doPost(request, response);
-  }
+    private void flushResponse(OutputStream out, TraceData traceData, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            if (!interceptor.interceptResponse(traceData, response)) {
+                Throwable t = ContextUtils.getInterceptionError(traceData.getServiceSpan());
+                if (t != null) {
+                    throw new ServletException(t);
+                }
+            }
+            if (out != null) {
+                out.flush();
+            }
+        } catch (Exception e) {
+            LOG.error("Unexpected exception during flush response", e);
+            throw e;
+        }
+    }
 
-  public void addCustomHeader(final String key, final String value) {
-    this.customHeaders.add(new AbstractMap.SimpleImmutableEntry(key, value));
-  }
+    /**
+     * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse
+     * response)
+     */
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        doPost(request, response);
+    }
 
-  public void setCustomHeaders(Collection<Map.Entry<String, String>> headers) {
-    this.customHeaders.clear();
-    this.customHeaders.addAll(headers);
-  }
+    public void addCustomHeader(final String key, final String value) {
+        this.customHeaders.add(new AbstractMap.SimpleImmutableEntry(key, value));
+    }
+
+    public void setCustomHeaders(Collection<Map.Entry<String, String>> headers) {
+        this.customHeaders.clear();
+        this.customHeaders.addAll(headers);
+    }
 }
