@@ -2,6 +2,8 @@ package com.rbkmoney.woody.api.interceptor.ext;
 
 import com.rbkmoney.woody.api.interceptor.Interceptor;
 import com.rbkmoney.woody.api.trace.TraceData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.function.BiFunction;
@@ -10,6 +12,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ExtendableInterceptor implements Interceptor {
+
+    private static final Logger LOG = LoggerFactory.getLogger(ExtendableInterceptor.class);
+
     private final InterceptorExtension[] extensions;
     private final BiFunction<TraceData, Throwable, Boolean> errContextResolver;
 
@@ -47,6 +52,7 @@ public class ExtendableInterceptor implements Interceptor {
     @Override
     public boolean intercept(TraceData traceData, Object providerContext, Object... contextParams) {
         try {
+            LOG.trace("Intercept for multiple extensions");
             ExtensionContext extContext = createContext(traceData, providerContext, contextParams);
             initInterception(extContext);
             for (int i = 0; i < extensions.length; ++i) {
@@ -55,6 +61,7 @@ public class ExtendableInterceptor implements Interceptor {
             finalizeInterception(extContext);
             return true;
         } catch (Exception e) {
+            LOG.trace("Intercept extension error");
             return interceptError(traceData, e, errContextResolver.apply(traceData, e));
         }
     }

@@ -12,7 +12,7 @@
     <packaging>pom</packaging>
     <groupId>com.rbkmoney.woody</groupId>
     <artifactId>woody</artifactId>
-    <version>1.1.19</version>
+    <version>1.1.20</version>
 
     <name>Woody Java</name>
     <description>Java implementation for Woody spec</description>

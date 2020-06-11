@@ -19,7 +19,7 @@ public class MethodCallInterceptors {
             try {
                 result = caller.call(src, args);
             } catch (Throwable t) {
-                log.debug("Call Error", t);
+                log.error("Call Error", t);
                 callTracer.callError(args, caller, t);
                 throw t;
             }
