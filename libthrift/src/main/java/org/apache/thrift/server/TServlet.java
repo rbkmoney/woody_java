@@ -101,9 +101,9 @@ public class TServlet extends HttpServlet {
             throws ServletException, IOException {
 
         TraceData traceData = TraceContext.getCurrentTraceData();
-        InputStream in = request.getInputStream();
         OutputStream out = null;
         try {
+            InputStream in = request.getInputStream();
             out = response.getOutputStream();
             response.setContentType("application/x-thrift");
 
