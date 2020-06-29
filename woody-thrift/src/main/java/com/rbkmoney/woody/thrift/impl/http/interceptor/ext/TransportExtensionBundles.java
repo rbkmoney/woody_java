@@ -250,6 +250,9 @@ public class TransportExtensionBundles {
     }
 
     private static void validateAndProcessTraceHeaders(HttpServletRequest request, Function<THttpHeader, String> getHeaderKeyFunction, List<Map.Entry<THttpHeader, Consumer<String>>> headerConsumers) {
+        if (log.isDebugEnabled()) {
+            printHeader(request);
+        }
         List<String> missingHeaders = headerConsumers.stream()
                 .filter(entry -> {
                     String id = Optional.ofNullable(request.getHeader(getHeaderKeyFunction.apply(entry.getKey()))).orElse("");
@@ -261,5 +264,16 @@ public class TransportExtensionBundles {
         if (!missingHeaders.isEmpty()) {
             throw new THRequestInterceptionException(TTransportErrorType.BAD_TRACE_HEADER, String.join(", ", missingHeaders));
         }
+    }
+
+    private static void printHeader(HttpServletRequest request) {
+        Enumeration<String> headerNames = request.getHeaderNames();
+        Map<String, List<String>> headersMap = Collections.list(request.getHeaderNames())
+                .stream()
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        headerName -> Collections.list(request.getHeaders(headerName))
+                ));
+        log.debug("Request headers: {}", headersMap);
     }
 }
