@@ -6,6 +6,8 @@ import com.rbkmoney.woody.api.trace.context.TraceContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
+
 public class ContextInterceptor implements CommonInterceptor {
 
     private static final Logger LOG = LoggerFactory.getLogger(ContextInterceptor.class);
@@ -14,7 +16,7 @@ public class ContextInterceptor implements CommonInterceptor {
     private final CommonInterceptor interceptor;
 
     public ContextInterceptor(TraceContext traceContext, CommonInterceptor interceptor) {
-        this.traceContext = traceContext;
+        this.traceContext = Objects.requireNonNull(traceContext, "TraceContext can't be null");
         this.interceptor = interceptor != null ? interceptor : new EmptyCommonInterceptor();
     }
 
