@@ -131,6 +131,7 @@ public class TServlet extends HttpServlet {
             ContextUtils.setCallError(traceData.getServiceSpan(), tw);
         } finally {
             flushResponse(out, traceData, response);
+            TraceContext.getCurrentTraceData().reset();
         }
     }
 
