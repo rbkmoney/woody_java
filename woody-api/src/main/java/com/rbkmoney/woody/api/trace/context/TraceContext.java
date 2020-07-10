@@ -147,7 +147,6 @@ public class TraceContext {
             } else {
                 traceData = destroyServiceContext(traceData);
             }
-            setCurrentTraceData(traceData);
 
             if (traceData.getServiceSpan().isFilled()) {
                 MDCUtils.putSpanData(traceData.getServiceSpan().getSpan());
