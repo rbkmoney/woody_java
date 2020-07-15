@@ -23,6 +23,9 @@ public class ContextInterceptor implements CommonInterceptor {
     @Override
     public boolean interceptRequest(TraceData traceData, Object providerContext, Object... contextParams) {
         LOG.trace("Intercept request context");
+        if (!TraceContext.getCurrentTraceData().getServiceSpan().isFilled()) {
+            throw new IllegalStateException("TraceContext service span must be filled");
+        }
         traceContext.init();
         return interceptor.interceptRequest(traceData, providerContext, contextParams);
     }

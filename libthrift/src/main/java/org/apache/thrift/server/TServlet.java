@@ -148,6 +148,8 @@ public class TServlet extends HttpServlet {
         } catch (Exception e) {
             LOG.error("Unexpected exception during flush response", e);
             throw e;
+        } finally {
+            TraceContext.getCurrentTraceData().reset();
         }
     }
 
